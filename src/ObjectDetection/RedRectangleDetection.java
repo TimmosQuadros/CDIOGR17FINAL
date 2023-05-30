@@ -5,12 +5,13 @@ import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.videoio.VideoCapture;
 
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import static run.Main.videoCapture;
 
 public class RedRectangleDetection {
 
@@ -20,7 +21,7 @@ public class RedRectangleDetection {
     private Mat frame;
 
 
-    public RedRectangleDetection(VideoCapture videoCapture){
+    public RedRectangleDetection(){
         //detectField(videoCapture);
     }
 
@@ -30,15 +31,14 @@ public class RedRectangleDetection {
      * for the remaining objects that is : table tennis balls, obstacle and Mr. Robot.
      * Having a subsection of the actual frame defined minimized the computational work errors / disturbances
      * of observations not of interest.
-     * @param videoCapture live video capture.
      */
-    public List<Point> detectField(VideoCapture videoCapture){
-        retrieveFrame(videoCapture);
+    public List<Point> detectField(){
+        retrieveFrame();
         findCorners(findLines(frame)); // find corners.
         findFloorCorners();
         determineGoalCenters();
 
-        drawCorners(coordinates, frame);
+        //drawCorners(coordinates, frame);
 
         return coordinates;
     }
@@ -86,13 +86,13 @@ public class RedRectangleDetection {
      */
     public List<Point> testRedRectangleDetection(){
         ///String imagePath = "src/main/resources/FieldImages/detectMrRobot.jpg";
-        String imagePath = "resources/FieldImages/InkedMrRobotBlackGreenEnds.jpg";
+        String imagePath = "resources/FieldImages/MrRobotBlackGreenNBlueEnds.jpg";
         frame = Imgcodecs.imread(imagePath);
 
         findCorners(findLines(frame));
         findFloorCorners();
         determineGoalCenters();
-        drawCorners(coordinates, frame);
+        //drawCorners(coordinates, frame);
         for (Point x : coordinates){
             System.out.println("X coordinate = " + x.x + " AND y coordinate = " + x.y);
         }
@@ -115,8 +115,8 @@ public class RedRectangleDetection {
 
         Imgproc.circle(frame, coordinates.get(9), 5, new Scalar(0, 255, 0), -1);
 
-        Imgproc.circle(frame, new Point(-1029.0, 10.0), 5, new Scalar(0, 255, 0), -1);
-        Imgproc.circle(frame, new Point(920.0,460.0), 5, new Scalar(0, 255, 0), -1);
+        Imgproc.circle(frame, new Point(766.0, 429.0), 5, new Scalar(0, 255, 0), -1);
+        Imgproc.circle(frame, new Point(674.0,627.5), 5, new Scalar(0, 255, 0), -1);
 
         /*List<Point> pointList = new ArrayList<>();
         pointList.add(new Point(596.0, 302.0));
@@ -146,10 +146,9 @@ public class RedRectangleDetection {
 
     /**
      * This method will retrieve a frame to analyze from the videocapture.
-     * @param videoCapture the live video.
      * @return frame to analyze.
      */
-    public void retrieveFrame(VideoCapture videoCapture){
+    public void retrieveFrame(){
         // Check if the VideoCapture object is opened successfully
         if (!videoCapture.isOpened()) {
             System.out.println("Failed to open the webcam.");

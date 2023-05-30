@@ -12,19 +12,14 @@ public class findAreaOfInterestTask implements Callable<List<Point>> {
 
     VideoCapture videoCapture = null;
 
-    public findAreaOfInterestTask(VideoCapture capture){
-        this.videoCapture = capture;
+    public findAreaOfInterestTask(){
     }
 
     public List<Point> call() throws Exception{
-        // Create an instance of the RedRectangleDetection class with the specified VideoCapture object
-        RedRectangleDetection detectField = new RedRectangleDetection(this.videoCapture);
+        RedRectangleDetection detectField = new RedRectangleDetection();
+        //return detectField.testRedRectangleDetection();
 
-        // Call the testRedRectangleDetection method of the RedRectangleDetection class to detect and return points of interest
-        return detectField.testRedRectangleDetection();
-
-        // Alternative: Use the detectField method instead of testRedRectangleDetection
-        //return detectField.detectField(this.videoCapture);
+        return detectField.detectField();
     }
 
 }

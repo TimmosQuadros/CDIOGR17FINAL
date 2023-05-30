@@ -42,6 +42,10 @@ public class LineSegment {
         return endPoint;
     }
 
+    public double getLength() {
+        return Math.sqrt(Math.pow(endPoint.x - startPoint.x, 2) + Math.pow(endPoint.y - startPoint.y, 2));
+    }
+
     public double getA(){return this.a;}
     public double getB(){return this.b;}
 

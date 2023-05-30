@@ -1,7 +1,12 @@
 package run;
 
+import ObjectDetection.MrRobotDetection;
 import org.opencv.core.Core;
+import org.opencv.core.Mat;
 import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.highgui.HighGui;
+import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
 import java.util.List;
@@ -16,6 +21,7 @@ public class Main {
     static {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
+    public static VideoCapture videoCapture;
 
     //An array to store relevant course coordinates. Index 0-3 will correspond to the raw corner coordinates.
     //Index 4-7 will be the adjusted corner coordinates. And 8-9 will be the goal coordinates.
@@ -24,27 +30,28 @@ public class Main {
     //ie courseCoordinates[0] will be the to left corner. courseCoordinates[2] will be bottom left corner, and so on.
     public static Point[] courseCoordinates = new Point[10];
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         //print current version of opencv
         System.out.println(Core.VERSION);
 
         //variable for testing
-        VideoCapture videoCapture = null;
+        //VideoCapture videoCapture = null;
 
-        //VideoCapture videoCapture = new VideoCapture(0);
-        //setMaxResolution(videoCapture);
+        videoCapture = new VideoCapture(0);
+        setMaxResolution();
 
-        executorservice(videoCapture);
+        executorservice();
 
         //FieldObjectDetection fieldObjectDetection = new FieldObjectDetection(videoCapture, courseCoordinates);
 
-        //MrRobotDetection mrRobot = new MrRobotDetection(courseCoordinates);
+        MrRobotDetection mrRobot = new MrRobotDetection(courseCoordinates);
+        mrRobot.updatePosition();
 
         //stop capturing
         //videoCapture.release();
     }
 
-    private static void setMaxResolution(VideoCapture videoCapture) {
+    private static void setMaxResolution() {
         // Set the property for maximum resolution to a high value
         int maxResolutionProperty = -1;
         // Find the property representing the maximum resolution
@@ -68,14 +75,14 @@ public class Main {
         System.out.println("Resolution: " + width + "x" + height);
     }
 
-    private static void executorservice(VideoCapture videoCapture){
+    private static void executorservice(){
         // Create an ExecutorService with a fixed thread pool
         ExecutorService executor = Executors.newFixedThreadPool(1);
 
         //Point[] areaOfInterest = new Point[4];
 
         // Create an instance of your task
-        Callable<List<Point>> task = new findAreaOfInterestTask(videoCapture);
+        Callable<List<Point>> task = new findAreaOfInterestTask();
         // Submit the task to the executor
         Future<List<Point>> future = executor.submit(task);
 
