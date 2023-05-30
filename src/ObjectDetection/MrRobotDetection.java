@@ -23,6 +23,11 @@ public class MrRobotDetection {
     private Point frontCenter;
 
 
+    /**
+     * Constructs a MrRobotDetection object to detect the robot within the specified area of interest.
+     *
+     * @param area the area of interest on the field.
+     */
     public MrRobotDetection(Point[] area){
         System.arraycopy(area, 4, areaOfInterest, 0, areaOfInterest.length);
         Mat greenMask = detectRobot();

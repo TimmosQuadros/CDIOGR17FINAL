@@ -13,6 +13,7 @@ public class Server implements KeyListener{
 	PrintWriter writer;
 	
 public Server() {
+	// Create a JFrame for the server GUI
 	JFrame frame = new JFrame();
     frame.setSize(300, 300);
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -22,11 +23,19 @@ public Server() {
 		int portNumber = 4445;
 		ServerSocket serverSocket = new ServerSocket(portNumber);
 		while(true) {
+
+			// Wait for a client connection
 			Socket socket = serverSocket.accept();
 			System.out.println("connected");
+
+			// Create a PrintWriter to send messages to the client
 			writer = new PrintWriter(socket.getOutputStream(), true);
+
+			// Send a greeting message to the client
 			writer.println("hello");
 			writer.println();
+
+			// Check if the socket is closed and break the loop if it is
 			if(socket.isClosed()) {
 				System.out.println("connection closed: "+socket.getRemoteSocketAddress());
 				break;
@@ -83,6 +92,7 @@ public Server() {
 	@Override
 	public void keyPressed(KeyEvent e) {
 		// TODO Auto-generated method stub
+		// Send commands based on the pressed key
 		if(e.getKeyChar()=='w') {
 			writer.println("MoveForward");
 		}else if(e.getKeyChar()=='s') {
@@ -103,6 +113,7 @@ public Server() {
 	@Override
 	public void keyReleased(KeyEvent e) {
 		// TODO Auto-generated method stub
+		// Send stop commands based on the released key
 		if(e.getKeyChar()=='w') {
 			writer.println("StopMoveForward");
 		}else if(e.getKeyChar()=='s') {

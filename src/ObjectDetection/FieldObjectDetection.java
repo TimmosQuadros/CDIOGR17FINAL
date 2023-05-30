@@ -12,6 +12,12 @@ public class FieldObjectDetection {
 
     public static LineSegment[] crossLines = new LineSegment[2];
 
+    /**
+     * Constructs a FieldObjectDetection object to detect field objects, specifically the cross lines on the field.
+     *
+     * @param videoCapture   the video capture object to retrieve frames from.
+     * @param areaOfInterest an array of points defining the area of interest on the field.
+     */
     public FieldObjectDetection(VideoCapture videoCapture, Point[] areaOfInterest) {
         String imagePath = "src/main/resources/FieldImages/fieldwithcross.png";
         Mat frame = Imgcodecs.imread(imagePath);
@@ -34,6 +40,17 @@ public class FieldObjectDetection {
         }
 
     }
+
+    /**
+     * Creates a red cross mask based on the frame and the area of interest points.
+     *
+     * @param frame       the input frame to create the mask from.
+     * @param topLeft     the top-left point of the area of interest.
+     * @param topRight    the top-right point of the area of interest.
+     * @param bottomRight the bottom-right point of the area of interest.
+     * @param bottomLeft  the bottom-left point of the area of interest.
+     * @return the red cross mask.
+     */
 
     public static Mat createRedCrossMask(Mat frame, Point topLeft, Point topRight, Point bottomRight, Point bottomLeft) {
         // Create a blank bitmask with the same size as the frame
