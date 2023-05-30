@@ -38,7 +38,7 @@ public class RedRectangleDetection {
         findFloorCorners();
         determineGoalCenters();
 
-        //drawCorners(coordinates, frame);
+        drawCorners(coordinates, frame);
 
         return coordinates;
     }
@@ -86,13 +86,13 @@ public class RedRectangleDetection {
      */
     public List<Point> testRedRectangleDetection(){
         ///String imagePath = "src/main/resources/FieldImages/detectMrRobot.jpg";
-        String imagePath = "resources/FieldImages/MrRobotBlackGreenNBlueEnds.jpg";
+        String imagePath = "resources/FieldImages/WIN_20230530_16_58_11_Pro.jpg";
         frame = Imgcodecs.imread(imagePath);
 
         findCorners(findLines(frame));
         findFloorCorners();
         determineGoalCenters();
-        //drawCorners(coordinates, frame);
+        drawCorners(coordinates, frame);
         for (Point x : coordinates){
             System.out.println("X coordinate = " + x.x + " AND y coordinate = " + x.y);
         }

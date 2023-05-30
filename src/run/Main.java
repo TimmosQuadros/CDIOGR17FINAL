@@ -21,7 +21,7 @@ public class Main {
     static {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
-    public static VideoCapture videoCapture;
+    public static VideoCapture videoCapture = null;
 
     //An array to store relevant course coordinates. Index 0-3 will correspond to the raw corner coordinates.
     //Index 4-7 will be the adjusted corner coordinates. And 8-9 will be the goal coordinates.
@@ -37,8 +37,8 @@ public class Main {
         //variable for testing
         //VideoCapture videoCapture = null;
 
-        videoCapture = new VideoCapture(0);
-        setMaxResolution();
+        //videoCapture = new VideoCapture(0);
+        //setMaxResolution();
 
         executorservice();
 

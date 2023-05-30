@@ -20,7 +20,7 @@ import static run.Main.videoCapture;
 
 public class MrRobotDetection {
 
-    private Mat frame;
+    private Mat frame = null;
     private Point[] areaOfInterest = new Point[4];
     private LineSegment front;
     private LineSegment back;
@@ -56,8 +56,8 @@ public class MrRobotDetection {
     }
 
     public void findPoints(){
-        retrieveFrame();
-        Mat aoiImage = detectRobot(frame);
+        //retrieveFrame();
+        Mat aoiImage = detectRobot();
         //find green line
         front = findColouredLineSegment(aoiImage, true);
         //find blue line
@@ -65,9 +65,8 @@ public class MrRobotDetection {
         frontCenter = determineFrontCenter();
         backCenter = determineBackCenter();
 
-        Point[] points = new Point[2];
-        points[0] = frontCenter;
-        points[1] = backCenter;
+        System.out.println("front center" + frontCenter.x + " and " + frontCenter.y);
+        System.out.println("back center" + backCenter.x + " and " + backCenter.y);
     }
 
     public void retrieveFrame(){
@@ -118,9 +117,9 @@ public class MrRobotDetection {
 
         // Detect lines using the Hough Line Transform
         Mat lines = new Mat();
-        double minLineLength = 100; // Minimum line length
-        double maxLineGap = 10; // Maximum gap between line segments
-        Imgproc.HoughLinesP(colorMask, lines, 1, Math.PI / 180, 100, minLineLength, 10);
+        double minLineLength = 50; // Minimum line length
+        double maxLineGap = 5; // Maximum gap between line segments
+        Imgproc.HoughLinesP(colorMask, lines, 1, Math.PI / 180, 100, minLineLength, maxLineGap);
 
         return findBiggestLine(lines);
     }
@@ -164,18 +163,16 @@ public class MrRobotDetection {
         return new Point((back.getEndPoint().x + back.getStartPoint().x) / 2.0, (back.getEndPoint().y + back.getStartPoint().y) / 2.0);
     }
 
-    public Mat detectRobot(Mat frame) {
+    public Mat detectRobot() {
         // Load the OpenCV native library
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
-        Mat image = frame;
-
         if (frame == null) {
             // Load the input image
-            image = Imgcodecs.imread("C:\\Users\\emil1\\OneDrive\\Documents\\CDIOGR17FINAL\\resources\\FieldImages\\MrRobotBlackGreenNBlueEnds.jpg");
+            frame = Imgcodecs.imread("C:\\Users\\emil1\\OneDrive\\Documents\\CDIOGR17FINAL\\resources\\FieldImages\\WIN_20230530_16_58_11_Pro.jpg");
         }
 
-        Mat mask = Mat.zeros(image.size(), CvType.CV_8UC1);
+        Mat mask = Mat.zeros(frame.size(), CvType.CV_8UC1);
 
         // Create a region of interest polygon using the four points
         List<Point> roiPoints = new ArrayList<>();
@@ -191,7 +188,7 @@ public class MrRobotDetection {
 
         // Apply the mask to the original image
         Mat maskedImage = new Mat();
-        image.copyTo(maskedImage, mask);
+        frame.copyTo(maskedImage, mask);
 
         // Save the masked image and the binary mask image
         Imgcodecs.imwrite("maskedImage.jpg", maskedImage);
