@@ -86,7 +86,7 @@ public class RedRectangleDetection {
      */
     public List<Point> testRedRectangleDetection(){
         ///String imagePath = "src/main/resources/FieldImages/detectMrRobot.jpg";
-        String imagePath = "src/main/resources/FieldImages/InkedMrRobotBlackGreenEnds.jpg";
+        String imagePath = "resources/FieldImages/InkedMrRobotBlackGreenEnds.jpg";
         frame = Imgcodecs.imread(imagePath);
 
         findCorners(findLines(frame));
