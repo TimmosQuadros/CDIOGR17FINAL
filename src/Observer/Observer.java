@@ -1,4 +1,4 @@
-package Observer
+package Observer;
 
 public interface Observer {
 
