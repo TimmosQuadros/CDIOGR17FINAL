@@ -1,6 +1,8 @@
 package run;
 
+import ObjectDetection.FieldObjectDetection;
 import ObjectDetection.MrRobotDetection;
+import ObjectDetection.RedRectangleDetection;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -21,7 +23,7 @@ public class Main {
     static {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
-    public static VideoCapture videoCapture = null;
+    public static VideoCapture videoCapture;
 
     //An array to store relevant course coordinates. Index 0-3 will correspond to the raw corner coordinates.
     //Index 4-7 will be the adjusted corner coordinates. And 8-9 will be the goal coordinates.
@@ -34,21 +36,40 @@ public class Main {
         //print current version of opencv
         System.out.println(Core.VERSION);
 
-        //variable for testing
-        //VideoCapture videoCapture = null;
+        testWithoutVideo();
 
-        //videoCapture = new VideoCapture(0);
-        //setMaxResolution();
+        //runWithVideo();
 
-        executorservice();
+    }
 
-        //FieldObjectDetection fieldObjectDetection = new FieldObjectDetection(videoCapture, courseCoordinates);
+    private static void runWithVideo() {
+        videoCapture = new VideoCapture(0);
+        setMaxResolution();
 
-        MrRobotDetection mrRobot = new MrRobotDetection(courseCoordinates);
-        mrRobot.updatePosition();
+        //detecs field
+        RedRectangleDetection rectangleDetection = new RedRectangleDetection();
+        rectangleDetection.detectField();
 
-        //stop capturing
-        //videoCapture.release();
+        //detect cross
+        FieldObjectDetection fieldObjectDetection = new FieldObjectDetection();
+
+        MrRobotDetection mrRobot = new MrRobotDetection();
+        mrRobot.findPoints();
+
+        videoCapture.release();
+    }
+
+    private static void testWithoutVideo() {
+        //detecs field
+        RedRectangleDetection rectangleDetection = new RedRectangleDetection();
+        rectangleDetection.testRedRectangleDetection();
+
+        //detect cross
+        FieldObjectDetection fieldObjectDetection = new FieldObjectDetection();
+
+        //detect robot
+        MrRobotDetection mrRobot = new MrRobotDetection();
+        mrRobot.test();
     }
 
     private static void setMaxResolution() {
@@ -79,8 +100,6 @@ public class Main {
         // Create an ExecutorService with a fixed thread pool
         ExecutorService executor = Executors.newFixedThreadPool(1);
 
-        //Point[] areaOfInterest = new Point[4];
-
         // Create an instance of your task
         Callable<List<Point>> task = new findAreaOfInterestTask();
         // Submit the task to the executor
@@ -88,7 +107,7 @@ public class Main {
 
         // Retrieve the result from the future object
         try {
-            assignCoordinates(future.get());
+            future.get();
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
@@ -97,11 +116,5 @@ public class Main {
         }
     }
 
-    private static void assignCoordinates(List<Point> points) {
-
-        for (int i = 0; i < points.size() ; i++) {
-            courseCoordinates[i] = points.get(i);
-        }
-    }
 }
 

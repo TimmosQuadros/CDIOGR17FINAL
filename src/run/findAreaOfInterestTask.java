@@ -4,7 +4,6 @@ import ObjectDetection.RedRectangleDetection;
 import org.opencv.core.Point;
 import org.opencv.videoio.VideoCapture;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -17,9 +16,10 @@ public class findAreaOfInterestTask implements Callable<List<Point>> {
 
     public List<Point> call() throws Exception{
         RedRectangleDetection detectField = new RedRectangleDetection();
-        return detectField.testRedRectangleDetection();
+        detectField.testRedRectangleDetection();
 
-        //return detectField.detectField();
+        //detectField.detectField();
+        return null;
     }
 
 }

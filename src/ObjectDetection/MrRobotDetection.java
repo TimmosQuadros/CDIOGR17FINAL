@@ -1,5 +1,6 @@
 package ObjectDetection;
 
+import Bitmasks.AreaOfInterestMask;
 import LineCreation.LineSegment;
 import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
@@ -16,28 +17,18 @@ import org.opencv.videoio.VideoCapture;
 import java.util.ArrayList;
 import java.util.List;
 
+import static run.Main.courseCoordinates;
 import static run.Main.videoCapture;
 
 public class MrRobotDetection {
 
-    private Mat frame = null;
-    private Point[] areaOfInterest = new Point[4];
+    private AreaOfInterestMask aoiMask = null;
+    private Mat frame = new Mat();
     private LineSegment front;
     private LineSegment back;
     public static Point frontCenter;
     public static Point backCenter;
 
-    /**
-     * Constructs a MrRobotDetection object to detect the robot within the specified area of interest.
-     *
-     * @param area the area of interest on the field.
-     */
-    public MrRobotDetection(Point[] area){
-        System.arraycopy(area, 4, areaOfInterest, 0, areaOfInterest.length);
-
-        //System.out.println("front center" + frontCenter.x + " and " + frontCenter.y);
-        //System.out.println("back center" + backCenter.x + " and " + backCenter.y);
-    }
     public void updatePosition() throws InterruptedException {
         findPoints();
 
@@ -55,8 +46,22 @@ public class MrRobotDetection {
             // Check for keyboard input and break the loop if the 'q' key is pressed
     }
 
+    public void test(){
+        Mat aoiImage = detectRobot();
+        //find green line
+        front = findColouredLineSegment(aoiImage, true);
+        //find blue line
+        back = findColouredLineSegment(aoiImage, false);
+        if(!((front == null) || (back == null))) {
+            frontCenter = determineFrontCenter();
+            backCenter = determineBackCenter();
+            System.out.println("front center" + frontCenter.x + " and " + frontCenter.y);
+            System.out.println("back center" + backCenter.x + " and " + backCenter.y);
+        }
+    }
+
     public void findPoints(){
-        //retrieveFrame();
+        retrieveFrame();
         Mat aoiImage = detectRobot();
         //find green line
         front = findColouredLineSegment(aoiImage, true);
@@ -76,13 +81,7 @@ public class MrRobotDetection {
             return ;
         }
 
-        this.frame = new Mat();
-        if (videoCapture.read(this.frame)) { //reads next frame of videocapture into the frame variable.
-            //Save the frame as a PNG file
-            //imagePath = getRessourcePath();
-            //Imgcodecs.imwrite(imagePath, this.frame);
-            //System.out.println("Frame saved as " + imagePath);
-        } else {
+        while (!videoCapture.read(this.frame)) { //reads next frame of videocapture into the frame variable.
             System.out.println("Failed to capture a frame.");
         }
     }
@@ -164,31 +163,19 @@ public class MrRobotDetection {
     }
 
     public Mat detectRobot() {
-        // Load the OpenCV native library
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-
-        if (frame == null) {
+        if (videoCapture == null) {
             // Load the input image
-            frame = Imgcodecs.imread("C:\\Users\\emil1\\OneDrive\\Documents\\CDIOGR17FINAL\\resources\\FieldImages\\WIN_20230530_16_58_11_Pro.jpg");
+            //frame = Imgcodecs.imread("C:\\Users\\emil1\\OneDrive\\Documents\\GitHub\\CDIOGR17FINAL\\resources\\FieldImages\\MrRobotBlackGreenNBlueEnds.jpg");
+            frame = Imgcodecs.imread("C:\\Users\\emil1\\OneDrive\\Documents\\GitHub\\CDIOGR17FINAL\\resources\\FieldImages\\WIN_20230530_16_58_11_Pro.jpg");
         }
-
-        Mat mask = Mat.zeros(frame.size(), CvType.CV_8UC1);
-
-        // Create a region of interest polygon using the four points
-        List<Point> roiPoints = new ArrayList<>();
-        roiPoints.add(areaOfInterest[0]);
-        roiPoints.add(areaOfInterest[1]);
-        roiPoints.add(areaOfInterest[3]);
-        roiPoints.add(areaOfInterest[2]);
-        MatOfPoint roiContour = new MatOfPoint();
-        roiContour.fromList(roiPoints);
-
-        // Fill the region of interest polygon with white color in the mask image
-        Imgproc.fillPoly(mask, List.of(roiContour), new Scalar(255));
 
         // Apply the mask to the original image
         Mat maskedImage = new Mat();
-        frame.copyTo(maskedImage, mask);
+
+        if(aoiMask == null)
+            aoiMask = new AreaOfInterestMask(frame);
+
+        frame.copyTo(maskedImage, aoiMask.getAoiMask());
 
         // Save the masked image and the binary mask image
         Imgcodecs.imwrite("maskedImage.jpg", maskedImage);

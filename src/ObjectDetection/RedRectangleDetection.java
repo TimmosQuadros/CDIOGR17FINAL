@@ -1,5 +1,6 @@
 package ObjectDetection;
 
+import Bitmasks.AreaOfInterestMask;
 import LineCreation.LineSegment;
 import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
@@ -11,18 +12,17 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import static run.Main.courseCoordinates;
 import static run.Main.videoCapture;
 
 public class RedRectangleDetection {
 
     private final int frameWidth = 1920;
     private final int frameHeight = 1080;
-    public List<Point> coordinates = new ArrayList<>();
     private Mat frame;
 
 
     public RedRectangleDetection(){
-        //detectField(videoCapture);
     }
 
     /**
@@ -32,23 +32,23 @@ public class RedRectangleDetection {
      * Having a subsection of the actual frame defined minimized the computational work errors / disturbances
      * of observations not of interest.
      */
-    public List<Point> detectField(){
+    public void detectField(){
         retrieveFrame();
         findCorners(findLines(frame)); // find corners.
         findFloorCorners();
         determineGoalCenters();
+        AreaOfInterestMask aoiMask = new AreaOfInterestMask(this.frame);
 
-        drawCorners(coordinates, frame);
+        //drawCorners(coordinates, frame);
 
-        return coordinates;
     }
 
     private void determineGoalCenters() {
         // finds posts for lefthand side.
-        coordinates.add(8, getAverage(coordinates.get(4),coordinates.get(6)));
+        courseCoordinates[8] = getAverage(courseCoordinates[4],courseCoordinates[6]);
 
         //finds posts for righthand side.
-        coordinates.add(9, getAverage(coordinates.get(5),coordinates.get(7)));
+        courseCoordinates[9] = getAverage(courseCoordinates[5],courseCoordinates[7]);
     }
 
     private Point getAverage(Point upperPoint, Point lowerPoint) {
@@ -72,48 +72,43 @@ public class RedRectangleDetection {
 
         System.out.println(pixelRatioHeight);
         System.out.println(pixelRatioWidth);
-        coordinates.add(4, new Point((adjustWidth + coordinates.get(0).x),(adjustHeight + coordinates.get(0).y)));
+        courseCoordinates[4] = new Point((adjustWidth + courseCoordinates[0].x),(adjustHeight + courseCoordinates[0].y));
+        courseCoordinates[5] = new Point((courseCoordinates[1].x - adjustWidth),(adjustHeight + courseCoordinates[1].y));
+        courseCoordinates[6] = new Point((adjustWidth + courseCoordinates[2].x),(courseCoordinates[2].y) - adjustHeight);
+        courseCoordinates[7] = new Point((courseCoordinates[3].x - adjustWidth),(courseCoordinates[3].y) - adjustHeight);
 
-        coordinates.add(5, new Point((coordinates.get(1).x - adjustWidth),(adjustHeight + coordinates.get(1).y)));
-
-        coordinates.add(6, new Point((adjustWidth + coordinates.get(2).x),(coordinates.get(2).y) - adjustHeight));
-
-        coordinates.add(7, new Point((coordinates.get(3).x - adjustWidth),(coordinates.get(3).y) - adjustHeight));
     }
 
     /**
      * method to test how well working the methods are using png images.
      */
-    public List<Point> testRedRectangleDetection(){
-        ///String imagePath = "src/main/resources/FieldImages/detectMrRobot.jpg";
+    public void testRedRectangleDetection(){
         String imagePath = "resources/FieldImages/WIN_20230530_16_58_11_Pro.jpg";
+        //String imagePath = "resources/FieldImages/MrRobotBlackGreenNBlueEnds.jpg";
         frame = Imgcodecs.imread(imagePath);
 
         findCorners(findLines(frame));
         findFloorCorners();
         determineGoalCenters();
-        drawCorners(coordinates, frame);
-        for (Point x : coordinates){
+        drawCorners(frame);
+        for (Point x : courseCoordinates){
             System.out.println("X coordinate = " + x.x + " AND y coordinate = " + x.y);
         }
-
-        return coordinates;
     }
 
     /**
      * This method will draw green circles on each point received as input.
-     * @param coordinates coordinates to draw at.
      * @param frame frame to draw on.
      */
-    private void drawCorners(List<Point> coordinates, Mat frame) {
+    private void drawCorners(Mat frame) {
         // Draw circles for each coordinate
-        for (Point coordinate : coordinates) {
+        for (Point coordinate : courseCoordinates) {
             Imgproc.circle(frame, coordinate, 5, new Scalar(0, 255, 0), -1);
         }
 
-        Imgproc.circle(frame, coordinates.get(8), 5, new Scalar(0, 255, 0), -1);
+        Imgproc.circle(frame, courseCoordinates[8], 5, new Scalar(0, 255, 0), -1);
 
-        Imgproc.circle(frame, coordinates.get(9), 5, new Scalar(0, 255, 0), -1);
+        Imgproc.circle(frame, courseCoordinates[9], 5, new Scalar(0, 255, 0), -1);
 
         Imgproc.circle(frame, new Point(766.0, 429.0), 5, new Scalar(0, 255, 0), -1);
         Imgproc.circle(frame, new Point(674.0,627.5), 5, new Scalar(0, 255, 0), -1);
@@ -131,11 +126,7 @@ public class RedRectangleDetection {
         Imgproc.minEnclosingCircle(points, center, radius);
         Imgproc.circle(frame, center, (int) radius[0], new Scalar(0, 255, 0), 2);
 
-        Imgproc.circle(frame, new Point(596.0, 302.0), 5, new Scalar(0, 255, 0), -1);
-        Imgproc.circle(frame, new Point(575.0, 408.0), 5, new Scalar(0, 255, 0), -1);
-        Imgproc.circle(frame, new Point(531.0, 348.0), 5, new Scalar(0, 255, 0), -1);
-        Imgproc.circle(frame, new Point(638.0, 363.0), 5, new Scalar(0, 255, 0), -1);
-        */
+         */
 
         // Display the frame
         HighGui.imshow("Frame", frame);
@@ -195,8 +186,8 @@ public class RedRectangleDetection {
     private void findCorners(List<LineSegment> lines) {
         int j = 0;
 
-        for (int i = 0; i < lines.size() / 2 ; i ++) {
-            coordinates.add(i, findIntersection(lines.get(j),lines.get(++j)));
+        for (int i = 0; i < 4 ; i ++) {
+            courseCoordinates[i] = findIntersection(lines.get(j),lines.get(++j));
             j++;
         }
     }
