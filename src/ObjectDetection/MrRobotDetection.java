@@ -6,18 +6,14 @@ import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.videoio.VideoCapture;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static run.Main.courseCoordinates;
 import static run.Main.videoCapture;
 
 public class MrRobotDetection {
@@ -47,22 +43,50 @@ public class MrRobotDetection {
     }
 
     public void test(){
-        Mat aoiImage = detectRobot();
+        //applys the area of interest to the frame to avoid noise - things outside the field.
+        //Mat aoiImage = narrowSearchArea();
+
+        String imagePath = "resources/FieldImages/redblue.png";
+        Mat frame = Imgcodecs.imread(imagePath);
+
         //find green line
-        front = findColouredLineSegment(aoiImage, true);
+        //front = findColouredLineSegment(frame, true);
+        back = findColouredLineSegment(frame, true);
         //find blue line
-        back = findColouredLineSegment(aoiImage, false);
-        if(!((front == null) || (back == null))) {
+        front = findColouredLineSegment(frame, false);
+
+        if (front != null){
+            frontCenter = determineFrontCenter();
+            System.out.println("front center" + frontCenter.x + " and " + frontCenter.y);
+            Imgproc.circle(frame, frontCenter, 5, new Scalar(0, 255, 0), -1);
+        }
+        if (back != null){
+            backCenter = determineBackCenter();
+            System.out.println("back center" + backCenter.x + " and " + backCenter.y);
+            Imgproc.circle(frame, backCenter, 5, new Scalar(0, 255, 0), -1);
+            Imgproc.circle(frame, back.getStartPoint(), 5, new Scalar(0, 255, 0), -1);
+            Imgproc.circle(frame, back.getEndPoint(), 5, new Scalar(0, 255, 0), -1);
+        }
+
+        // Display the frame
+        HighGui.imshow("Frame", frame);
+        HighGui.waitKey();
+
+        frame.release();
+
+        /*if(!((front == null) || (back == null))) {
             frontCenter = determineFrontCenter();
             backCenter = determineBackCenter();
             System.out.println("front center" + frontCenter.x + " and " + frontCenter.y);
             System.out.println("back center" + backCenter.x + " and " + backCenter.y);
         }
+         */
+
     }
 
     public void findPoints(){
         retrieveFrame();
-        Mat aoiImage = detectRobot();
+        Mat aoiImage = narrowSearchArea();
         //find green line
         front = findColouredLineSegment(aoiImage, true);
         //find blue line
@@ -97,11 +121,15 @@ public class MrRobotDetection {
 
         if (green) {
             // Define the lower and upper green color thresholds in HSV
-            lower = new Scalar(35, 100, 100);
-            upper = new Scalar(85, 255, 255);
+            // lower = new Scalar(0, 100, 0);
+            // upper = new Scalar(100, 255, 255);
+
+            // Define the lower and upper thresholds for red color
+            lower = new Scalar(0, 100, 100);
+            upper = new Scalar(10, 255, 255);
         }
         else{
-            lower = new Scalar(90, 50, 50); // Lower blue threshold in HSV
+            lower = new Scalar(90, 50, 50,0); // Lower blue threshold in HSV
             upper = new Scalar(130, 255, 255); // Upper blue threshold in HSV
         }
 
@@ -117,7 +145,7 @@ public class MrRobotDetection {
         // Detect lines using the Hough Line Transform
         Mat lines = new Mat();
         double minLineLength = 50; // Minimum line length
-        double maxLineGap = 5; // Maximum gap between line segments
+        double maxLineGap = 15; // Maximum gap between line segments
         Imgproc.HoughLinesP(colorMask, lines, 1, Math.PI / 180, 100, minLineLength, maxLineGap);
 
         return findBiggestLine(lines);
@@ -162,7 +190,7 @@ public class MrRobotDetection {
         return new Point((back.getEndPoint().x + back.getStartPoint().x) / 2.0, (back.getEndPoint().y + back.getStartPoint().y) / 2.0);
     }
 
-    public Mat detectRobot() {
+    public Mat narrowSearchArea() {
         if (videoCapture == null) {
             // Load the input image
             //frame = Imgcodecs.imread("C:\\Users\\emil1\\OneDrive\\Documents\\GitHub\\CDIOGR17FINAL\\resources\\FieldImages\\MrRobotBlackGreenNBlueEnds.jpg");

@@ -83,7 +83,7 @@ public class RedRectangleDetection {
      * method to test how well working the methods are using png images.
      */
     public void testRedRectangleDetection(){
-        String imagePath = "resources/FieldImages/WIN_20230530_16_58_11_Pro.jpg";
+        String imagePath = "resources/FieldImages/whiteMiddle.jpg";
         //String imagePath = "resources/FieldImages/MrRobotBlackGreenNBlueEnds.jpg";
         frame = Imgcodecs.imread(imagePath);
 

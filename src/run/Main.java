@@ -61,11 +61,11 @@ public class Main {
 
     private static void testWithoutVideo() {
         //detecs field
-        RedRectangleDetection rectangleDetection = new RedRectangleDetection();
-        rectangleDetection.testRedRectangleDetection();
+        //RedRectangleDetection rectangleDetection = new RedRectangleDetection();
+        //rectangleDetection.testRedRectangleDetection();
 
         //detect cross
-        FieldObjectDetection fieldObjectDetection = new FieldObjectDetection();
+        //FieldObjectDetection fieldObjectDetection = new FieldObjectDetection();
 
         //detect robot
         MrRobotDetection mrRobot = new MrRobotDetection();
