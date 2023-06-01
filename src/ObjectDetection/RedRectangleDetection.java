@@ -203,7 +203,7 @@ public class RedRectangleDetection {
      * @param vertical lineSegment.
      * @return intersection point of the two lines - equal to the corner.
      */
-    private Point findIntersection(LineSegment horizontal, LineSegment vertical) {
+    public static Point findIntersection(LineSegment horizontal, LineSegment vertical) {
         horizontal.determineEquation();
         vertical.determineEquation();
 

@@ -1,14 +1,10 @@
 package run;
 
-import ObjectDetection.FieldObjectDetection;
+import ObjectDetection.RedCrossDetection;
 import ObjectDetection.MrRobotDetection;
 import ObjectDetection.RedRectangleDetection;
 import org.opencv.core.Core;
-import org.opencv.core.Mat;
 import org.opencv.core.Point;
-import org.opencv.core.Scalar;
-import org.opencv.highgui.HighGui;
-import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
 import java.util.List;
@@ -51,7 +47,7 @@ public class Main {
         rectangleDetection.detectField();
 
         //detect cross
-        FieldObjectDetection fieldObjectDetection = new FieldObjectDetection();
+        RedCrossDetection fieldObjectDetection = new RedCrossDetection();
 
         MrRobotDetection mrRobot = new MrRobotDetection();
         mrRobot.findPoints();
@@ -65,11 +61,12 @@ public class Main {
         rectangleDetection.testRedRectangleDetection();
 
         //detect cross
-        //FieldObjectDetection fieldObjectDetection = new FieldObjectDetection();
+        RedCrossDetection redCrossDetection = new RedCrossDetection();
+        redCrossDetection.detectCrossTest();
 
         //detect robot
-        MrRobotDetection mrRobot = new MrRobotDetection();
-        mrRobot.test();
+        //MrRobotDetection mrRobot = new MrRobotDetection();
+        //mrRobot.test();
     }
 
     private static void setMaxResolution() {

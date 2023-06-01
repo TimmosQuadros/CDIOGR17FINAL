@@ -1,32 +1,83 @@
 package ObjectDetection;
 
+import Bitmasks.AreaOfInterestMask;
 import LineCreation.LineSegment;
 import org.opencv.core.*;
+import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
-import run.Main;
 
-import java.util.List;
+import static run.Main.videoCapture;
 
-public class FieldObjectDetection {
+public class RedCrossDetection {
 
     public static LineSegment[] crossLines = new LineSegment[2];
+    private AreaOfInterestMask aoiMask = null;
+    private Mat frame = new Mat();
+    private Point crossCenter;
 
     /**
      * Constructs a FieldObjectDetection object to detect field objects, specifically the cross lines on the field.
      *
      */
-    public FieldObjectDetection() {
-        String imagePath = "src/main/resources/FieldImages/fieldwithcross.png";
-        Mat frame = Imgcodecs.imread(imagePath);
-        Mat redCrossMask = createRedCrossMask(frame);
-
-        //Mat redCrossMask = createRedCrossMask(Objects.requireNonNull(RedRectangleDetection.retrieveFrame(videoCapture)), areaOfInterest[0], areaOfInterest[1], areaOfInterest[3], areaOfInterest[2]);
-        fillObstableArray(redCrossMask);
-
+    public RedCrossDetection() {
     }
 
-    private void fillObstableArray(Mat redCrossMask) {
+    public void detectCross(){
+        retrieveFrame();
+        Mat aoiImage = createAOIMask(frame);
+
+        fillObstableArray(aoiImage);
+        crossCenter = RedRectangleDetection.findIntersection(crossLines[1], crossLines[0]);
+    }
+
+    public void detectCrossTest(){
+        String imagePath = "resources/FieldImages/cutfieldImageWithCross.png";
+        Mat frame = Imgcodecs.imread(imagePath);
+        //Mat aoiImage = createAOIMask(frame);
+
+        fillObstableArray(frame);
+
+        Imgproc.circle(frame, crossLines[0].getStartPoint(), 5, new Scalar(0, 255, 0), -1);
+        Imgproc.circle(frame, crossLines[0].getEndPoint(), 5, new Scalar(0, 255, 0), -1);
+
+        Imgproc.circle(frame, crossLines[1].getStartPoint(), 5, new Scalar(0, 255, 0), -1);
+        Imgproc.circle(frame, crossLines[1].getEndPoint(), 5, new Scalar(0, 255, 0), -1);
+
+        crossCenter = RedRectangleDetection.findIntersection(crossLines[1], crossLines[0]);
+
+        Imgproc.circle(frame, crossCenter, 5, new Scalar(0, 255, 0), -1);
+
+        // Display the frame
+        HighGui.imshow("Frame", frame);
+        HighGui.waitKey();
+
+        frame.release();
+    }
+
+    public void retrieveFrame(){
+        // Check if the VideoCapture object is opened successfully
+        if (!videoCapture.isOpened()) {
+            System.out.println("Failed to open the webcam.");
+            return ;
+        }
+
+        while (!videoCapture.read(this.frame)) { //reads next frame of videocapture into the frame variable.
+            System.out.println("Failed to capture a frame.");
+        }
+    }
+
+    private void fillObstableArray(Mat aoiMask) {
+        Mat hsvImage = new Mat();
+        Imgproc.cvtColor(aoiMask, hsvImage, Imgproc.COLOR_BGR2HSV);
+        Mat redCrossMask = new Mat();
+
+        // Define the lower and upper thresholds for red color
+        Scalar lowerRed = new Scalar(0, 100, 100);
+        Scalar upperRed = new Scalar(10, 255, 255);
+
+        Core.inRange(hsvImage, lowerRed, upperRed, redCrossMask);
+
         //vertical line
         crossLines[0] = findLinesegment(redCrossMask, true);
 
@@ -46,33 +97,19 @@ public class FieldObjectDetection {
      * @return the red cross mask.
      */
 
-    public static Mat createRedCrossMask(Mat frame) {
-        // Create a blank bitmask with the same size as the frame
-        Mat mask = Mat.zeros(frame.size(), CvType.CV_8UC1);
+    public Mat createAOIMask(Mat frame) {
+        // Apply the mask to the original image
+        Mat maskedImage = new Mat();
 
-        // Define the area of interest as a polygon
-        MatOfPoint roi = new MatOfPoint(Main.courseCoordinates[4], Main.courseCoordinates[5], Main.courseCoordinates[7], Main.courseCoordinates[6]);
-        MatOfPoint[] roiContours = { roi };
+        if(aoiMask == null)
+            aoiMask = new AreaOfInterestMask(frame);
 
-        // Fill the area of interest with white color (255) in the bitmask
-        Imgproc.fillPoly(mask, List.of(roiContours), new Scalar(255));
+        frame.copyTo(maskedImage, aoiMask.getAoiMask());
 
-        // Convert the frame to the HSV color space
-        Mat hsvFrame = new Mat();
-        Imgproc.cvtColor(frame, hsvFrame, Imgproc.COLOR_BGR2HSV);
+        // Save the masked image and the binary mask image
+        Imgcodecs.imwrite("maskedImage.jpg", maskedImage);
 
-        // Define the lower and upper bounds of the red color in HSV
-        Scalar lowerRed = new Scalar(0, 100, 100);
-        Scalar upperRed = new Scalar(10, 255, 255);
-
-        // Create the red color mask using the defined bounds
-        Mat redMask = new Mat();
-        Core.inRange(hsvFrame, lowerRed, upperRed, redMask);
-
-        // Apply the area of interest mask to the red color mask
-        Core.bitwise_and(redMask, mask, redMask);
-
-        return redMask;
+        return maskedImage;
     }
 
     private LineSegment findLinesegment(Mat binaryImage, boolean vertical) {
