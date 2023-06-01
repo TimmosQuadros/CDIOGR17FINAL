@@ -14,7 +14,7 @@ public class FindAreaOfInterestSubject extends Subject implements FindAreaOfInte
     private RedRectangleDetection fieldDetection;
     private final VideoCapture videoCapture;
 
-    public FindAreaOfInterestSubject(VideoCaptureSingleton videoCaptureSingleton){
+    public FindAreaOfInterestSubject(){
         this.videoCapture = VideoCaptureSingleton.getInstance().getVideoCapture();
         fieldDetection = new RedRectangleDetection(videoCapture);
 
@@ -22,12 +22,14 @@ public class FindAreaOfInterestSubject extends Subject implements FindAreaOfInte
 
     @Override
     public List<Point> getGoalPos() {
-        return fieldDetection.detectField(this.videoCapture);
+        fieldDetection.determineGoalCenters();
+        return fieldDetection.getGoals();
     }
 
     @Override
     public List<Point> getCorners() {
-        return fieldDetection.determineGoalCenters();
+        fieldDetection.detectField(videoCapture);
+        return fieldDetection.getFloorCorners();
     }
 
     @Override
