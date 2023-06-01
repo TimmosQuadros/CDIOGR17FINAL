@@ -40,7 +40,7 @@ public class QRCodeDetectorSubject extends Subject implements QRCodeDetector {
         Point point6 = new Point(1,1);
         Point point7 = new Point(1,1);
 
-        final int FRAMECOUNT = 100;
+        final int FRAMECOUNT = 40;
         // Iterate through the video frames
         for(int i = 0; i<FRAMECOUNT; i++){
             Mat frame = new Mat();
@@ -86,24 +86,25 @@ public class QRCodeDetectorSubject extends Subject implements QRCodeDetector {
             points.add(point7);
         }
 
-        double threshold = 2.0; // Set the threshold for outlier filtering
+        double threshold = 5.0; // Set the threshold for outlier filtering
 
-        Point average = calculateFilteredAveragePoint(points, threshold);
-
-        return null;
+        return calculateFilteredAveragePoint(points, threshold);
     }
 
     public Point calculateFilteredAveragePoint(List<Point> points, double threshold) {
-        List<Point> validPoints = points.stream()
-                .filter(point -> {
-                    double diffX = Math.abs(point.x);
-                    double diffY = Math.abs(point.y);
-                    return diffX <= threshold && diffY <= threshold;
-                }).toList();
+        List<Point> filterePoints = new ArrayList<>();
+        for (Point point:points){
+            if(point.x!=0.0 && point.y!=0.0){
+                filterePoints.add(point);
+            }
+        }
 
-        double sumX = validPoints.stream().mapToDouble(point -> point.x).sum();
-        double sumY = validPoints.stream().mapToDouble(point -> point.y).sum();
-        int count = validPoints.size();
+
+        double sumX = filterePoints.stream().mapToDouble(point -> point.x).sum();
+        double sumY = filterePoints.stream().mapToDouble(point -> point.y).sum();
+        int count = filterePoints.size();
+
+
 
         if (count == 0) {
             return null; // Return null if no valid points exist
