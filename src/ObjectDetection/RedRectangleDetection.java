@@ -65,13 +65,8 @@ public class RedRectangleDetection {
      * @return the coordinates of the approximated foldiing intersections for each corner.
      */
     private void findFloorCorners() {
-        double pixelRatioWidth = 0.015372790161414296;
-        double pixelRatioHeight = 0.0273224043715847;
-        double adjustWidth = pixelRatioWidth * frameWidth;
-        double adjustHeight = pixelRatioHeight * frameHeight;
-
-        System.out.println(pixelRatioHeight);
-        System.out.println(pixelRatioWidth);
+        double adjustHeight = 8.0;
+        double adjustWidth = 10.0;
         courseCoordinates[4] = new Point((adjustWidth + courseCoordinates[0].x),(adjustHeight + courseCoordinates[0].y));
         courseCoordinates[5] = new Point((courseCoordinates[1].x - adjustWidth),(adjustHeight + courseCoordinates[1].y));
         courseCoordinates[6] = new Point((adjustWidth + courseCoordinates[2].x),(courseCoordinates[2].y) - adjustHeight);
@@ -83,14 +78,14 @@ public class RedRectangleDetection {
      * method to test how well working the methods are using png images.
      */
     public void testRedRectangleDetection(){
-        String imagePath = "resources/FieldImages/whiteMiddle.jpg";
+        String imagePath = "resources/FieldImages/bluegreen.jpg";
         //String imagePath = "resources/FieldImages/MrRobotBlackGreenNBlueEnds.jpg";
         frame = Imgcodecs.imread(imagePath);
 
         findCorners(findLines(frame));
         findFloorCorners();
         determineGoalCenters();
-        drawCorners(frame);
+        //drawCorners(frame);
         for (Point x : courseCoordinates){
             System.out.println("X coordinate = " + x.x + " AND y coordinate = " + x.y);
         }
@@ -105,6 +100,8 @@ public class RedRectangleDetection {
         for (Point coordinate : courseCoordinates) {
             Imgproc.circle(frame, coordinate, 5, new Scalar(0, 255, 0), -1);
         }
+        Imgproc.circle(frame, new Point(courseCoordinates[2].x + 10, courseCoordinates[2].y - 10), 5, new Scalar(0, 0, 255), -1);
+
 
         Imgproc.circle(frame, courseCoordinates[8], 5, new Scalar(0, 255, 0), -1);
 

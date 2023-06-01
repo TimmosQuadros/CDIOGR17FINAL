@@ -44,32 +44,31 @@ public class MrRobotDetection {
 
     public void test(){
         //applys the area of interest to the frame to avoid noise - things outside the field.
-        //Mat aoiImage = narrowSearchArea();
+        Mat aoiImage = narrowSearchArea();
 
-        String imagePath = "resources/FieldImages/redblue.png";
-        Mat frame = Imgcodecs.imread(imagePath);
+        //String imagePath = "resources/FieldImages/redblue.jpg";
+        //Mat frame = Imgcodecs.imread(imagePath);
 
         //find green line
-        //front = findColouredLineSegment(frame, true);
-        back = findColouredLineSegment(frame, true);
+        back = findColouredLineSegment(aoiImage, true);
         //find blue line
-        front = findColouredLineSegment(frame, false);
+        front = findColouredLineSegment(aoiImage, false);
 
         if (front != null){
             frontCenter = determineFrontCenter();
             System.out.println("front center" + frontCenter.x + " and " + frontCenter.y);
-            Imgproc.circle(frame, frontCenter, 5, new Scalar(0, 255, 0), -1);
+            Imgproc.circle(aoiImage, frontCenter, 5, new Scalar(0, 255, 0), -1);
         }
         if (back != null){
             backCenter = determineBackCenter();
             System.out.println("back center" + backCenter.x + " and " + backCenter.y);
-            Imgproc.circle(frame, backCenter, 5, new Scalar(0, 255, 0), -1);
-            Imgproc.circle(frame, back.getStartPoint(), 5, new Scalar(0, 255, 0), -1);
-            Imgproc.circle(frame, back.getEndPoint(), 5, new Scalar(0, 255, 0), -1);
+            Imgproc.circle(aoiImage, backCenter, 5, new Scalar(0, 255, 0), -1);
+            Imgproc.circle(aoiImage, back.getStartPoint(), 5, new Scalar(0, 255, 0), -1);
+            Imgproc.circle(aoiImage, back.getEndPoint(), 5, new Scalar(0, 255, 0), -1);
         }
 
         // Display the frame
-        HighGui.imshow("Frame", frame);
+        HighGui.imshow("Frame", aoiImage);
         HighGui.waitKey();
 
         frame.release();
@@ -111,7 +110,7 @@ public class MrRobotDetection {
     }
 
 
-    private LineSegment findColouredLineSegment(Mat aoiImage, boolean green) {
+    private LineSegment findColouredLineSegment(Mat aoiImage, boolean red) {
         // Convert the frame to the HSV color space
         Mat hsvImage = new Mat();
         Imgproc.cvtColor(aoiImage, hsvImage, Imgproc.COLOR_BGR2HSV);
@@ -119,14 +118,10 @@ public class MrRobotDetection {
         Scalar lower;
         Scalar upper;
 
-        if (green) {
+        if (red) {
             // Define the lower and upper green color thresholds in HSV
-            // lower = new Scalar(0, 100, 0);
-            // upper = new Scalar(100, 255, 255);
-
-            // Define the lower and upper thresholds for red color
-            lower = new Scalar(0, 100, 100);
-            upper = new Scalar(10, 255, 255);
+             lower = new Scalar(0, 100, 0);
+             upper = new Scalar(100, 255, 255);
         }
         else{
             lower = new Scalar(90, 50, 50,0); // Lower blue threshold in HSV
@@ -144,7 +139,7 @@ public class MrRobotDetection {
 
         // Detect lines using the Hough Line Transform
         Mat lines = new Mat();
-        double minLineLength = 50; // Minimum line length
+        double minLineLength = 60; // Minimum line length
         double maxLineGap = 15; // Maximum gap between line segments
         Imgproc.HoughLinesP(colorMask, lines, 1, Math.PI / 180, 100, minLineLength, maxLineGap);
 
@@ -194,7 +189,7 @@ public class MrRobotDetection {
         if (videoCapture == null) {
             // Load the input image
             //frame = Imgcodecs.imread("C:\\Users\\emil1\\OneDrive\\Documents\\GitHub\\CDIOGR17FINAL\\resources\\FieldImages\\MrRobotBlackGreenNBlueEnds.jpg");
-            frame = Imgcodecs.imread("C:\\Users\\emil1\\OneDrive\\Documents\\GitHub\\CDIOGR17FINAL\\resources\\FieldImages\\WIN_20230530_16_58_11_Pro.jpg");
+            frame = Imgcodecs.imread("C:\\Users\\emil1\\OneDrive\\Documents\\CDIOGR17FINAL\\resources\\FieldImages\\redblue.jpg");
         }
 
         // Apply the mask to the original image
