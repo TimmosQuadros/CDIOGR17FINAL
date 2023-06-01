@@ -2,12 +2,12 @@ package ObjectDetection;
 
 import Bitmasks.AreaOfInterestMask;
 import LineCreation.LineSegment;
+import Singleton.VideoCaptureSingleton;
 import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
-
-import static run.Main.videoCapture;
+import org.opencv.videoio.VideoCapture;
 
 public class RedCrossDetection {
 
@@ -23,9 +23,8 @@ public class RedCrossDetection {
     public RedCrossDetection() {
     }
 
-    public void detectCross(){
-        retrieveFrame();
-        Mat aoiImage = createAOIMask(frame);
+    public void detectCross(VideoCaptureSingleton videoCaptureSingleton, Point[] corners){
+        Mat aoiImage = createAOIMask(videoCaptureSingleton.getVideoCapture(), corners);
 
         fillObstableArray(aoiImage);
         crossCenter = RedRectangleDetection.findIntersection(crossLines[1], crossLines[0]);
@@ -55,7 +54,7 @@ public class RedCrossDetection {
         frame.release();
     }
 
-    public void retrieveFrame(){
+    public void retrieveFrame(VideoCapture videoCapture){
         // Check if the VideoCapture object is opened successfully
         if (!videoCapture.isOpened()) {
             System.out.println("Failed to open the webcam.");
@@ -93,16 +92,15 @@ public class RedCrossDetection {
     /**
      * Creates a red cross mask based on the frame and the area of interest points.
      *
-     * @param frame       the input frame to create the mask from.
      * @return the red cross mask.
      */
 
-    public Mat createAOIMask(Mat frame) {
+    public Mat createAOIMask(VideoCapture videoCapture, Point[] corners) {
         // Apply the mask to the original image
         Mat maskedImage = new Mat();
 
         if(aoiMask == null)
-            aoiMask = new AreaOfInterestMask(frame);
+            aoiMask = new AreaOfInterestMask(videoCapture, corners);
 
         frame.copyTo(maskedImage, aoiMask.getAoiMask());
 

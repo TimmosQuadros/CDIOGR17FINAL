@@ -2,6 +2,7 @@ package ObjectDetection;
 
 import Bitmasks.AreaOfInterestMask;
 import LineCreation.LineSegment;
+import Singleton.VideoCaptureSingleton;
 import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgproc.Imgproc;
@@ -10,11 +11,10 @@ import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.videoio.VideoCapture;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static run.Main.videoCapture;
 
 public class MrRobotDetection {
 
@@ -25,8 +25,8 @@ public class MrRobotDetection {
     public static Point frontCenter;
     public static Point backCenter;
 
-    public void updatePosition() throws InterruptedException {
-        findPoints();
+    public void updatePosition(VideoCaptureSingleton videoCaptureSingleton, Point[] corners) throws InterruptedException {
+        findPoints(videoCaptureSingleton.getVideoCapture(), corners);
 
             // Read a new frame from the video capture
 
@@ -42,9 +42,9 @@ public class MrRobotDetection {
             // Check for keyboard input and break the loop if the 'q' key is pressed
     }
 
-    public void test(){
+    public void test(VideoCaptureSingleton videoCaptureSingleton, Point[] corners){
         //applys the area of interest to the frame to avoid noise - things outside the field.
-        Mat aoiImage = narrowSearchArea();
+        Mat aoiImage = narrowSearchArea(videoCaptureSingleton.getVideoCapture(), corners);
 
         //String imagePath = "resources/FieldImages/redblue.jpg";
         //Mat frame = Imgcodecs.imread(imagePath);
@@ -83,9 +83,8 @@ public class MrRobotDetection {
 
     }
 
-    public void findPoints(){
-        retrieveFrame();
-        Mat aoiImage = narrowSearchArea();
+    public void findPoints(VideoCapture videoCapture, Point[] corners){
+        Mat aoiImage = narrowSearchArea(videoCapture, corners);
         //find green line
         front = findColouredLineSegment(aoiImage, true);
         //find blue line
@@ -97,7 +96,7 @@ public class MrRobotDetection {
         System.out.println("back center" + backCenter.x + " and " + backCenter.y);
     }
 
-    public void retrieveFrame(){
+    public void retrieveFrame(VideoCapture videoCapture){
         // Check if the VideoCapture object is opened successfully
         if (!videoCapture.isOpened()) {
             System.out.println("Failed to open the webcam.");
@@ -185,7 +184,7 @@ public class MrRobotDetection {
         return new Point((back.getEndPoint().x + back.getStartPoint().x) / 2.0, (back.getEndPoint().y + back.getStartPoint().y) / 2.0);
     }
 
-    public Mat narrowSearchArea() {
+    public Mat narrowSearchArea(VideoCapture videoCapture, Point[] corners) {
         if (videoCapture == null) {
             // Load the input image
             //frame = Imgcodecs.imread("C:\\Users\\emil1\\OneDrive\\Documents\\GitHub\\CDIOGR17FINAL\\resources\\FieldImages\\MrRobotBlackGreenNBlueEnds.jpg");
@@ -196,7 +195,7 @@ public class MrRobotDetection {
         Mat maskedImage = new Mat();
 
         if(aoiMask == null)
-            aoiMask = new AreaOfInterestMask(frame);
+            aoiMask = new AreaOfInterestMask(videoCapture, corners);
 
         frame.copyTo(maskedImage, aoiMask.getAoiMask());
 

@@ -3,6 +3,7 @@ package run;
 import ObjectDetection.RedCrossDetection;
 import ObjectDetection.MrRobotDetection;
 import ObjectDetection.RedRectangleDetection;
+import Singleton.VideoCaptureSingleton;
 import org.opencv.core.Core;
 import org.opencv.core.Point;
 import org.opencv.videoio.VideoCapture;
@@ -19,7 +20,7 @@ public class Main {
     static {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
-    public static VideoCapture videoCapture;
+    //public static VideoCapture videoCapture;
 
     //An array to store relevant course coordinates. Index 0-3 will correspond to the raw corner coordinates.
     //Index 4-7 will be the adjusted corner coordinates. And 8-9 will be the goal coordinates.
@@ -39,20 +40,20 @@ public class Main {
     }
 
     private static void runWithVideo() {
-        videoCapture = new VideoCapture(0);
-        setMaxResolution();
+        VideoCaptureSingleton videoCaptureSingleton = VideoCaptureSingleton.getInstance();
+        setMaxResolution(videoCaptureSingleton);
 
         //detecs field
         RedRectangleDetection rectangleDetection = new RedRectangleDetection();
-        rectangleDetection.detectField();
+        rectangleDetection.detectField(videoCaptureSingleton);
 
         //detect cross
         RedCrossDetection fieldObjectDetection = new RedCrossDetection();
 
         MrRobotDetection mrRobot = new MrRobotDetection();
-        mrRobot.findPoints();
+        mrRobot.findPoints(videoCaptureSingleton.getVideoCapture(), null); //replace null with corners
 
-        videoCapture.release();
+        videoCaptureSingleton.getVideoCapture().release();
     }
 
     private static void testWithoutVideo() {
@@ -69,25 +70,25 @@ public class Main {
         //mrRobot.test();
     }
 
-    private static void setMaxResolution() {
+    private static void setMaxResolution(VideoCaptureSingleton videoCapture) {
         // Set the property for maximum resolution to a high value
         int maxResolutionProperty = -1;
         // Find the property representing the maximum resolution
         double maxResolution = 0.0;
         ;
         for (int prop = 0; prop < 20; prop++) { // Iterate over the properties
-            double value = videoCapture.get(prop);
+            double value = videoCapture.getVideoCapture().get(prop);
             if (value > maxResolution) {
                 maxResolution = value;
                 maxResolutionProperty = prop;
             }
         }
 
-        videoCapture.set(maxResolutionProperty, 9999);
+        videoCapture.getVideoCapture().set(maxResolutionProperty, 9999);
 
         // Get the resolution of the video capture
-        int width = (int) videoCapture.get(3);
-        int height = (int) videoCapture.get(4);
+        int width = (int) videoCapture.getVideoCapture().get(3);
+        int height = (int) videoCapture.getVideoCapture().get(4);
 
         // Print the resolution
         System.out.println("Resolution: " + width + "x" + height);

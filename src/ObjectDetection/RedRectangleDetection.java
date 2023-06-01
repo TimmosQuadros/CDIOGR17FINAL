@@ -1,25 +1,24 @@
 package ObjectDetection;
 
-import Bitmasks.AreaOfInterestMask;
 import LineCreation.LineSegment;
+import Singleton.VideoCaptureSingleton;
 import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.videoio.VideoCapture;
 
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import static run.Main.courseCoordinates;
-import static run.Main.videoCapture;
-
 public class RedRectangleDetection {
 
     private final int frameWidth = 1920;
     private final int frameHeight = 1080;
     private Mat frame;
+    private Point[] courseCoordinates = new Point[10];
 
 
     public RedRectangleDetection(){
@@ -31,24 +30,27 @@ public class RedRectangleDetection {
      * for the remaining objects that is : table tennis balls, obstacle and Mr. Robot.
      * Having a subsection of the actual frame defined minimized the computational work errors / disturbances
      * of observations not of interest.
+     * @param videoCapture
+     * @return
      */
-    public void detectField(){
-        retrieveFrame();
+    public List<Point> detectField(VideoCaptureSingleton videoCapture){
+        retrieveFrame(videoCapture.getVideoCapture());
         findCorners(findLines(frame)); // find corners.
-        findFloorCorners();
-        determineGoalCenters();
-        AreaOfInterestMask aoiMask = new AreaOfInterestMask(this.frame);
-
         //drawCorners(coordinates, frame);
 
+        return findFloorCorners();
     }
 
-    private void determineGoalCenters() {
+    public List<Point> determineGoalCenters() {
+        List<Point> goals = new ArrayList<>();
         // finds posts for lefthand side.
         courseCoordinates[8] = getAverage(courseCoordinates[4],courseCoordinates[6]);
-
+        goals.add(courseCoordinates[8]);
         //finds posts for righthand side.
         courseCoordinates[9] = getAverage(courseCoordinates[5],courseCoordinates[7]);
+        goals.add(courseCoordinates[9]);
+
+        return goals;
     }
 
     private Point getAverage(Point upperPoint, Point lowerPoint) {
@@ -64,14 +66,18 @@ public class RedRectangleDetection {
      * Fiinds an approximation of the coordiinates of the folding in the corner.
      * @return the coordinates of the approximated foldiing intersections for each corner.
      */
-    private void findFloorCorners() {
+    private List<Point> findFloorCorners() {
+        List<Point> corners = new ArrayList<>();
         double adjustHeight = 8.0;
         double adjustWidth = 10.0;
         courseCoordinates[4] = new Point((adjustWidth + courseCoordinates[0].x),(adjustHeight + courseCoordinates[0].y));
         courseCoordinates[5] = new Point((courseCoordinates[1].x - adjustWidth),(adjustHeight + courseCoordinates[1].y));
         courseCoordinates[6] = new Point((adjustWidth + courseCoordinates[2].x),(courseCoordinates[2].y) - adjustHeight);
         courseCoordinates[7] = new Point((courseCoordinates[3].x - adjustWidth),(courseCoordinates[3].y) - adjustHeight);
-
+        for (int i = 4; i < 8; i++) {
+            corners.add(courseCoordinates[i]);
+        }
+        return corners;
     }
 
     /**
@@ -83,12 +89,11 @@ public class RedRectangleDetection {
         frame = Imgcodecs.imread(imagePath);
 
         findCorners(findLines(frame));
-        findFloorCorners();
-        determineGoalCenters();
+        //findFloorCorners();
         //drawCorners(frame);
-        for (Point x : courseCoordinates){
-            System.out.println("X coordinate = " + x.x + " AND y coordinate = " + x.y);
-        }
+        //for (Point x : courseCoordinates){
+          //  System.out.println("X coordinate = " + x.x + " AND y coordinate = " + x.y);
+        //}
     }
 
     /**
@@ -135,8 +140,9 @@ public class RedRectangleDetection {
     /**
      * This method will retrieve a frame to analyze from the videocapture.
      * @return frame to analyze.
+     * @param videoCapture
      */
-    public void retrieveFrame(){
+    public void retrieveFrame(VideoCapture videoCapture){
         // Check if the VideoCapture object is opened successfully
         if (!videoCapture.isOpened()) {
             System.out.println("Failed to open the webcam.");
