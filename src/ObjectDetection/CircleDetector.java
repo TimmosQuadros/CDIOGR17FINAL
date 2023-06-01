@@ -1,4 +1,4 @@
-package run;
+package ObjectDetection;
 
 import org.opencv.core.*;
         import org.opencv.imgproc.Imgproc;
