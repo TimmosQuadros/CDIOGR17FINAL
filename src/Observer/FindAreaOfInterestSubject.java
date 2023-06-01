@@ -15,7 +15,7 @@ public class FindAreaOfInterestSubject extends Subject implements FindAreaOfInte
     private final VideoCapture videoCapture;
 
     public FindAreaOfInterestSubject(VideoCaptureSingleton videoCaptureSingleton){
-        this.videoCapture = videoCaptureSingleton.getVideoCapture();
+        this.videoCapture = VideoCaptureSingleton.getInstance().getVideoCapture();
         fieldDetection = new RedRectangleDetection(videoCapture);
 
     }

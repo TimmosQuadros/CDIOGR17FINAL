@@ -5,6 +5,7 @@ import Observer.QRCodeDetectorSubject;
 import Singleton.VideoCaptureSingleton;
 import org.opencv.core.Core;
 import org.opencv.core.Point;
+import org.opencv.videoio.VideoCapture;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,13 +21,14 @@ public class RobotAI {
         List<Point> corners;
         List<Point> goals;
 
-        VideoCaptureSingleton videoCaptureSingleton = VideoCaptureSingleton.getInstance();
 
-        /*FindAreaOfInterestSubject areaOfInterestSubject = new FindAreaOfInterestSubject();
-        corners = areaOfInterestSubject.getCorners(videoCaptureSingleton);
-        goals = areaOfInterestSubject.getGoalPos(videoCaptureSingleton);*/
+        VideoCapture videoCapture = VideoCaptureSingleton.getInstance().getVideoCapture();
 
-        QRCodeDetectorSubject qrCodeDetectorSubject = new QRCodeDetectorSubject(videoCaptureSingleton);
+        FindAreaOfInterestSubject areaOfInterestSubject = new FindAreaOfInterestSubject(VideoCaptureSingleton.getInstance());
+        corners = areaOfInterestSubject.getCorners();
+        goals = areaOfInterestSubject.getGoalPos();
+
+        QRCodeDetectorSubject qrCodeDetectorSubject = new QRCodeDetectorSubject(VideoCaptureSingleton.getInstance());
 
         Point point = qrCodeDetectorSubject.getPos();
         System.out.println(point.x+","+point.y);
