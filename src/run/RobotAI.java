@@ -1,6 +1,7 @@
 package run;
 
 import Observer.FindAreaOfInterestSubject;
+import Observer.QRCodeDetectorSubject;
 import Singleton.VideoCaptureSingleton;
 import org.opencv.core.Core;
 import org.opencv.core.Point;
@@ -21,9 +22,17 @@ public class RobotAI {
 
         VideoCaptureSingleton videoCaptureSingleton = VideoCaptureSingleton.getInstance();
 
-        FindAreaOfInterestSubject areaOfInterestSubject = new FindAreaOfInterestSubject(videoCaptureSingleton);
-        corners = areaOfInterestSubject.getCorners();
-        goals = areaOfInterestSubject.getGoalPos();
-        
+        /*FindAreaOfInterestSubject areaOfInterestSubject = new FindAreaOfInterestSubject();
+        corners = areaOfInterestSubject.getCorners(videoCaptureSingleton);
+        goals = areaOfInterestSubject.getGoalPos(videoCaptureSingleton);*/
+
+        QRCodeDetectorSubject qrCodeDetectorSubject = new QRCodeDetectorSubject(videoCaptureSingleton);
+
+        Point point = qrCodeDetectorSubject.getPos();
+        System.out.println(point.x+","+point.y);
+        point = qrCodeDetectorSubject.getPos();
+        System.out.println(point.x+","+point.y);
+        point = qrCodeDetectorSubject.getPos();
+        System.out.println(point.x+","+point.y);
     }
 }
