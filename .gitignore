@@ -11,7 +11,5 @@
 
 *.xml
 
-out/
-
 # Compiled class file
 /*.class
