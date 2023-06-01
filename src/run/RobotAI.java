@@ -13,14 +13,13 @@ import java.util.List;
 public class RobotAI {
 
     //load the opencv library into the JVM at runtime
-    static {
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-    }
+
+
 
     public static void main(String[] args) {
         List<Point> corners;
         List<Point> goals;
-
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
         VideoCapture videoCapture = VideoCaptureSingleton.getInstance().getVideoCapture();
 
