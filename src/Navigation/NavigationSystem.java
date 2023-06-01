@@ -2,40 +2,54 @@ package Navigation;
 
 import Interface.Navigation;
 import org.opencv.core.Point;
+import java.util.ArrayList;
+import java.util.List;
 
 public class NavigationSystem implements Navigation {
-
     @Override
     public void goTo(Point src, Point dst, double direction) {
-        // Calculate the target angle based on the source and destination points
-        double targetAngle = Math.atan2(dst.y - src.y, dst.x - src.x) * 180 / Math.PI;
+        // Perform path planning to find the optimal path from src to dst
+        List<Point> path = calculatePath(src, dst);
 
-        // Adjust the target angle to be within the range of [0, 360)
-        targetAngle = (targetAngle + 360) % 360;
+        // Traverse the path
+        for (Point point : path) {
+            // Calculate the target angle based on the current point and the next point in the path
+            double targetAngle = Math.atan2(point.y - src.y, point.x - src.x) * 180 / Math.PI;
 
-        // Determine the angle difference between the current direction and the target angle
-        double angleDifference = targetAngle - direction;
+            // Adjust the target angle to be within the range of [0, 360)
+            targetAngle = (targetAngle + 360) % 360;
 
-        // Normalize the angle difference to be within the range of [-180, 180)
-        if (angleDifference < -180)
-            angleDifference += 360;
-        else if (angleDifference >= 180)
-            angleDifference -= 360;
+            // Determine the angle difference between the current direction and the target angle
+            double angleDifference = targetAngle - direction;
 
-        // Turn to face the target direction
-        turn(angleDifference);
+            // Normalize the angle difference to be within the range of [-180, 180)
+            if (angleDifference < -180)
+                angleDifference += 360;
+            else if (angleDifference >= 180)
+                angleDifference -= 360;
 
-        // Calculate the distance between the source and destination points
-        double distance = Math.sqrt(Math.pow(dst.x - src.x, 2) + Math.pow(dst.y - src.y, 2));
+            // Turn to face the target direction
+            turn(angleDifference);
 
-        // Move forward by the calculated distance
-        move(distance);
+            // Calculate the distance between the current point and the next point in the path
+            double distance = Math.sqrt(Math.pow(point.x - src.x, 2) + Math.pow(point.y - src.y, 2));
 
-        // Update the direction to face the destination point
-        direction = targetAngle;
+            // Move forward by the calculated distance
+            move(distance);
 
-        // Turn to face the destination point
-        turn(direction - targetAngle);
+            // Update the direction to face the next point in the path
+            direction = targetAngle;
+            src = point;
+        }
+    }
+
+    private List<Point> calculatePath(Point src, Point dst) {
+        // Code to calculate the optimal path from src to dst using A* or other path planning algorithms
+        // The result should be a list of points representing the path
+        List<Point> path = new ArrayList<>();
+        // Perform path planning here and populate the path list
+        // ...
+        return path;
     }
 
     private void turn(double angle) {
