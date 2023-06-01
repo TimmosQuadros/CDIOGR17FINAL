@@ -23,7 +23,7 @@ public class RobotAI {
 
         VideoCapture videoCapture = VideoCaptureSingleton.getInstance().getVideoCapture();
 
-        FindAreaOfInterestSubject areaOfInterestSubject = new FindAreaOfInterestSubject(VideoCaptureSingleton.getInstance());
+        FindAreaOfInterestSubject areaOfInterestSubject = new FindAreaOfInterestSubject();
         corners = areaOfInterestSubject.getCorners();
         goals = areaOfInterestSubject.getGoalPos();
 

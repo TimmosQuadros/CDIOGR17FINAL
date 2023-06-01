@@ -20,7 +20,8 @@ public class RedRectangleDetection {
     private Mat frame;
     private Point[] courseCoordinates = new Point[10];
     private final VideoCapture videoCapture;
-    private List<Point> corners;
+    private List<Point> corners = new ArrayList<>();
+    private List<Point> goals = new ArrayList<>();
     private Mat aoiMask;
 
     public RedRectangleDetection(VideoCapture videoCapture){
@@ -53,17 +54,14 @@ public class RedRectangleDetection {
 
     public Mat getAoiMask(){return aoiMask;}
 
-    public List<Point> determineGoalCenters() {
-        List<Point> goals = new ArrayList<>();
+    public void determineGoalCenters() {
         // finds posts for lefthand side.
-        courseCoordinates[8] = getAverage(courseCoordinates[4],courseCoordinates[6]);
-        goals.add(courseCoordinates[8]);
+        goals.add(getAverage(corners.get(0),corners.get(2)));
         //finds posts for righthand side.
-        courseCoordinates[9] = getAverage(courseCoordinates[5],courseCoordinates[7]);
-        goals.add(courseCoordinates[9]);
-
-        return goals;
+        goals.add(getAverage(corners.get(1),corners.get(3)));
     }
+
+    public List<Point> getGoals(){ return goals; }
 
     private Point getAverage(Point upperPoint, Point lowerPoint) {
         double centerX = (upperPoint.x + lowerPoint.x) / 2;
