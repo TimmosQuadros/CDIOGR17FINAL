@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface FindAreaOfInterest {
 
-    public List<Point> getGoalPos(VideoCaptureSingleton videoCapture);
-    public List<Point> getCorners(VideoCaptureSingleton videoCapture);
+    public List<Point> getGoalPos();
+    public List<Point> getCorners();
+    public List<Point> getCross();
 }

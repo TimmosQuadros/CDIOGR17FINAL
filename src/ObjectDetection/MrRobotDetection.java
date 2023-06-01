@@ -25,6 +25,7 @@ public class MrRobotDetection {
     public static Point frontCenter;
     public static Point backCenter;
 
+
     public void updatePosition(VideoCaptureSingleton videoCaptureSingleton, Point[] corners) throws InterruptedException {
         findPoints(videoCaptureSingleton.getVideoCapture(), corners);
 
@@ -193,9 +194,6 @@ public class MrRobotDetection {
 
         // Apply the mask to the original image
         Mat maskedImage = new Mat();
-
-        if(aoiMask == null)
-            aoiMask = new AreaOfInterestMask(videoCapture, corners);
 
         frame.copyTo(maskedImage, aoiMask.getAoiMask());
 

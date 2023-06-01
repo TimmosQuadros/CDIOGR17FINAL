@@ -1,7 +1,7 @@
 package ObjectDetection;
 
+import Bitmasks.AreaOfInterestMask;
 import LineCreation.LineSegment;
-import Singleton.VideoCaptureSingleton;
 import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -19,9 +19,12 @@ public class RedRectangleDetection {
     private final int frameHeight = 1080;
     private Mat frame;
     private Point[] courseCoordinates = new Point[10];
+    private final VideoCapture videoCapture;
+    private List<Point> corners;
+    private Mat aoiMask;
 
-
-    public RedRectangleDetection(){
+    public RedRectangleDetection(VideoCapture videoCapture){
+        this.videoCapture = videoCapture;
     }
 
     /**
@@ -33,13 +36,22 @@ public class RedRectangleDetection {
      * @param videoCapture
      * @return
      */
-    public List<Point> detectField(VideoCaptureSingleton videoCapture){
-        retrieveFrame(videoCapture.getVideoCapture());
+    public List<Point> detectField(VideoCapture videoCapture){
+        retrieveFrame(videoCapture);
         findCorners(findLines(frame)); // find corners.
+        findFloorCorners();
         //drawCorners(coordinates, frame);
+        AreaOfInterestMask mask = AreaOfInterestMask.getInstance(videoCapture, getFloorCorners());
+        aoiMask = mask.getAoiMask();
 
-        return findFloorCorners();
+        return getFloorCorners();
     }
+
+    public List<Point> getFloorCorners(){
+        return corners;
+    }
+
+    public Mat getAoiMask(){return aoiMask;}
 
     public List<Point> determineGoalCenters() {
         List<Point> goals = new ArrayList<>();
@@ -66,8 +78,7 @@ public class RedRectangleDetection {
      * Fiinds an approximation of the coordiinates of the folding in the corner.
      * @return the coordinates of the approximated foldiing intersections for each corner.
      */
-    private List<Point> findFloorCorners() {
-        List<Point> corners = new ArrayList<>();
+    private void findFloorCorners() {
         double adjustHeight = 8.0;
         double adjustWidth = 10.0;
         courseCoordinates[4] = new Point((adjustWidth + courseCoordinates[0].x),(adjustHeight + courseCoordinates[0].y));
@@ -75,9 +86,8 @@ public class RedRectangleDetection {
         courseCoordinates[6] = new Point((adjustWidth + courseCoordinates[2].x),(courseCoordinates[2].y) - adjustHeight);
         courseCoordinates[7] = new Point((courseCoordinates[3].x - adjustWidth),(courseCoordinates[3].y) - adjustHeight);
         for (int i = 4; i < 8; i++) {
-            corners.add(courseCoordinates[i]);
+            this.corners.add(courseCoordinates[i]);
         }
-        return corners;
     }
 
     /**

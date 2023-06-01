@@ -2,32 +2,41 @@ package ObjectDetection;
 
 import Bitmasks.AreaOfInterestMask;
 import LineCreation.LineSegment;
-import Singleton.VideoCaptureSingleton;
 import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class RedCrossDetection {
 
     public static LineSegment[] crossLines = new LineSegment[2];
-    private AreaOfInterestMask aoiMask = null;
+    private Mat aoiMask;
     private Mat frame = new Mat();
     private Point crossCenter;
+    private final VideoCapture videoCapture;
+    private final List<Point> coordinates = new ArrayList<>();
 
     /**
      * Constructs a FieldObjectDetection object to detect field objects, specifically the cross lines on the field.
      *
+     * @param videoCapture
+     * @param aoiMask
      */
-    public RedCrossDetection() {
+    public RedCrossDetection(VideoCapture videoCapture, Mat aoiMask) {
+        this.videoCapture = videoCapture;
+        this.aoiMask = aoiMask;
     }
 
-    public void detectCross(VideoCaptureSingleton videoCaptureSingleton, Point[] corners){
-        Mat aoiImage = createAOIMask(videoCaptureSingleton.getVideoCapture(), corners);
+    public void detectCross(){
+        Mat aoiImage = createAOIMask();
 
         fillObstableArray(aoiImage);
         crossCenter = RedRectangleDetection.findIntersection(crossLines[1], crossLines[0]);
+        coordinates.add(crossCenter);
     }
 
     public void detectCrossTest(){
@@ -95,14 +104,11 @@ public class RedCrossDetection {
      * @return the red cross mask.
      */
 
-    public Mat createAOIMask(VideoCapture videoCapture, Point[] corners) {
+    public Mat createAOIMask() {
         // Apply the mask to the original image
         Mat maskedImage = new Mat();
 
-        if(aoiMask == null)
-            aoiMask = new AreaOfInterestMask(videoCapture, corners);
-
-        frame.copyTo(maskedImage, aoiMask.getAoiMask());
+        frame.copyTo(maskedImage, this.aoiMask);
 
         // Save the masked image and the binary mask image
         Imgcodecs.imwrite("maskedImage.jpg", maskedImage);
@@ -155,4 +161,7 @@ public class RedCrossDetection {
         return new LineSegment(startPoint, endPoint);
     }
 
+    public List<Point> getCross() {
+        return this.coordinates;
+    }
 }

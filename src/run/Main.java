@@ -6,7 +6,6 @@ import ObjectDetection.RedRectangleDetection;
 import Singleton.VideoCaptureSingleton;
 import org.opencv.core.Core;
 import org.opencv.core.Point;
-import org.opencv.videoio.VideoCapture;
 
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -33,9 +32,9 @@ public class Main {
         //print current version of opencv
         System.out.println(Core.VERSION);
 
-        testWithoutVideo();
+        //testWithoutVideo();
 
-        //runWithVideo();
+        runWithVideo();
 
     }
 
@@ -44,12 +43,10 @@ public class Main {
         setMaxResolution(videoCaptureSingleton);
 
         //detecs field
-        RedRectangleDetection rectangleDetection = new RedRectangleDetection();
-        rectangleDetection.detectField(videoCaptureSingleton);
+        RedRectangleDetection rectangleDetection = new RedRectangleDetection(videoCaptureSingleton.getVideoCapture());
+        rectangleDetection.detectField(videoCaptureSingleton.getVideoCapture());
 
         //detect cross
-        RedCrossDetection fieldObjectDetection = new RedCrossDetection();
-
         MrRobotDetection mrRobot = new MrRobotDetection();
         mrRobot.findPoints(videoCaptureSingleton.getVideoCapture(), null); //replace null with corners
 
@@ -58,12 +55,10 @@ public class Main {
 
     private static void testWithoutVideo() {
         //detecs field
-        RedRectangleDetection rectangleDetection = new RedRectangleDetection();
-        rectangleDetection.testRedRectangleDetection();
+        //RedRectangleDetection rectangleDetection = new RedRectangleDetection();
+        //rectangleDetection.testRedRectangleDetection();
 
         //detect cross
-        RedCrossDetection redCrossDetection = new RedCrossDetection();
-        redCrossDetection.detectCrossTest();
 
         //detect robot
         //MrRobotDetection mrRobot = new MrRobotDetection();
@@ -94,25 +89,6 @@ public class Main {
         System.out.println("Resolution: " + width + "x" + height);
     }
 
-    private static void executorservice(){
-        // Create an ExecutorService with a fixed thread pool
-        ExecutorService executor = Executors.newFixedThreadPool(1);
-
-        // Create an instance of your task
-        Callable<List<Point>> task = new findAreaOfInterestTask();
-        // Submit the task to the executor
-        Future<List<Point>> future = executor.submit(task);
-
-        // Retrieve the result from the future object
-        try {
-            future.get();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }finally {
-            // Shutdown the executor when done
-            executor.shutdown();
-        }
-    }
 
 }
 
