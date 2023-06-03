@@ -29,11 +29,11 @@ public class RobotAI {
     public void run() {
         QRCodeDetectorSubject qrCodeDetectorSubject = new QRCodeDetectorSubject(VideoCaptureSingleton.getInstance());
 
-        /*Point point = qrCodeDetectorSubject.getPos();
+        Point point = qrCodeDetectorSubject.getPos();
         System.out.println(point.x+","+point.y);
         point = qrCodeDetectorSubject.getPos();
         System.out.println(point.x+","+point.y);
         point = qrCodeDetectorSubject.getPos();
-        System.out.println(point.x+","+point.y);*/
+        System.out.println(point.x+","+point.y);
     }
 }

@@ -36,9 +36,9 @@ public class QRCodeDetectorSubject extends Subject implements QRCodeDetector {
         Point point2 = new Point(1,1);
         Point point3 = new Point(1,1);
         Point point4 = new Point(1,1);
-        Point point5 = new Point(1,1);
-        Point point6 = new Point(1,1);
-        Point point7 = new Point(1,1);
+        Point frontCenter = new Point(1,1);
+        Point backCenter = new Point(1,1);
+        Point center = new Point(1,1);
 
         final int FRAMECOUNT = 40;
         // Iterate through the video frames
@@ -79,11 +79,11 @@ public class QRCodeDetectorSubject extends Subject implements QRCodeDetector {
             point2 = new Point(qrCodePoints.get(0, 1));
             point3 = new Point(qrCodePoints.get(0, 2));
             point4 = new Point(qrCodePoints.get(0, 3));
-            point5 = new Point((point1.x+point2.x)/2,(point1.y+point2.y)/2);
-            point6 = new Point((point3.x+point4.x)/2,(point3.y+point4.y)/2);
-            point7 = new Point((point5.x+point6.x)/2,(point5.y+point6.y)/2);
+            frontCenter = new Point((point1.x+point2.x)/2,(point1.y+point2.y)/2);
+            backCenter = new Point((point3.x+point4.x)/2,(point3.y+point4.y)/2);
+            center = new Point((frontCenter.x+backCenter.x)/2,(frontCenter.y+backCenter.y)/2);
 
-            points.add(point7);
+            points.add(center);
         }
 
         double threshold = 5.0; // Set the threshold for outlier filtering

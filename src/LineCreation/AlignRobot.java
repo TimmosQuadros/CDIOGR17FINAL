@@ -34,6 +34,10 @@ public class AlignRobot {
         this.widthSlope = new LineSegment(estimatedSlope, estimatedB);
     }
 
+    public void alignRobotWithPoint(LineSegment robotDirection, Point ball){
+        
+    }
+
 
     public LineSegment getLengthAlign(){return lengthSlope;}
     public LineSegment getWidthAlign(){return widthSlope;}
