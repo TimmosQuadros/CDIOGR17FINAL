@@ -6,6 +6,8 @@ import java.util.List;
 
 public class AlignRobot {
 
+
+
     private LineSegment lengthSlope;
     private LineSegment widthSlope;
 
@@ -35,7 +37,7 @@ public class AlignRobot {
     }
 
     public void alignRobotWithPoint(LineSegment robotDirection, Point ball){
-        
+
     }
 
 
