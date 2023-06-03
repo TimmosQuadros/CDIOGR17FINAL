@@ -12,8 +12,8 @@ import java.util.List;
 public class HoughCircleDetectorSubject implements HoughCircleDetector {
 
 
-    private final int FRAMECOUNT = 10;
-    private final double MAXDIFF = 2.0;
+    private final int FRAMECOUNT = 30;
+    private final double MINDIFF = 10;
     private final VideoCapture videoCapture;
     public HoughCircleDetectorSubject(){
         this.videoCapture = VideoCaptureSingleton.getInstance().getVideoCapture();
@@ -38,22 +38,21 @@ public class HoughCircleDetectorSubject implements HoughCircleDetector {
                     Imgproc.HoughCircles(blurredFrame, circles, Imgproc.HOUGH_GRADIENT, 1, 20, 200, 30, 1, 15);
 
                     if (circles.cols() > 0) {
-                        System.out.println("White circle detected!");
                         boolean shouldAddBall = false;
                         for (int i = 0; i < circles.cols(); i++) {
                             double[] circle = circles.get(0, i);
                             Point center = new Point(circle[0], circle[1]);
 
                             if(!listCircles.isEmpty() && listCircles.size()>1){
-                                double xDiff = 0.0;
-                                double yDiff = 0.0;
-                                for(Point point : listCircles){
-                                    for(Point pointNest : listCircles){
-                                        xDiff = Math.abs(point.x-pointNest.x);
-                                        yDiff = Math.abs(point.x-pointNest.x);
-                                    }
+                                double xDiff = 999999999;
+                                double yDiff = 999999999;
+                                for(Point pointNest : listCircles){
+                                        if(Math.abs(center.x-pointNest.x)<xDiff)
+                                            xDiff = Math.abs(center.x-pointNest.x);
+                                        if(Math.abs(center.y-pointNest.y)<yDiff)
+                                            yDiff = Math.abs(center.y-pointNest.y);
                                 }
-                                if(xDiff<=MAXDIFF && yDiff<=MAXDIFF){
+                                if(xDiff>= MINDIFF || yDiff>= MINDIFF){
                                     listCircles.add(center);
                                 }
                             }else{
@@ -63,11 +62,6 @@ public class HoughCircleDetectorSubject implements HoughCircleDetector {
                             int radius = (int) Math.round(circle[2]);
                             Imgproc.circle(frame1, center, radius, new Scalar(0, 0, 255), 2);
                         }
-                    }
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
                     }
                 }
             }
