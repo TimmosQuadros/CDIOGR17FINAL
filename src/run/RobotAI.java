@@ -23,7 +23,8 @@ public class RobotAI {
         FindAreaOfInterestSubject areaOfInterestSubject = new FindAreaOfInterestSubject();
         corners = areaOfInterestSubject.getCorners();
         goals = areaOfInterestSubject.getGoalPos();
-        alignRobot = new AlignRobot(corners);
+        //areaOfInterestSubject.detectRobot();
+        //alignRobot = new AlignRobot(corners);
     }
 
     public void run() {
@@ -35,5 +36,7 @@ public class RobotAI {
         System.out.println(point.x+","+point.y);
         point = qrCodeDetectorSubject.getPos();
         System.out.println(point.x+","+point.y);
+
+
     }
 }

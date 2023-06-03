@@ -26,6 +26,10 @@ public class VectorCalculations {
                         ((Math.sqrt(Math.pow(vectorBall.getX(), 2) + Math.pow(vectorBall.getY(), 2))))));
     }
 
-    public double getCosAngle(){return cosAngle;}
+    public double getAngle(){
+        double angleInRadians = Math.acos(cosAngle);
+
+        return Math.toDegrees(angleInRadians);
+    }
 
 }

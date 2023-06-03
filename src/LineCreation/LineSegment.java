@@ -20,6 +20,7 @@ public class LineSegment {
         this.endPoint = endPoint;
         if(startPoint.x == endPoint.x)
             this.infiniteSlope = true;
+        determineEquation();
     }
 
     public LineSegment(double a, double b){

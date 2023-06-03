@@ -11,7 +11,6 @@ import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
-import org.opencv.videoio.VideoCapture;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +25,9 @@ public class MrRobotDetection {
     public static Point backCenter;
 
 
-    public void updatePosition(VideoCaptureSingleton videoCaptureSingleton, Point[] corners) throws InterruptedException {
-        findPoints(videoCaptureSingleton.getVideoCapture(), corners);
-
+    public void updatePosition(RedRectangleDetection rectangleDetection) throws InterruptedException {
             // Read a new frame from the video capture
+            findPoints(rectangleDetection);
 
             // Draw a dot at the object position on the frame
             Imgproc.circle(frame, frontCenter, 5, new Scalar(0, 0, 255), -1);
@@ -43,9 +41,9 @@ public class MrRobotDetection {
             // Check for keyboard input and break the loop if the 'q' key is pressed
     }
 
-    public void test(VideoCaptureSingleton videoCaptureSingleton, Point[] corners){
+    public void test(Point[] corners){
         //applys the area of interest to the frame to avoid noise - things outside the field.
-        Mat aoiImage = narrowSearchArea(videoCaptureSingleton.getVideoCapture(), corners);
+        Mat aoiImage = narrowSearchArea(corners);
 
         //String imagePath = "resources/FieldImages/redblue.jpg";
         //Mat frame = Imgcodecs.imread(imagePath);
@@ -84,12 +82,12 @@ public class MrRobotDetection {
 
     }
 
-    public void findPoints(VideoCapture videoCapture, Point[] corners){
-        Mat aoiImage = narrowSearchArea(videoCapture, corners);
+    public void findPoints(RedRectangleDetection rectangleDetection){
+        Mat aoiImage = rectangleDetection.getAoiMask();
         //find green line
-        front = findColouredLineSegment(aoiImage, true);
+        front = findColouredLineSegment(aoiImage, false);
         //find blue line
-        back = findColouredLineSegment(aoiImage, false);
+        back = findColouredLineSegment(aoiImage, true);
         frontCenter = determineFrontCenter();
         backCenter = determineBackCenter();
 
@@ -97,14 +95,14 @@ public class MrRobotDetection {
         System.out.println("back center" + backCenter.x + " and " + backCenter.y);
     }
 
-    public void retrieveFrame(VideoCapture videoCapture){
+    public void retrieveFrame(){
         // Check if the VideoCapture object is opened successfully
-        if (!videoCapture.isOpened()) {
+        if (!VideoCaptureSingleton.getInstance().getVideoCapture().isOpened()) {
             System.out.println("Failed to open the webcam.");
             return ;
         }
 
-        while (!videoCapture.read(this.frame)) { //reads next frame of videocapture into the frame variable.
+        while (!VideoCaptureSingleton.getInstance().getVideoCapture().read(this.frame)) { //reads next frame of videocapture into the frame variable.
             System.out.println("Failed to capture a frame.");
         }
     }
@@ -120,8 +118,8 @@ public class MrRobotDetection {
 
         if (red) {
             // Define the lower and upper green color thresholds in HSV
-             lower = new Scalar(0, 100, 0);
-             upper = new Scalar(100, 255, 255);
+            lower = new Scalar(0, 100, 100);
+            upper = new Scalar(10, 255, 255);
         }
         else{
             lower = new Scalar(90, 50, 50,0); // Lower blue threshold in HSV
@@ -185,8 +183,8 @@ public class MrRobotDetection {
         return new Point((back.getEndPoint().x + back.getStartPoint().x) / 2.0, (back.getEndPoint().y + back.getStartPoint().y) / 2.0);
     }
 
-    public Mat narrowSearchArea(VideoCapture videoCapture, Point[] corners) {
-        if (videoCapture == null) {
+    public Mat narrowSearchArea(Point[] corners) {
+        if (VideoCaptureSingleton.getInstance().getVideoCapture() == null) {
             // Load the input image
             //frame = Imgcodecs.imread("C:\\Users\\emil1\\OneDrive\\Documents\\GitHub\\CDIOGR17FINAL\\resources\\FieldImages\\MrRobotBlackGreenNBlueEnds.jpg");
             frame = Imgcodecs.imread("C:\\Users\\emil1\\OneDrive\\Documents\\CDIOGR17FINAL\\resources\\FieldImages\\redblue.jpg");

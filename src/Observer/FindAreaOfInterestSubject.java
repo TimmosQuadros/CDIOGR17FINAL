@@ -1,6 +1,7 @@
 package Observer;
 
 import Interface.FindAreaOfInterest;
+import ObjectDetection.MrRobotDetection;
 import ObjectDetection.RedCrossDetection;
 import ObjectDetection.RedRectangleDetection;
 import Singleton.VideoCaptureSingleton;
@@ -34,6 +35,11 @@ public class FindAreaOfInterestSubject extends Subject implements FindAreaOfInte
         RedCrossDetection redCrossDetection = new RedCrossDetection(fieldDetection.getAoiMask());
         redCrossDetection.detectCross();
         return redCrossDetection.getCross();
+    }
+
+    public void detectRobot(){
+        MrRobotDetection mrRobotDetection = new MrRobotDetection();
+        mrRobotDetection.findPoints(fieldDetection);
     }
 
     public void newDetection(){
