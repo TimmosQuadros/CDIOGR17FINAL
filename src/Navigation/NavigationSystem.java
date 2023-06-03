@@ -2,8 +2,8 @@ package Navigation;
 
 import Interface.Navigation;
 import org.opencv.core.Point;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.util.*;
 
 public class NavigationSystem implements Navigation {
     @Override
@@ -44,13 +44,74 @@ public class NavigationSystem implements Navigation {
     }
 
     private List<Point> calculatePath(Point src, Point dst) {
-        // Code to calculate the optimal path from src to dst using A* or other path planning algorithms
-        // The result should be a list of points representing the path
+        // Define the graph or grid representation of the course
+
+        // Initialize data structures
+        Map<Point, Double> costMap = new HashMap<>();
+        Map<Point, Point> parentMap = new HashMap<>();
+        PriorityQueue<Point> openSet = new PriorityQueue<>((a, b) -> Double.compare(costMap.get(a), costMap.get(b)));
+        Set<Point> closedSet = new HashSet<>();
+
+        // Initialize the starting point
+        costMap.put(src, 0.0);
+        openSet.add(src);
+
+        // Perform A* algorithm
+        while (!openSet.isEmpty()) {
+            Point current = openSet.poll();
+
+            // Check if the goal point is reached
+            if (current.equals(dst)) {
+                break;
+            }
+
+            // Explore neighboring points
+            for (Point neighbor : getNeighbors(current)) {
+                double newCost = costMap.get(current) + calculateDistance(current, neighbor);
+
+                if (!costMap.containsKey(neighbor) || newCost < costMap.get(neighbor)) {
+                    costMap.put(neighbor, newCost);
+                    double estimatedCostToGoal = newCost + calculateHeuristic(neighbor, dst);
+                    openSet.add(neighbor);
+                    parentMap.put(neighbor, current);
+                }
+            }
+
+            closedSet.add(current);
+        }
+
+        // Reconstruct the optimal path
         List<Point> path = new ArrayList<>();
-        // Perform path planning here and populate the path list
-        // ...
+        Point current = dst;
+        while (current != null) {
+            path.add(current);
+            current = parentMap.get(current);
+        }
+        Collections.reverse(path);
+
         return path;
     }
+
+    // Helper method to get neighboring points
+    private List<Point> getNeighbors(Point point) {
+        // Implement logic to retrieve neighboring points based on the grid/graph representation
+        List<Point> neighbors = new ArrayList<>();
+        // ...
+        return neighbors;
+    }
+
+    // Helper method to calculate the Euclidean distance between two points
+    private double calculateDistance(Point point1, Point point2) {
+        double dx = point2.x - point1.x;
+        double dy = point2.y - point1.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    // Helper method to calculate the heuristic (estimated cost-to-goal) using Euclidean distance
+    private double calculateHeuristic(Point point, Point goal) {
+        return calculateDistance(point, goal);
+    }
+
 
     private void turn(double angle) {
         // Code to turn the robot to the specified angle

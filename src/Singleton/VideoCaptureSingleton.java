@@ -51,6 +51,5 @@ public class VideoCaptureSingleton {
         System.out.println("Resolution: " + width + "x" + height);
     }
 }
-
 //VideoCaptureSingleton videoCaptureSingleton = VideoCaptureSingleton.getInstance();
 //VideoCapture videoCapture = videoCaptureSingleton.getVideoCapture();
