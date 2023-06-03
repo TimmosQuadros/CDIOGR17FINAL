@@ -56,9 +56,9 @@ public class RedRectangleDetection {
 
     public void determineGoalCenters() {
         // finds posts for lefthand side.
-        goals.add(getAverage(corners.get(0),corners.get(2)));
+        goals.add(getAverage(corners.get(0),corners.get(3)));
         //finds posts for righthand side.
-        goals.add(getAverage(corners.get(1),corners.get(3)));
+        goals.add(getAverage(corners.get(1),corners.get(2)));
     }
 
     public List<Point> getGoals(){ return goals; }
@@ -79,13 +79,10 @@ public class RedRectangleDetection {
     private void findFloorCorners() {
         double adjustHeight = 8.0;
         double adjustWidth = 10.0;
-        courseCoordinates[4] = new Point((adjustWidth + courseCoordinates[0].x),(adjustHeight + courseCoordinates[0].y));
-        courseCoordinates[5] = new Point((courseCoordinates[1].x - adjustWidth),(adjustHeight + courseCoordinates[1].y));
-        courseCoordinates[6] = new Point((adjustWidth + courseCoordinates[2].x),(courseCoordinates[2].y) - adjustHeight);
-        courseCoordinates[7] = new Point((courseCoordinates[3].x - adjustWidth),(courseCoordinates[3].y) - adjustHeight);
-        for (int i = 4; i < 8; i++) {
-            this.corners.add(courseCoordinates[i]);
-        }
+        corners.add(0, new Point((adjustWidth + courseCoordinates[0].x),(adjustHeight + courseCoordinates[0].y)));
+        corners.add(1, new Point((courseCoordinates[1].x - adjustWidth),(adjustHeight + courseCoordinates[1].y)));
+        corners.add(2, new Point((courseCoordinates[3].x - adjustWidth),(courseCoordinates[3].y) - adjustHeight));
+        corners.add(3, new Point((adjustWidth + courseCoordinates[2].x),(courseCoordinates[2].y) - adjustHeight));
     }
 
     /**
