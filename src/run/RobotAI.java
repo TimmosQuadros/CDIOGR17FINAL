@@ -12,21 +12,17 @@ import java.util.List;
 
 public class RobotAI {
 
-    //load the opencv library into the JVM at runtime
+    private List<Point> corners;
+    private List<Point> goals;
 
 
-
-    public static void main(String[] args) {
-        List<Point> corners;
-        List<Point> goals;
-        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-
-        VideoCapture videoCapture = VideoCaptureSingleton.getInstance().getVideoCapture();
-
+    public RobotAI(){
         FindAreaOfInterestSubject areaOfInterestSubject = new FindAreaOfInterestSubject();
         corners = areaOfInterestSubject.getCorners();
         goals = areaOfInterestSubject.getGoalPos();
+    }
 
+    public void run() {
         QRCodeDetectorSubject qrCodeDetectorSubject = new QRCodeDetectorSubject(VideoCaptureSingleton.getInstance());
 
         Point point = qrCodeDetectorSubject.getPos();
