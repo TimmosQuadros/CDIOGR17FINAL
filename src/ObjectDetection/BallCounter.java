@@ -62,7 +62,7 @@ import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.videoio.VideoCapture;
 
-public class BallTracker {
+public class BallCounter {
     private static int totalBalls = 0;
     private static int capturedBalls = 0;
     private static int remainingBalls = 0;
