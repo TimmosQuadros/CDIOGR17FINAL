@@ -22,6 +22,11 @@ public class LineSegment {
             this.infiniteSlope = true;
     }
 
+    public LineSegment(double a, double b){
+        this.a = a;
+        this.b = b;
+    }
+
     /**
      * Returns the starting point of the line segment.
      *

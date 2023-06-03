@@ -1,5 +1,6 @@
 package run;
 
+import LineCreation.AlignRobot;
 import Observer.FindAreaOfInterestSubject;
 import Observer.QRCodeDetectorSubject;
 import Singleton.VideoCaptureSingleton;
@@ -15,12 +16,14 @@ public class RobotAI {
     //Holds the corner in clock direction from top left to bottom left.
     private List<Point> corners;
     private List<Point> goals;
+    private AlignRobot alignRobot;
 
 
     public RobotAI(){
         FindAreaOfInterestSubject areaOfInterestSubject = new FindAreaOfInterestSubject();
         corners = areaOfInterestSubject.getCorners();
         goals = areaOfInterestSubject.getGoalPos();
+        alignRobot = new AlignRobot(corners);
     }
 
     public void run() {
