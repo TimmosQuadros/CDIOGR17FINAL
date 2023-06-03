@@ -1,5 +1,6 @@
 package Bitmasks;
 
+import Singleton.VideoCaptureSingleton;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -12,31 +13,31 @@ public class AreaOfInterestMask {
 
     private static AreaOfInterestMask instance;
     private Mat aoiMask;
-    Mat frame = new Mat();
+    private Mat frame = new Mat();
 
-    private AreaOfInterestMask(VideoCapture videoCapture, List<Point> corners) {
-        createAreaOfInterestMask(videoCapture, corners);
+    private AreaOfInterestMask(List<Point> corners) {
+        createAreaOfInterestMask(corners);
     }
 
-    public static AreaOfInterestMask getInstance(VideoCapture videoCapture, List<Point> corners) {
+    public static AreaOfInterestMask getInstance(List<Point> corners) {
         if (instance == null) {
             synchronized (AreaOfInterestMask.class) {
                 if (instance == null) {
-                    instance = new AreaOfInterestMask(videoCapture, corners);
+                    instance = new AreaOfInterestMask(corners);
                 }
             }
         }
         return instance;
     }
 
-    public void retrieveFrame(VideoCapture videoCapture){
+    public void retrieveFrame(){
         // Check if the VideoCapture object is opened successfully
-        if (!videoCapture.isOpened()) {
+        if (!VideoCaptureSingleton.getInstance().getVideoCapture().isOpened()) {
             System.out.println("Failed to open the webcam.");
             return ;
         }
 
-        while (!videoCapture.read(this.frame)) { //reads next frame of videocapture into the frame variable.
+        while (!VideoCaptureSingleton.getInstance().getVideoCapture().read(this.frame)) { //reads next frame of videocapture into the frame variable.
             System.out.println("Failed to capture a frame.");
         }
     }
@@ -46,8 +47,8 @@ public class AreaOfInterestMask {
      * @param
      * @param corners
      */
-    private void createAreaOfInterestMask(VideoCapture capture, List<Point> corners) {
-        retrieveFrame(capture);
+    private void createAreaOfInterestMask(List<Point> corners) {
+        retrieveFrame();
 
         aoiMask = Mat.zeros(frame.size(), CvType.CV_8UC1);
 

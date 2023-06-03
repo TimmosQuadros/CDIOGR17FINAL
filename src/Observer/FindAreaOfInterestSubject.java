@@ -12,31 +12,33 @@ import java.util.List;
 public class FindAreaOfInterestSubject extends Subject implements FindAreaOfInterest {
 
     private RedRectangleDetection fieldDetection;
-    private final VideoCapture videoCapture;
 
     public FindAreaOfInterestSubject(){
-        this.videoCapture = VideoCaptureSingleton.getInstance().getVideoCapture();
-        fieldDetection = new RedRectangleDetection(videoCapture);
-
+        fieldDetection = new RedRectangleDetection();
+        fieldDetection.detectField();
+        fieldDetection.determineGoalCenters();
     }
 
     @Override
     public List<Point> getGoalPos() {
-        fieldDetection.determineGoalCenters();
         return fieldDetection.getGoals();
     }
 
     @Override
     public List<Point> getCorners() {
-        fieldDetection.detectField(videoCapture);
         return fieldDetection.getFloorCorners();
     }
 
     @Override
     public List<Point> getCross() {
-        RedCrossDetection redCrossDetection = new RedCrossDetection(videoCapture, fieldDetection.getAoiMask());
+        RedCrossDetection redCrossDetection = new RedCrossDetection(fieldDetection.getAoiMask());
         redCrossDetection.detectCross();
         return redCrossDetection.getCross();
+    }
+
+    public void newDetection(){
+        this.fieldDetection.detectField();
+        this.fieldDetection.determineGoalCenters();
     }
 
 

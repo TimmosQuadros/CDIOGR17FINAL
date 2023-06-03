@@ -12,6 +12,7 @@ import java.util.List;
 
 public class RobotAI {
 
+    //Holds the corner in clock direction from top left to bottom left.
     private List<Point> corners;
     private List<Point> goals;
 
@@ -25,11 +26,11 @@ public class RobotAI {
     public void run() {
         QRCodeDetectorSubject qrCodeDetectorSubject = new QRCodeDetectorSubject(VideoCaptureSingleton.getInstance());
 
-        Point point = qrCodeDetectorSubject.getPos();
+        /*Point point = qrCodeDetectorSubject.getPos();
         System.out.println(point.x+","+point.y);
         point = qrCodeDetectorSubject.getPos();
         System.out.println(point.x+","+point.y);
         point = qrCodeDetectorSubject.getPos();
-        System.out.println(point.x+","+point.y);
+        System.out.println(point.x+","+point.y);*/
     }
 }

@@ -1,7 +1,7 @@
 package ObjectDetection;
 
-import Bitmasks.AreaOfInterestMask;
 import LineCreation.LineSegment;
+import Singleton.VideoCaptureSingleton;
 import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -17,17 +17,14 @@ public class RedCrossDetection {
     private Mat aoiMask;
     private Mat frame = new Mat();
     private Point crossCenter;
-    private final VideoCapture videoCapture;
     private final List<Point> coordinates = new ArrayList<>();
 
     /**
      * Constructs a FieldObjectDetection object to detect field objects, specifically the cross lines on the field.
      *
-     * @param videoCapture
      * @param aoiMask
      */
-    public RedCrossDetection(VideoCapture videoCapture, Mat aoiMask) {
-        this.videoCapture = videoCapture;
+    public RedCrossDetection(Mat aoiMask) {
         this.aoiMask = aoiMask;
     }
 
@@ -63,14 +60,14 @@ public class RedCrossDetection {
         frame.release();
     }
 
-    public void retrieveFrame(VideoCapture videoCapture){
+    public void retrieveFrame(){
         // Check if the VideoCapture object is opened successfully
-        if (!videoCapture.isOpened()) {
+        if (!VideoCaptureSingleton.getInstance().getVideoCapture().isOpened()) {
             System.out.println("Failed to open the webcam.");
             return ;
         }
 
-        while (!videoCapture.read(this.frame)) { //reads next frame of videocapture into the frame variable.
+        while (!VideoCaptureSingleton.getInstance().getVideoCapture().read(this.frame)) { //reads next frame of videocapture into the frame variable.
             System.out.println("Failed to capture a frame.");
         }
     }

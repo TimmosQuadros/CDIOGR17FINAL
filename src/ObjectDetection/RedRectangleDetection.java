@@ -2,6 +2,7 @@ package ObjectDetection;
 
 import Bitmasks.AreaOfInterestMask;
 import LineCreation.LineSegment;
+import Singleton.VideoCaptureSingleton;
 import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -19,14 +20,9 @@ public class RedRectangleDetection {
     private final int frameHeight = 1080;
     private Mat frame;
     private Point[] courseCoordinates = new Point[10];
-    private final VideoCapture videoCapture;
     private List<Point> corners = new ArrayList<>();
     private List<Point> goals = new ArrayList<>();
     private Mat aoiMask;
-
-    public RedRectangleDetection(VideoCapture videoCapture){
-        this.videoCapture = videoCapture;
-    }
 
     /**
      * Method to be used in real time.
@@ -34,15 +30,14 @@ public class RedRectangleDetection {
      * for the remaining objects that is : table tennis balls, obstacle and Mr. Robot.
      * Having a subsection of the actual frame defined minimized the computational work errors / disturbances
      * of observations not of interest.
-     * @param videoCapture
      * @return
      */
-    public List<Point> detectField(VideoCapture videoCapture){
-        retrieveFrame(videoCapture);
+    public List<Point> detectField(){
+        retrieveFrame();
         findCorners(findLines(frame)); // find corners.
         findFloorCorners();
         //drawCorners(coordinates, frame);
-        AreaOfInterestMask mask = AreaOfInterestMask.getInstance(videoCapture, getFloorCorners());
+        AreaOfInterestMask mask = AreaOfInterestMask.getInstance(getFloorCorners());
         aoiMask = mask.getAoiMask();
 
         return getFloorCorners();
@@ -145,18 +140,17 @@ public class RedRectangleDetection {
     /**
      * This method will retrieve a frame to analyze from the videocapture.
      * @return frame to analyze.
-     * @param videoCapture
      */
-    public void retrieveFrame(VideoCapture videoCapture){
+    public void retrieveFrame(){
         // Check if the VideoCapture object is opened successfully
-        if (!videoCapture.isOpened()) {
+        if (!VideoCaptureSingleton.getInstance().getVideoCapture().isOpened()) {
             System.out.println("Failed to open the webcam.");
             return;
         }
         String imagePath = null;
 
         this.frame = new Mat();
-        if (videoCapture.read(this.frame)) { //reads next frame of videocapture into the frame variable.
+        if (VideoCaptureSingleton.getInstance().getVideoCapture().read(this.frame)) { //reads next frame of videocapture into the frame variable.
              //Save the frame as a PNG file
             //imagePath = getRessourcePath();
             //Imgcodecs.imwrite(imagePath, this.frame);
