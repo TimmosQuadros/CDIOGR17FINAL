@@ -3,6 +3,7 @@ package Observer;
 import Interface.HoughCircleDetector;
 import Singleton.VideoCaptureSingleton;
 import org.opencv.core.*;
+import org.opencv.highgui.HighGui;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
@@ -35,7 +36,7 @@ public class HoughCircleDetectorSubject implements HoughCircleDetector {
                     Imgproc.GaussianBlur(grayFrame, blurredFrame, new Size(9, 9), 2, 2);
 
                     Mat circles = new Mat();
-                    Imgproc.HoughCircles(blurredFrame, circles, Imgproc.HOUGH_GRADIENT, 1, 20, 200, 30, 1, 15);
+                    Imgproc.HoughCircles(grayFrame, circles, Imgproc.HOUGH_GRADIENT, 1, 30, 300, 20, 12, 16);
 
                     if (circles.cols() > 0) {
                         boolean shouldAddBall = false;
@@ -64,6 +65,7 @@ public class HoughCircleDetectorSubject implements HoughCircleDetector {
                         }
                     }
                 }
+                HighGui.imshow("abe",frame1);
             }
         } else {
             System.out.println("Failed to open camera!");
