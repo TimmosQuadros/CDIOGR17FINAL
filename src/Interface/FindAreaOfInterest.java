@@ -11,4 +11,6 @@ public interface FindAreaOfInterest {
     public List<Point> getGoalPos();
     public List<Point> getCorners();
     public List<Point> getCross();
+    public double getScaleFactor();
+
 }

@@ -42,11 +42,11 @@ public class RedRectangleDetection {
         retrieveFrame();
         findCorners(findLines(frame)); // find corners.
         findFloorCorners();
-        //drawCorners(coordinates, frame);
+        //drawCorners();
         AreaOfInterestMask mask = AreaOfInterestMask.getInstance(getFloorCorners());
         aoiMask = mask.getAoiMask();
 
-        redCross = new RedCrossDetection(aoiMask);
+        //redCross = new RedCrossDetection(aoiMask);
 
         return getFloorCorners();
     }
@@ -112,22 +112,16 @@ public class RedRectangleDetection {
 
     /**
      * This method will draw green circles on each point received as input.
-     * @param frame frame to draw on.
      */
-    private void drawCorners(Mat frame) {
+    private void drawCorners() {
         // Draw circles for each coordinate
-        for (Point coordinate : courseCoordinates) {
+        for (Point coordinate : corners) {
             Imgproc.circle(frame, coordinate, 5, new Scalar(0, 255, 0), -1);
         }
-        Imgproc.circle(frame, new Point(courseCoordinates[2].x + 10, courseCoordinates[2].y - 10), 5, new Scalar(0, 0, 255), -1);
+        //Imgproc.circle(frame, new Point(courseCoordinates[2].x + 10, courseCoordinates[2].y - 10), 5, new Scalar(0, 0, 255), -1);
 
-
-        Imgproc.circle(frame, courseCoordinates[8], 5, new Scalar(0, 255, 0), -1);
-
-        Imgproc.circle(frame, courseCoordinates[9], 5, new Scalar(0, 255, 0), -1);
-
-        Imgproc.circle(frame, new Point(766.0, 429.0), 5, new Scalar(0, 255, 0), -1);
-        Imgproc.circle(frame, new Point(674.0,627.5), 5, new Scalar(0, 255, 0), -1);
+        Imgproc.circle(frame, goals.get(0), 5, new Scalar(0, 255, 0), -1);
+        Imgproc.circle(frame, goals.get(1), 5, new Scalar(0, 255, 0), -1);
 
         /*List<Point> pointList = new ArrayList<>();
         pointList.add(new Point(596.0, 302.0));
@@ -161,8 +155,6 @@ public class RedRectangleDetection {
             System.out.println("Failed to open the webcam.");
             return;
         }
-        String imagePath = null;
-
         this.frame = new Mat();
         if (VideoCaptureSingleton.getInstance().getVideoCapture().read(this.frame)) { //reads next frame of videocapture into the frame variable.
              //Save the frame as a PNG file

@@ -35,6 +35,11 @@ public class FindAreaOfInterestSubject extends Subject implements FindAreaOfInte
         return fieldDetection.getRedCross().getCoordinates();
     }
 
+    @Override
+    public double getScaleFactor() {
+        return fieldDetection.getScaleFactor();
+    }
+
     public void detectRobot(){
         MrRobotDetection mrRobotDetection = new MrRobotDetection();
         mrRobotDetection.findPoints(fieldDetection);
