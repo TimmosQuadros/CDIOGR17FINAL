@@ -6,7 +6,6 @@ import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.videoio.VideoCapture;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,26 +13,69 @@ import java.util.List;
 public class RedCrossDetection {
 
     public static LineSegment[] crossLines = new LineSegment[2];
-    private Mat aoiMask;
     private Mat frame = new Mat();
     private Point crossCenter;
     private final List<Point> coordinates = new ArrayList<>();
 
     /**
      * Constructs a FieldObjectDetection object to detect field objects, specifically the cross lines on the field.
-     *
      * @param aoiMask
      */
     public RedCrossDetection(Mat aoiMask) {
-        this.aoiMask = aoiMask;
-    }
-
-    public void detectCross(){
-        Mat aoiImage = createAOIMask();
+        Mat aoiImage = createAOIMask(aoiMask);
 
         fillObstableArray(aoiImage);
         crossCenter = RedRectangleDetection.findIntersection(crossLines[1], crossLines[0]);
-        coordinates.add(crossCenter);
+        coordinates.add(0, crossCenter);
+
+        determineCrosscoordinates();
+    }
+
+    private void determineCrosscoordinates() {
+        Point[] points = new Point[4];
+        points[0] = crossLines[0].getStartPoint();
+        points[1] = crossLines[0].getEndPoint();
+        points[2] = crossLines[1].getStartPoint();
+        points[3] = crossLines[1].getEndPoint();
+
+        addTopLeft(points);
+        addTopRight(points);
+        addBottomRight(points);
+        addBottomLeft(points);
+    }
+
+    public List<Point> getCoordinates(){return coordinates;}
+
+    private void addBottomLeft(Point[] points) {
+        for (Point p : points){
+            if ((p.x < coordinates.get(0).x) && (p.y > coordinates.get(0).y)) {
+                coordinates.add(4, p);
+            }
+        }
+    }
+
+    private void addBottomRight(Point[] points) {
+        for (Point p : points){
+            if ((p.x > coordinates.get(0).x) && (p.y > coordinates.get(0).y)) {
+                coordinates.add(3, p);
+            }
+        }
+    }
+
+    private void addTopRight(Point[] points) {
+        for (Point p : points){
+            if ((p.x > coordinates.get(0).x) && (p.y < coordinates.get(0).y)) {
+                coordinates.add(2, p);
+            }
+        }
+    }
+
+    private void addTopLeft(Point[] points) {
+        for (Point p : points){
+            if ((p.x < coordinates.get(0).x) && (p.y < coordinates.get(0).y)) {
+                coordinates.add(1, p);
+            }
+        }
     }
 
     public void detectCrossTest(){
@@ -101,11 +143,11 @@ public class RedCrossDetection {
      * @return the red cross mask.
      */
 
-    public Mat createAOIMask() {
+    public Mat createAOIMask(Mat aoiMask) {
         // Apply the mask to the original image
         Mat maskedImage = new Mat();
 
-        frame.copyTo(maskedImage, this.aoiMask);
+        frame.copyTo(maskedImage, aoiMask);
 
         // Save the masked image and the binary mask image
         Imgcodecs.imwrite("maskedImage.jpg", maskedImage);

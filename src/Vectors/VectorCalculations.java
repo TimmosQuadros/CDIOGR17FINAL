@@ -5,25 +5,34 @@ import org.opencv.core.Point;
 
 public class VectorCalculations {
 
-    private Vector vectorRobot;
-    private Vector vectorBall;
-    private Point robotCenter;
+    private Vector vectorOne;
+    private Vector vectorTwo;
+    private Point center;
+    private Point pivotPoint;
     private double cosAngle;
 
     public VectorCalculations(LineSegment robot, Point ballCoordinat){
-        robotCenter = new Point ((robot.getEndPoint().x + robot.getEndPoint().x) / 2.0,
-                (robot.getEndPoint().y + robot.getEndPoint().y) / 2.0);
+        center = new Point ((robot.getEndPoint().x + robot.getStartPoint().x) / 2.0,
+                (robot.getEndPoint().y + robot.getStartPoint().y) / 2.0);
 
-        vectorRobot = new Vector(robot.getEndPoint().x - robotCenter.x, robot.getEndPoint().y - robotCenter.y);
-        vectorBall = new Vector(ballCoordinat.x - robotCenter.x, ballCoordinat.y - robotCenter.y);
+        vectorOne = new Vector(robot.getEndPoint().x - center.x, robot.getEndPoint().y - center.y);
+        vectorTwo = new Vector(ballCoordinat.x - center.x, ballCoordinat.y - center.y);
 
         calculateAngle();
     }
 
+    public VectorCalculations(Point center, Point edge1, Point edge2){
+        vectorOne = new Vector(edge1.x - center.x, edge1.y - center.y);
+        vectorTwo = new Vector(edge2.x - center.x, edge2.y - center.y);
+
+        Vector resultingVector = new Vector(vectorOne.getX() + vectorTwo.getX(), vectorOne.getY() + vectorTwo.getY());
+        pivotPoint = new Point(center.x + resultingVector.getX(), center.y + resultingVector.getY());
+    }
+
     private void calculateAngle(){
-        cosAngle = (((vectorRobot.getX() * vectorBall.getX()) + (vectorRobot.getY() * vectorBall.getY())) /
-                (((Math.sqrt(Math.pow(vectorRobot.getX(), 2) + Math.pow(vectorRobot.getY(), 2)))) *
-                        ((Math.sqrt(Math.pow(vectorBall.getX(), 2) + Math.pow(vectorBall.getY(), 2))))));
+        cosAngle = (((vectorOne.getX() * vectorTwo.getX()) + (vectorOne.getY() * vectorTwo.getY())) /
+                (((Math.sqrt(Math.pow(vectorOne.getX(), 2) + Math.pow(vectorOne.getY(), 2)))) *
+                        ((Math.sqrt(Math.pow(vectorTwo.getX(), 2) + Math.pow(vectorTwo.getY(), 2))))));
     }
 
     public double getAngle(){

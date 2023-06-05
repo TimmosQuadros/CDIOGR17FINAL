@@ -12,7 +12,7 @@ import java.util.List;
 
 public class FindAreaOfInterestSubject extends Subject implements FindAreaOfInterest {
 
-    private RedRectangleDetection fieldDetection;
+    private final RedRectangleDetection fieldDetection;
 
     public FindAreaOfInterestSubject(){
         fieldDetection = new RedRectangleDetection();
@@ -32,9 +32,7 @@ public class FindAreaOfInterestSubject extends Subject implements FindAreaOfInte
 
     @Override
     public List<Point> getCross() {
-        RedCrossDetection redCrossDetection = new RedCrossDetection(fieldDetection.getAoiMask());
-        redCrossDetection.detectCross();
-        return redCrossDetection.getCross();
+        return fieldDetection.getRedCross().getCoordinates();
     }
 
     public void detectRobot(){

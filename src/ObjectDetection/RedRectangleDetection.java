@@ -14,6 +14,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Langt brede = 178 cm.
+ * Kort brede = 133 cm.
+ */
 public class RedRectangleDetection {
 
     private final int frameWidth = 1920;
@@ -22,6 +26,8 @@ public class RedRectangleDetection {
     private Point[] courseCoordinates = new Point[10];
     private List<Point> corners = new ArrayList<>();
     private List<Point> goals = new ArrayList<>();
+    private RedCrossDetection redCross;
+    private double scaleFactor;
     private Mat aoiMask;
 
     /**
@@ -40,8 +46,16 @@ public class RedRectangleDetection {
         AreaOfInterestMask mask = AreaOfInterestMask.getInstance(getFloorCorners());
         aoiMask = mask.getAoiMask();
 
+        redCross = new RedCrossDetection(aoiMask);
+
         return getFloorCorners();
     }
+
+    public RedCrossDetection getRedCross(){
+        return redCross;
+    }
+
+    public double getScaleFactor(){ return this.scaleFactor; }
 
     public List<Point> getFloorCorners(){
         return corners;
@@ -192,6 +206,67 @@ public class RedRectangleDetection {
             courseCoordinates[i] = findIntersection(lines.get(j),lines.get(++j));
             j++;
         }
+
+        FindScaling(lines);
+    }
+
+    private void FindScaling(List<LineSegment> lines) {
+        LineSegment[] findScale = new LineSegment[4];
+
+        findScale[0] = findScaleLong(lines.get(0), lines.get(2), 0 ,1);
+        findScale[1] = findScaleLong(lines.get(4), lines.get(6), 2 ,3);
+        findScale[2] = findScaleShort(lines.get(1), lines.get(7), 0,3);
+        findScale[3] = findScaleShort(lines.get(3), lines.get(5), 1,2);
+
+        double[] scale = new double[4];
+        scale[0] = findLengthForScale(0,findScale);
+        scale[1] = findLengthForScale(1,findScale);
+        scale[2] = findLengthForScale(2,findScale);
+        scale[3] = findLengthForScale(3,findScale);
+
+        double sum = 0.0;
+        for (double x : scale){
+            sum += x;
+        }
+        this.scaleFactor = sum / 4.0;
+    }
+
+    private double findLengthForScale(int index, LineSegment[] findScale) {
+        return Math.sqrt(Math.pow((findScale[index].getEndPoint().x - findScale[index].getStartPoint().x), 2.0) +
+                Math.pow(findScale[index].getEndPoint().y - findScale[index].getStartPoint().y, 2.0));
+    }
+
+    private LineSegment findScaleShort(LineSegment lineSegment1, LineSegment lineSegment2, int cornerStart, int cornerEnd) {
+        Point start;
+        Point end;
+        if(lineSegment1.getEndPoint().y < courseCoordinates[cornerStart].y)
+            start = lineSegment1.getEndPoint();
+        else
+            start = lineSegment1.getStartPoint();
+
+        if (lineSegment2.getEndPoint().y > courseCoordinates[cornerEnd].y)
+            end = lineSegment2.getEndPoint();
+        else
+            end = lineSegment2.getStartPoint();
+
+        return new LineSegment(start, end);
+    }
+
+    private LineSegment findScaleLong(LineSegment lineSegment, LineSegment lineSegment1, int cornerStart, int cornerEnd) {
+        Point start;
+        Point end;
+
+        if(lineSegment.getEndPoint().x < courseCoordinates[cornerStart].x)
+            start = lineSegment.getEndPoint();
+        else
+            start = lineSegment.getStartPoint();
+
+        if(lineSegment1.getEndPoint().x > courseCoordinates[cornerEnd].x)
+            end = lineSegment1.getEndPoint();
+        else
+            end = lineSegment1.getStartPoint();
+
+        return new LineSegment(start, end);
     }
 
     /**
