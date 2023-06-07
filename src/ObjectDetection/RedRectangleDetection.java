@@ -221,6 +221,9 @@ public class RedRectangleDetection {
             sum += x;
         }
         this.scaleFactor = sum / 4.0;
+
+        System.out.println("ScaleFactor : " + this.scaleFactor);
+
     }
 
     private double findLengthForScale(int index, LineSegment[] findScale) {
