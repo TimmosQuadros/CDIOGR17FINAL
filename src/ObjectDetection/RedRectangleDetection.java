@@ -7,7 +7,6 @@ import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.videoio.VideoCapture;
 
 import java.io.File;
 import java.net.URL;
@@ -39,8 +38,8 @@ public class RedRectangleDetection {
      * @return
      */
     public List<Point> detectField(){
-        retrieveFrame();
-        findCorners(findLines(frame)); // find corners.
+        findAverageCorner(50);
+        FindScaling();
         findFloorCorners();
         determineGoalCenters();
         drawCorners();
@@ -50,6 +49,38 @@ public class RedRectangleDetection {
         //redCross = new RedCrossDetection(aoiMask);
 
         return getFloorCorners();
+    }
+
+    private void findAverageCorner(int size) {
+        Point[][] cornersAve = new Point[size][4];
+
+        for (int i = 0; i < cornersAve.length; i++) {
+            retrieveFrame();
+            findCorners(cornersAve[i], findLines()); // find corners.
+        }
+
+        Point corner1 = new Point(0.0, 0.0);
+        Point corner2 = new Point(0.0, 0.0);
+        Point corner3 = new Point(0.0, 0.0);
+        Point corner4 = new Point(0.0, 0.0);
+
+        for (int i = 0; i < cornersAve.length; i++) {
+            for (int j = 0; j < 4; j++) {
+                corner1.x += cornersAve[i][j].x;
+                corner1.y += cornersAve[i][j++].y;
+                corner2.x += cornersAve[i][j].x;
+                corner2.y += cornersAve[i][j++].y;
+                corner3.x += cornersAve[i][j].x;
+                corner3.y += cornersAve[i][j++].y;
+                corner4.x += cornersAve[i][j].x;
+                corner4.y += cornersAve[i][j++].y;
+            }
+        }
+
+        courseCoordinates[0] = new Point(corner1.x /50.0, corner1.y / 50);
+        courseCoordinates[1] = new Point(corner2.x /50.0, corner2.y / 50);
+        courseCoordinates[2] = new Point(corner3.x /50.0, corner3.y / 50);
+        courseCoordinates[3] = new Point(corner4.x /50.0, corner4.y / 50);
     }
 
     public RedCrossDetection getRedCross(){
@@ -103,7 +134,6 @@ public class RedRectangleDetection {
         //String imagePath = "resources/FieldImages/MrRobotBlackGreenNBlueEnds.jpg";
         frame = Imgcodecs.imread(imagePath);
 
-        findCorners(findLines(frame));
         //findFloorCorners();
         //drawCorners(frame);
         //for (Point x : courseCoordinates){
@@ -190,20 +220,19 @@ public class RedRectangleDetection {
     /**
      * We loop through our list of lines and perform the findIntersection method on each pair.
      * We end up with a point array of all the corners.
+     * @param points
      * @param lines the list of linesegments.
      */
-    private void findCorners(List<LineSegment> lines) {
+    private void findCorners(Point[] points, List<LineSegment> lines) {
         int j = 0;
 
         for (int i = 0; i < 4 ; i ++) {
-            courseCoordinates[i] = findIntersection(lines.get(j),lines.get(++j));
+            points[i] = findIntersection(lines.get(j),lines.get(++j));
             j++;
         }
-
-        FindScaling(lines);
     }
 
-    private void FindScaling(List<LineSegment> lines) {
+    private void FindScaling() {
         LineSegment[] findScale = new LineSegment[4];
 
         findScale[0] = new LineSegment(courseCoordinates[0], courseCoordinates[1]);
@@ -223,12 +252,7 @@ public class RedRectangleDetection {
         double scale1 = avg1/(170.3-1.6);
         double scale2 = avg2/(125-1.6);
 
-        double scaleFactor = (scale1+scale2)/2;
-        /*double sum = 0.0;
-        for (double x : scale){
-            sum += x;
-        }*/
-        //this.scaleFactor = sum / 4.0;
+        scaleFactor = (scale1+scale2)/2;
 
         System.out.println("ScaleFactor : " + this.scaleFactor);
 
@@ -319,13 +343,11 @@ public class RedRectangleDetection {
      * The next two entries will form the top right corner.
      * The next two entries will form the bottom left corner.
      * The last two entries will form the bottom right corner.
-     * @param frame the still image from the live video.
      * @return The list of line segments.
      */
-    private List<LineSegment> findLines(Mat frame){
-        //bit mask for all the red areas in the frame
-        Mat redMask = findRedMask(frame);
+    private List<LineSegment> findLines(){
         //redMask = applyCanny(redMask); //applying the canny edge detection algorithm for more precise detection.
+        Mat redMask = findRedMask();
 
         // Define the number of divisions and the size of each division
         int areaWidth = frameWidth / 2;
@@ -376,7 +398,7 @@ public class RedRectangleDetection {
         double theta = Math.PI / 180; // Angle resolution of the accumulator in radians
         int threshold = 100; // Minimum number of intersections to detect a line
         int minLineLength = 200; // Minimum length of a line in pixels
-        int maxLineGap = 10; // Maximum gap between line segments allowed in pixels
+        int maxLineGap = 12; // Maximum gap between line segments allowed in pixels
 
         // The houghLinesP function helps us look for line shapes and patterns.
         Imgproc.HoughLinesP(binaryImage, lines, rho, theta, threshold, minLineLength, maxLineGap);
@@ -432,10 +454,9 @@ public class RedRectangleDetection {
      * This mask will color all pixels black, within a radius of 100 pixels.
      * We will hereby avoid getting noise from the red cross in the middle,
      * that could possible interfere with the detection of the red corners.
-     * @param frame The frame is thee image we are working with.
      * @return the binary image (red mask) that we will use for fuurther processing.
      */
-    private Mat findRedMask(Mat frame){
+    private Mat findRedMask(){
         // Define the center region to exclude
         int centerX = frame.cols() / 2; // X-coordinate of the center
         int centerY = frame.rows() / 2; // Y-coordinate of the center
