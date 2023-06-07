@@ -37,7 +37,7 @@ public class RobotPositionSubject implements RobotPosition {
                     Imgproc.GaussianBlur(grayFrame, blurredFrame, new Size(9, 9), 2, 2);
 
                     Mat circles = new Mat();
-                    Imgproc.HoughCircles(blurredFrame, circles, Imgproc.HOUGH_GRADIENT, 1, 20, 200, 30, 40, 50);
+                    Imgproc.HoughCircles(grayFrame, circles, Imgproc.HOUGH_GRADIENT, 1, 20, 200, 30, 35, 42);
 
                     if (circles.cols() > 0) {
                         for (int i = 0; i < circles.cols(); i++) {

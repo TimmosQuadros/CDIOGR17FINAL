@@ -23,7 +23,7 @@ public class RedRectangleDetection {
     private final int frameWidth = 1920;
     private final int frameHeight = 1080;
     private Mat frame;
-    private Point[] courseCoordinates = new Point[10];
+    private Point[] courseCoordinates = new Point[4];
     private List<Point> corners = new ArrayList<>();
     private List<Point> goals = new ArrayList<>();
     private RedCrossDetection redCross;
@@ -42,7 +42,8 @@ public class RedRectangleDetection {
         retrieveFrame();
         findCorners(findLines(frame)); // find corners.
         findFloorCorners();
-        //drawCorners();
+        determineGoalCenters();
+        drawCorners();
         AreaOfInterestMask mask = AreaOfInterestMask.getInstance(getFloorCorners());
         aoiMask = mask.getAoiMask();
 
@@ -115,7 +116,7 @@ public class RedRectangleDetection {
      */
     private void drawCorners() {
         // Draw circles for each coordinate
-        for (Point coordinate : corners) {
+        for (Point coordinate : courseCoordinates) {
             Imgproc.circle(frame, coordinate, 5, new Scalar(0, 255, 0), -1);
         }
         //Imgproc.circle(frame, new Point(courseCoordinates[2].x + 10, courseCoordinates[2].y - 10), 5, new Scalar(0, 0, 255), -1);
@@ -205,10 +206,10 @@ public class RedRectangleDetection {
     private void FindScaling(List<LineSegment> lines) {
         LineSegment[] findScale = new LineSegment[4];
 
-        findScale[0] = findScaleLong(lines.get(0), lines.get(2), 0 ,1);
-        findScale[1] = findScaleLong(lines.get(4), lines.get(6), 2 ,3);
-        findScale[2] = findScaleShort(lines.get(1), lines.get(7), 0,3);
-        findScale[3] = findScaleShort(lines.get(3), lines.get(5), 1,2);
+        findScale[0] = new LineSegment(courseCoordinates[0], courseCoordinates[1]);
+        findScale[1] = new LineSegment(courseCoordinates[2], courseCoordinates[3]);
+        findScale[2] = new LineSegment(courseCoordinates[0], courseCoordinates[2]);
+        findScale[3] = new LineSegment(courseCoordinates[1], courseCoordinates[3]);
 
         double[] scale = new double[4];
         scale[0] = findLengthForScale(0,findScale);
@@ -216,11 +217,18 @@ public class RedRectangleDetection {
         scale[2] = findLengthForScale(2,findScale);
         scale[3] = findLengthForScale(3,findScale);
 
-        double sum = 0.0;
+        double avg1 =(scale[0]+scale[1])/2;
+        double avg2 =(scale[2]+scale[3])/2;
+
+        double scale1 = avg1/(170.3-1.6);
+        double scale2 = avg2/(125-1.6);
+
+        double scaleFactor = (scale1+scale2)/2;
+        /*double sum = 0.0;
         for (double x : scale){
             sum += x;
-        }
-        this.scaleFactor = sum / 4.0;
+        }*/
+        //this.scaleFactor = sum / 4.0;
 
         System.out.println("ScaleFactor : " + this.scaleFactor);
 
@@ -341,13 +349,6 @@ public class RedRectangleDetection {
                 lineSegments.add(findLinesegment(areaOfInterest, false, (j > 0), (i > 0), areaWidth, areaHeight));
                 lineSegments.add(findLinesegment(areaOfInterest, true, (j > 0), (i > 0), areaWidth, areaHeight));
             }
-        }
-
-        //Just a test code to view results -- should be deleted when tested thoroughly! :D
-        for (LineSegment x : lineSegments){
-            //System.out.println("Corner = (" + x.getStartPoint() + "," + x.getEndPoint() +")");
-            Imgproc.line(this.frame, x.getStartPoint(), x.getEndPoint(), new Scalar(255, 0, 0), 2);
-
         }
 
         return lineSegments;

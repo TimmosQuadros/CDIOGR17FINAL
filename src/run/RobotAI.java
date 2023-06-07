@@ -2,7 +2,9 @@ package run;
 
 import LineCreation.AlignRobot;
 import Observer.FindAreaOfInterestSubject;
+import Observer.HoughCircleDetectorSubject;
 import Observer.QRCodeDetectorSubject;
+import Observer.RobotPositionSubject;
 import Singleton.VideoCaptureSingleton;
 import org.opencv.core.Core;
 import org.opencv.core.Point;
@@ -28,13 +30,15 @@ public class RobotAI {
     }
 
     public void run() {
-        QRCodeDetectorSubject qrCodeDetectorSubject = new QRCodeDetectorSubject(VideoCaptureSingleton.getInstance());
+        RobotPositionSubject robotPositionSubject = new RobotPositionSubject();
+        HoughCircleDetectorSubject houghCircleDetectorSubject = new HoughCircleDetectorSubject();
 
-        Point point = qrCodeDetectorSubject.getPos();
-        System.out.println(point.x+","+point.y);
-        point = qrCodeDetectorSubject.getPos();
-        System.out.println(point.x+","+point.y);
-        point = qrCodeDetectorSubject.getPos();
+        List<Point> points = houghCircleDetectorSubject.getBalls();
+
+        System.out.println(points.toString());
+
+
+        Point point = robotPositionSubject.getPos().get(0);
         System.out.println(point.x+","+point.y);
 
 
