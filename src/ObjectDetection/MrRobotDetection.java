@@ -1,6 +1,6 @@
 package ObjectDetection;
 
-import Bitmasks.AreaOfInterestMask;
+import Bitmasks.AreaOfInterestFrame;
 import LineCreation.LineSegment;
 import Singleton.VideoCaptureSingleton;
 import org.opencv.core.*;
@@ -17,7 +17,7 @@ import java.util.List;
 
 public class MrRobotDetection {
 
-    private AreaOfInterestMask aoiMask = null;
+    private AreaOfInterestFrame aoiMask = null;
     private Mat frame = new Mat();
     private LineSegment front;
     private LineSegment back;

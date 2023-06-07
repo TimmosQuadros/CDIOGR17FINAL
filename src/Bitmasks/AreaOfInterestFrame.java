@@ -4,30 +4,17 @@ import Singleton.VideoCaptureSingleton;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.videoio.VideoCapture;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class AreaOfInterestMask {
+public class AreaOfInterestFrame {
 
-    private static AreaOfInterestMask instance;
+    private static AreaOfInterestFrame instance;
     private Mat aoiMask;
     private Mat frame = new Mat();
 
-    private AreaOfInterestMask(List<Point> corners) {
+    public AreaOfInterestFrame(List<Point> corners) {
         createAreaOfInterestMask(corners);
-    }
-
-    public static AreaOfInterestMask getInstance(List<Point> corners) {
-        if (instance == null) {
-            synchronized (AreaOfInterestMask.class) {
-                if (instance == null) {
-                    instance = new AreaOfInterestMask(corners);
-                }
-            }
-        }
-        return instance;
     }
 
     public void retrieveFrame(){
@@ -62,11 +49,12 @@ public class AreaOfInterestMask {
 
         frame.copyTo(maskedImage, aoiMask);
 
-        Imgcodecs.imwrite("maskedImage.jpg", maskedImage);
+        frame = maskedImage;
 
+        Imgcodecs.imwrite("numberOne.jpg", maskedImage);
     }
 
     public Mat getAoiMask() {
-        return aoiMask;
+        return frame;
     }
 }

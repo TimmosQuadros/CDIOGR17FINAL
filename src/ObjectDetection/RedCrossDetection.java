@@ -1,5 +1,6 @@
 package ObjectDetection;
 
+import Bitmasks.AreaOfInterestFrame;
 import LineCreation.LineSegment;
 import Singleton.VideoCaptureSingleton;
 import org.opencv.core.*;
@@ -14,6 +15,7 @@ public class RedCrossDetection {
 
     public static LineSegment[] crossLines = new LineSegment[2];
     private Mat frame = new Mat();
+    private Mat aoiImage;
     private Point crossCenter;
     private final List<Point> coordinates = new ArrayList<>();
 
@@ -21,10 +23,10 @@ public class RedCrossDetection {
      * Constructs a FieldObjectDetection object to detect field objects, specifically the cross lines on the field.
      * @param aoiMask
      */
-    public RedCrossDetection(Mat aoiMask) {
-        Mat aoiImage = createAOIMask(aoiMask);
+    public RedCrossDetection(AreaOfInterestFrame aoiMask) {
+        aoiImage = aoiMask.getAoiMask();
 
-        fillObstableArray(aoiImage);
+        fillObstableArray();
         crossCenter = RedRectangleDetection.findIntersection(crossLines[1], crossLines[0]);
         coordinates.add(0, crossCenter);
 
@@ -83,8 +85,6 @@ public class RedCrossDetection {
         Mat frame = Imgcodecs.imread(imagePath);
         //Mat aoiImage = createAOIMask(frame);
 
-        fillObstableArray(frame);
-
         Imgproc.circle(frame, crossLines[0].getStartPoint(), 5, new Scalar(0, 255, 0), -1);
         Imgproc.circle(frame, crossLines[0].getEndPoint(), 5, new Scalar(0, 255, 0), -1);
 
@@ -114,9 +114,9 @@ public class RedCrossDetection {
         }
     }
 
-    private void fillObstableArray(Mat aoiMask) {
+    private void fillObstableArray() {
         Mat hsvImage = new Mat();
-        Imgproc.cvtColor(aoiMask, hsvImage, Imgproc.COLOR_BGR2HSV);
+        Imgproc.cvtColor(aoiImage, hsvImage, Imgproc.COLOR_BGR2HSV);
         Mat redCrossMask = new Mat();
 
         // Define the lower and upper thresholds for red color
@@ -126,10 +126,13 @@ public class RedCrossDetection {
         Core.inRange(hsvImage, lowerRed, upperRed, redCrossMask);
 
         //vertical line
-        crossLines[0] = findLinesegment(redCrossMask, true);
+        //crossLines[0] = findLinesegment(redCrossMask, true);
 
+        crossLines[0] = findLine();
         //horizontal line
-        crossLines[1] = findLinesegment(redCrossMask, false);
+        //crossLines[1] = findLinesegment(redCrossMask, false);
+
+        crossLines[1] = crossLines[0];
 
         for (LineSegment x : crossLines){
             System.out.println(x.getEndPoint() + " AND " + x.getStartPoint());
@@ -137,22 +140,42 @@ public class RedCrossDetection {
 
     }
 
-    /**
-     * Creates a red cross mask based on the frame and the area of interest points.
-     *
-     * @return the red cross mask.
-     */
+    private LineSegment findLine() {
+        // Apply Hough Line Transform
+        Mat lines = new Mat();
+        Imgproc.HoughLinesP(aoiImage, lines, 1, Math.PI / 180, 100, 50, 10);
 
-    public Mat createAOIMask(Mat aoiMask) {
-        // Apply the mask to the original image
-        Mat maskedImage = new Mat();
+        // Find the longest line
+        double maxLineLength = 0;
+        double[] longestLine = null;
 
-        frame.copyTo(maskedImage, aoiMask);
+        for (int i = 0; i < lines.rows(); i++) {
+            double[] line = lines.get(i, 0);
+            double x1 = line[0];
+            double y1 = line[1];
+            double x2 = line[2];
+            double y2 = line[3];
 
-        // Save the masked image and the binary mask image
-        Imgcodecs.imwrite("maskedImage.jpg", maskedImage);
+            // Calculate the length of the line using Euclidean distance formula
+            double lineLength = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 
-        return maskedImage;
+            // Check if the current line is longer than the previous longest line
+            if (lineLength > maxLineLength) {
+                maxLineLength = lineLength;
+                longestLine = line;
+            }
+        }
+
+        // Process the longest line
+        if (longestLine != null) {
+            double x1 = longestLine[0];
+            double y1 = longestLine[1];
+            double x2 = longestLine[2];
+            double y2 = longestLine[3];
+
+            return new LineSegment(new Point(x1, y1), new Point(x2, y2));
+        }
+        return null;
     }
 
     private LineSegment findLinesegment(Mat binaryImage, boolean vertical) {

@@ -1,6 +1,6 @@
 package ObjectDetection;
 
-import Bitmasks.AreaOfInterestMask;
+import Bitmasks.AreaOfInterestFrame;
 import LineCreation.LineSegment;
 import Singleton.VideoCaptureSingleton;
 import org.opencv.core.*;
@@ -42,11 +42,15 @@ public class RedRectangleDetection {
         FindScaling();
         findFloorCorners();
         determineGoalCenters();
-        drawCorners();
-        AreaOfInterestMask mask = AreaOfInterestMask.getInstance(getFloorCorners());
-        aoiMask = mask.getAoiMask();
+        AreaOfInterestFrame mask = new AreaOfInterestFrame(corners);
 
-        //redCross = new RedCrossDetection(aoiMask);
+        for (Point p : courseCoordinates){
+            System.out.println("Corner x : " + p.x + " and corner y : " + p.y);
+        }
+
+        redCross = new RedCrossDetection(mask);
+
+        drawCorners();
 
         return getFloorCorners();
     }
@@ -151,23 +155,12 @@ public class RedRectangleDetection {
         }
         //Imgproc.circle(frame, new Point(courseCoordinates[2].x + 10, courseCoordinates[2].y - 10), 5, new Scalar(0, 0, 255), -1);
 
+        for (Point x:
+            redCross.getCoordinates()) {
+            Imgproc.circle(frame, x, 5, new Scalar(0, 255, 0), -1);
+        }
         Imgproc.circle(frame, goals.get(0), 5, new Scalar(0, 255, 0), -1);
         Imgproc.circle(frame, goals.get(1), 5, new Scalar(0, 255, 0), -1);
-
-        /*List<Point> pointList = new ArrayList<>();
-        pointList.add(new Point(596.0, 302.0));
-        pointList.add(new Point(575.0, 408.0));
-        pointList.add(new Point(531.0, 348.0));
-        pointList.add(new Point(638.0, 363.0));
-        MatOfPoint2f points = new MatOfPoint2f();
-        points.fromList(pointList);
-
-        Point center = new Point();
-        float[] radius = new float[1];
-        Imgproc.minEnclosingCircle(points, center, radius);
-        Imgproc.circle(frame, center, (int) radius[0], new Scalar(0, 255, 0), 2);
-
-         */
 
         // Display the frame
         HighGui.imshow("Frame", frame);
