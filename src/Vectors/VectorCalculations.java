@@ -11,6 +11,17 @@ public class VectorCalculations {
     private Point pivotPoint;
     private double cosAngle;
 
+    /**
+     * This method will take a linesegment from the robot along with a ballcoordinat.
+     * Based on the robots linesegment, we will calculate the center point of the robot.
+     * We will then use this centerpoint to create two vectors, with their starting point in the center.
+     * The first vector will be the vector representing the robots heading, hence we will use the frontpoint of the robot.
+     * The next vector will be from the the center to the ball.
+     * Having the same starting point of the vectors allows us to easily calculate the angle,
+     * that the robot needs to turn in order to point towards the ball.
+     * @param robot Linesegemnt.
+     * @param ballCoordinat point.
+     */
     public VectorCalculations(LineSegment robot, Point ballCoordinat){
         center = new Point ((robot.getEndPoint().x + robot.getStartPoint().x) / 2.0,
                 (robot.getEndPoint().y + robot.getStartPoint().y) / 2.0);

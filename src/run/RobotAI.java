@@ -26,7 +26,7 @@ public class RobotAI {
         corners = areaOfInterestSubject.getCorners();
         goals = areaOfInterestSubject.getGoalPos();
         //areaOfInterestSubject.detectRobot();
-        //alignRobot = new AlignRobot(corners);
+        alignRobot = new AlignRobot(corners);
     }
 
     public void run() {
