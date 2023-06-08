@@ -122,8 +122,8 @@ public class RedRectangleDetection {
      * @return the coordinates of the approximated foldiing intersections for each corner.
      */
     private void findFloorCorners() {
-        double adjustHeight = 8.0;
-        double adjustWidth = 10.0;
+        double adjustHeight = 11.0;
+        double adjustWidth = 15.0;
         corners.add(0, new Point((adjustWidth + courseCoordinates[0].x),(adjustHeight + courseCoordinates[0].y)));
         corners.add(1, new Point((courseCoordinates[1].x - adjustWidth),(adjustHeight + courseCoordinates[1].y)));
         corners.add(2, new Point((courseCoordinates[3].x - adjustWidth),(courseCoordinates[3].y) - adjustHeight));
@@ -155,12 +155,13 @@ public class RedRectangleDetection {
         }
         //Imgproc.circle(frame, new Point(courseCoordinates[2].x + 10, courseCoordinates[2].y - 10), 5, new Scalar(0, 0, 255), -1);
 
-        for (Point x:
-            redCross.getCoordinates()) {
-            Imgproc.circle(frame, x, 5, new Scalar(0, 255, 0), -1);
-        }
         Imgproc.circle(frame, goals.get(0), 5, new Scalar(0, 255, 0), -1);
         Imgproc.circle(frame, goals.get(1), 5, new Scalar(0, 255, 0), -1);
+
+        for (Point p : redCross.getCoordinates()){
+            Imgproc.circle(frame, p, 5, new Scalar(0, 255, 0), -1);
+            System.out.println("Crosspoint");
+        }
 
         // Display the frame
         HighGui.imshow("Frame", frame);
@@ -303,7 +304,7 @@ public class RedRectangleDetection {
      * @param vertical lineSegment.
      * @return intersection point of the two lines - equal to the corner.
      */
-    public static Point findIntersection(LineSegment horizontal, LineSegment vertical) {
+    public Point findIntersection(LineSegment horizontal, LineSegment vertical) {
         horizontal.determineEquation();
         vertical.determineEquation();
 
