@@ -28,4 +28,8 @@ public class Incoder
     public String startAngle(double startAngle){
         return MessageStrings.StartAngle+":"+startAngle;
     }
+
+    public String scaleFactor(double scaleFactor){
+        return MessageStrings.ScaleFactor+":"+scaleFactor;
+    }
 }

@@ -8,27 +8,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class Server extends Subject {
+public class Server implements Runnable{
 
+    public String connected = null;
 
     PrintWriter writer;
 
-    public Server() throws IOException {
-        int portNumber = 4445;
-        ServerSocket serverSocket = new ServerSocket(portNumber);
-        while(true) {
-            Socket socket = serverSocket.accept();
-            System.out.println("connected");
-            writer = new PrintWriter(socket.getOutputStream(), true);
-            writer.println("hello");
-            writer.println();
-            if(socket.isClosed()) {
-                System.out.println("connection closed: "+socket.getRemoteSocketAddress());
-                break;
-            }
-        }
+    public Server() {
 
-        serverSocket.close();
     }
 
     public void writeMessage(String message){
@@ -46,5 +33,23 @@ public class Server extends Subject {
         //Waits for input
         String message = input.nextLine();
         return message;
+    }
+
+    @Override
+    public void run() {
+
+        int portNumber = 4445;
+        try {
+            ServerSocket serverSocket = new ServerSocket(portNumber);
+            Socket socket = serverSocket.accept();
+            System.out.println("connected");
+            connected = "";
+            writer = new PrintWriter(socket.getOutputStream(), true);
+            writer.println("hello");
+            writer.println();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }
