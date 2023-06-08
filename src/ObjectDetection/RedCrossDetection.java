@@ -13,10 +13,9 @@ import java.util.List;
 
 public class RedCrossDetection {
 
-    public static LineSegment[] crossLines = new LineSegment[2];
+    public LineSegment[] crossLines = new LineSegment[2];
     private Mat frame = new Mat();
-    private Mat aoiImage;
-    private Point crossCenter;
+    private Mat aoiImage = new Mat();
     private final List<Point> coordinates = new ArrayList<>();
 
     /**
@@ -27,14 +26,29 @@ public class RedCrossDetection {
         aoiImage = aoiMask.getAoiMask();
 
         fillObstableArray();
-        crossCenter = RedRectangleDetection.findIntersection(crossLines[1], crossLines[0]);
-        coordinates.add(0, crossCenter);
+        findcenter();
 
         determineCrosscoordinates();
+
+        for (LineSegment x : crossLines){
+            System.out.println(x.getEndPoint() + " AND " + x.getStartPoint());
+        }
+    }
+
+    private void findcenter() {
+        coordinates.add(0, new Point((crossLines[0].getStartPoint().x + crossLines[0].getEndPoint().x) / 2,
+                (crossLines[0].getStartPoint().y + crossLines[0].getEndPoint().y) / 2));
     }
 
     private void determineCrosscoordinates() {
-        Point[] points = new Point[4];
+        crossLines[1] = findSecondLine();
+
+        coordinates.add(1, crossLines[0].getStartPoint());
+        coordinates.add(2, crossLines[0].getEndPoint());
+        coordinates.add(3, crossLines[1].getStartPoint());
+        coordinates.add(4, crossLines[1].getEndPoint());
+
+        /*Point[] points = new Point[4];
         points[0] = crossLines[0].getStartPoint();
         points[1] = crossLines[0].getEndPoint();
         points[2] = crossLines[1].getStartPoint();
@@ -43,7 +57,32 @@ public class RedCrossDetection {
         addTopLeft(points);
         addTopRight(points);
         addBottomRight(points);
-        addBottomLeft(points);
+        addBottomLeft(points);*/
+    }
+
+    public Point rotate90(Point p) {
+        return new Point(-p.y, p.x);
+    }
+
+    // Translate a point by a given vector
+    public Point translate(Point p, Point vector) {
+        return new Point(p.x + vector.x, p.y + vector.y);
+    }
+
+    private LineSegment findSecondLine() {
+        // Translate the start and end points so that the center point becomes the origin
+        Point translatedStart = translate(crossLines[0].getStartPoint(), new Point(-coordinates.get(0).x, -coordinates.get(0).y));
+        Point translatedEnd = translate(crossLines[0].getEndPoint(), new Point(-coordinates.get(0).x, -coordinates.get(0).y));
+
+        // Rotate the translated points
+        Point rotatedStart = rotate90(translatedStart);
+        Point rotatedEnd = rotate90(translatedEnd);
+
+        // Translate the points back
+        Point finalStart = translate(rotatedStart, coordinates.get(0));
+        Point finalEnd = translate(rotatedEnd, coordinates.get(0));
+
+        return new LineSegment(finalStart, finalEnd);
     }
 
     public List<Point> getCoordinates(){return coordinates;}
@@ -91,9 +130,7 @@ public class RedCrossDetection {
         Imgproc.circle(frame, crossLines[1].getStartPoint(), 5, new Scalar(0, 255, 0), -1);
         Imgproc.circle(frame, crossLines[1].getEndPoint(), 5, new Scalar(0, 255, 0), -1);
 
-        crossCenter = RedRectangleDetection.findIntersection(crossLines[1], crossLines[0]);
-
-        Imgproc.circle(frame, crossCenter, 5, new Scalar(0, 255, 0), -1);
+        Imgproc.circle(frame, coordinates.get(0), 5, new Scalar(0, 255, 0), -1);
 
         // Display the frame
         HighGui.imshow("Frame", frame);
@@ -125,25 +162,18 @@ public class RedCrossDetection {
 
         Core.inRange(hsvImage, lowerRed, upperRed, redCrossMask);
 
-        //vertical line
-        //crossLines[0] = findLinesegment(redCrossMask, true);
+        // Use morphological operations to clean up the thresholded image
+        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(3, 3));
+        Imgproc.morphologyEx(redCrossMask, redCrossMask, Imgproc.MORPH_OPEN, kernel);
+        Imgproc.morphologyEx(redCrossMask, redCrossMask, Imgproc.MORPH_CLOSE, kernel);
 
-        crossLines[0] = findLine();
-        //horizontal line
-        //crossLines[1] = findLinesegment(redCrossMask, false);
-
-        crossLines[1] = crossLines[0];
-
-        for (LineSegment x : crossLines){
-            System.out.println(x.getEndPoint() + " AND " + x.getStartPoint());
-        }
-
+        crossLines[0] = findLine(redCrossMask);
     }
 
-    private LineSegment findLine() {
+    private LineSegment findLine(Mat redmask) {
         // Apply Hough Line Transform
         Mat lines = new Mat();
-        Imgproc.HoughLinesP(aoiImage, lines, 1, Math.PI / 180, 100, 50, 10);
+        Imgproc.HoughLinesP(redmask, lines, 1, Math.PI / 180, 100, 50, 12);
 
         // Find the longest line
         double maxLineLength = 0;
