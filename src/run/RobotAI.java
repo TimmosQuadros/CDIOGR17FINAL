@@ -1,6 +1,7 @@
 package run;
 
 import IncodeMessage.Incoder;
+import Interface.RobotPosition;
 import LineCreation.AlignRobot;
 import LineCreation.LineSegment;
 import Observer.FindAreaOfInterestSubject;
@@ -37,14 +38,40 @@ public class RobotAI {
         this.server = server;
 
     }
+    public void run() {
+            while(true) {
+                RobotPositionSubject robotPositionSubject = new RobotPositionSubject();
+
+                boolean isBlueCircle = true; // Set the desired circle color preference here
+
+                List<Point> robotPos = robotPositionSubject.getPos(isBlueCircle);
+
+                // Process the robotPos as needed
+                // ...
+
+                // Write the robot position to the server
+                // server.writeMessage(robotPos.toString());
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /*
 
     public void run() {
         while(true){
         RobotPositionSubject robotPositionSubject = new RobotPositionSubject();
         HoughCircleDetectorSubject houghCircleDetectorSubject = new HoughCircleDetectorSubject();
 
+        boolean isBlueCircle = true; // Set the desired circle color preference here
+
         List<Point> ballPositions = houghCircleDetectorSubject.getBalls();
-        List<Point> robotPos = robotPositionSubject.getPos();
+        List<Point> robotPos = robotPositionSubject.getPos(isBlueCircle);
 
         VectorCalculations vectorCalculations = new VectorCalculations(new LineSegment(robotPos.get(0),robotPos.get(1)),ballPositions.get(0));
 
@@ -67,8 +94,7 @@ public class RobotAI {
                 e.printStackTrace();
             }
         }
-
-
-
     }
 }
+
+     */
