@@ -1,8 +1,10 @@
 package ObjectDetection;
 
 import Bitmasks.AreaOfInterestFrame;
+import LineCreation.Circle;
 import LineCreation.LineSegment;
 import Singleton.VideoCaptureSingleton;
+import Vectors.Vector;
 import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -15,24 +17,39 @@ public class RedCrossDetection {
 
     public LineSegment[] crossLines = new LineSegment[2];
     private Mat frame = new Mat();
-    private Mat aoiImage = new Mat();
+    private Mat aoiImage;
     private final List<Point> coordinates = new ArrayList<>();
+    public Circle circle;
 
     /**
      * Constructs a FieldObjectDetection object to detect field objects, specifically the cross lines on the field.
      * @param aoiMask
      */
-    public RedCrossDetection(AreaOfInterestFrame aoiMask) {
+    public RedCrossDetection(AreaOfInterestFrame aoiMask, double scaleFactor) {
         aoiImage = aoiMask.getAoiMask();
 
         fillObstableArray();
         findcenter();
+
+        Vector vector = new Vector(crossLines[0].getStartPoint().x - coordinates.get(0).x,
+                crossLines[0].getStartPoint().y - coordinates.get(0).y);
+
+        circle = new Circle(coordinates.get(0).x, coordinates.get(0).y, (vector.getLength() + (scaleFactor * 11)));
+        System.out.println("Length " + vector.getLength());
+
 
         determineCrosscoordinates();
 
         for (LineSegment x : crossLines){
             System.out.println(x.getEndPoint() + " AND " + x.getStartPoint());
         }
+
+        adjustCoordinatesWithScaleFactor(scaleFactor);
+
+    }
+
+    private void adjustCoordinatesWithScaleFactor(double scaleFactor) {
+
     }
 
     private void findcenter() {
@@ -43,12 +60,7 @@ public class RedCrossDetection {
     private void determineCrosscoordinates() {
         crossLines[1] = findSecondLine();
 
-        coordinates.add(1, crossLines[0].getStartPoint());
-        coordinates.add(2, crossLines[0].getEndPoint());
-        coordinates.add(3, crossLines[1].getStartPoint());
-        coordinates.add(4, crossLines[1].getEndPoint());
-
-        /*Point[] points = new Point[4];
+        Point[] points = new Point[4];
         points[0] = crossLines[0].getStartPoint();
         points[1] = crossLines[0].getEndPoint();
         points[2] = crossLines[1].getStartPoint();
@@ -57,7 +69,7 @@ public class RedCrossDetection {
         addTopLeft(points);
         addTopRight(points);
         addBottomRight(points);
-        addBottomLeft(points);*/
+        addBottomLeft(points);
     }
 
     public Point rotate90(Point p) {

@@ -10,6 +10,7 @@ public class Run {
 
     public static void main(String[] args) {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        /*
         try {
             Server server = new Server();
             Thread task1 = new Thread(server);
@@ -21,6 +22,8 @@ public class Run {
             robotAI.run();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
+        RobotAI robotAI = new RobotAI(null);
+        robotAI.run();
     }
 }

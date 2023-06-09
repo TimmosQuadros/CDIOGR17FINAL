@@ -27,6 +27,8 @@ public class RedRectangleDetection {
     private List<Point> goals = new ArrayList<>();
     private RedCrossDetection redCross;
     private double scaleFactor;
+    private final int axelLength = 20;
+    private final int axelTurnRadius = 22;
     private Mat aoiMask;
 
     /**
@@ -48,7 +50,7 @@ public class RedRectangleDetection {
             System.out.println("Corner x : " + p.x + " and corner y : " + p.y);
         }
 
-        redCross = new RedCrossDetection(mask);
+        redCross = new RedCrossDetection(mask, scaleFactor);
 
         drawCorners();
 
@@ -158,10 +160,16 @@ public class RedRectangleDetection {
         Imgproc.circle(frame, goals.get(0), 5, new Scalar(0, 255, 0), -1);
         Imgproc.circle(frame, goals.get(1), 5, new Scalar(0, 255, 0), -1);
 
-        for (Point p : redCross.getCoordinates()){
+        /*for (Point p : redCross.getCoordinates()){
             Imgproc.circle(frame, p, 5, new Scalar(0, 255, 0), -1);
             System.out.println("Crosspoint");
-        }
+        }*/
+        Imgproc.circle(frame, redCross.getCoordinates().get(1), 5, new Scalar(0, 255, 0), -1);
+        Imgproc.circle(frame, redCross.getCoordinates().get(2), 5, new Scalar(10, 255, 255), -1);
+        Imgproc.circle(frame, redCross.getCoordinates().get(3), 5, new Scalar(10, 255, 255), -1);
+        Imgproc.circle(frame, redCross.getCoordinates().get(4), 5, new Scalar(0, 255, 0), -1);
+
+        Imgproc.circle(frame, redCross.circle.getCenter(), (int) Math.round(redCross.circle.getRadius()), new Scalar(0, 255, 0), 2);
 
         // Display the frame
         HighGui.imshow("Frame", frame);
