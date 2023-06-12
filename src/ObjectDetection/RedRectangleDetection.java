@@ -37,16 +37,17 @@ public class RedRectangleDetection {
      * for the remaining objects that is : table tennis balls, obstacle and Mr. Robot.
      * Having a subsection of the actual frame defined minimized the computational work errors / disturbances
      * of observations not of interest.
+     *
      * @return
      */
-    public List<Point> detectField(){
+    public List<Point> detectField() {
         findAverageCorner(50);
         FindScaling();
         findFloorCorners();
         determineGoalCenters();
         AreaOfInterestFrame mask = new AreaOfInterestFrame(corners);
 
-        for (Point p : courseCoordinates){
+        for (Point p : courseCoordinates) {
             System.out.println("Corner x : " + p.x + " and corner y : " + p.y);
         }
 
@@ -83,59 +84,66 @@ public class RedRectangleDetection {
             }
         }
 
-        courseCoordinates[0] = new Point(corner1.x /50.0, corner1.y / 50);
-        courseCoordinates[1] = new Point(corner2.x /50.0, corner2.y / 50);
-        courseCoordinates[2] = new Point(corner3.x /50.0, corner3.y / 50);
-        courseCoordinates[3] = new Point(corner4.x /50.0, corner4.y / 50);
+        courseCoordinates[0] = new Point(corner1.x / 50.0, corner1.y / 50);
+        courseCoordinates[1] = new Point(corner2.x / 50.0, corner2.y / 50);
+        courseCoordinates[2] = new Point(corner3.x / 50.0, corner3.y / 50);
+        courseCoordinates[3] = new Point(corner4.x / 50.0, corner4.y / 50);
     }
 
-    public RedCrossDetection getRedCross(){
+    public RedCrossDetection getRedCross() {
         return redCross;
     }
 
-    public double getScaleFactor(){ return this.scaleFactor; }
+    public double getScaleFactor() {
+        return this.scaleFactor;
+    }
 
-    public List<Point> getFloorCorners(){
+    public List<Point> getFloorCorners() {
         return corners;
     }
 
-    public Mat getAoiMask(){return aoiMask;}
+    public Mat getAoiMask() {
+        return aoiMask;
+    }
 
     public void determineGoalCenters() {
         // finds posts for lefthand side.
-        goals.add(getAverage(corners.get(0),corners.get(3)));
+        goals.add(getAverage(corners.get(0), corners.get(3)));
         //finds posts for righthand side.
-        goals.add(getAverage(corners.get(1),corners.get(2)));
+        goals.add(getAverage(corners.get(1), corners.get(2)));
     }
 
-    public List<Point> getGoals(){ return goals; }
+    public List<Point> getGoals() {
+        return goals;
+    }
 
     private Point getAverage(Point upperPoint, Point lowerPoint) {
         double centerX = (upperPoint.x + lowerPoint.x) / 2;
         double centerY = (upperPoint.y + lowerPoint.y) / 2;
 
-        return new Point(centerX,centerY);
+        return new Point(centerX, centerY);
     }
 
     /**
      * OBS!! This method needs more testing!!
-     *
+     * <p>
      * Fiinds an approximation of the coordiinates of the folding in the corner.
+     *
      * @return the coordinates of the approximated foldiing intersections for each corner.
      */
     private void findFloorCorners() {
         double adjustHeight = 11.0;
         double adjustWidth = 15.0;
-        corners.add(0, new Point((adjustWidth + courseCoordinates[0].x),(adjustHeight + courseCoordinates[0].y)));
-        corners.add(1, new Point((courseCoordinates[1].x - adjustWidth),(adjustHeight + courseCoordinates[1].y)));
-        corners.add(2, new Point((courseCoordinates[3].x - adjustWidth),(courseCoordinates[3].y) - adjustHeight));
-        corners.add(3, new Point((adjustWidth + courseCoordinates[2].x),(courseCoordinates[2].y) - adjustHeight));
+        corners.add(0, new Point((adjustWidth + courseCoordinates[0].x), (adjustHeight + courseCoordinates[0].y)));
+        corners.add(1, new Point((courseCoordinates[1].x - adjustWidth), (adjustHeight + courseCoordinates[1].y)));
+        corners.add(2, new Point((courseCoordinates[3].x - adjustWidth), (courseCoordinates[3].y) - adjustHeight));
+        corners.add(3, new Point((adjustWidth + courseCoordinates[2].x), (courseCoordinates[2].y) - adjustHeight));
     }
 
     /**
      * method to test how well working the methods are using png images.
      */
-    public void testRedRectangleDetection(){
+    public void testRedRectangleDetection() {
         String imagePath = "resources/FieldImages/bluegreen.jpg";
         //String imagePath = "resources/FieldImages/MrRobotBlackGreenNBlueEnds.jpg";
         frame = Imgcodecs.imread(imagePath);
@@ -143,7 +151,7 @@ public class RedRectangleDetection {
         //findFloorCorners();
         //drawCorners(frame);
         //for (Point x : courseCoordinates){
-          //  System.out.println("X coordinate = " + x.x + " AND y coordinate = " + x.y);
+        //  System.out.println("X coordinate = " + x.x + " AND y coordinate = " + x.y);
         //}
     }
 
@@ -180,9 +188,10 @@ public class RedRectangleDetection {
 
     /**
      * This method will retrieve a frame to analyze from the videocapture.
+     *
      * @return frame to analyze.
      */
-    public void retrieveFrame(){
+    public void retrieveFrame() {
         // Check if the VideoCapture object is opened successfully
         if (!VideoCaptureSingleton.getInstance().getVideoCapture().isOpened()) {
             System.out.println("Failed to open the webcam.");
@@ -190,7 +199,7 @@ public class RedRectangleDetection {
         }
         this.frame = new Mat();
         if (VideoCaptureSingleton.getInstance().getVideoCapture().read(this.frame)) { //reads next frame of videocapture into the frame variable.
-             //Save the frame as a PNG file
+            //Save the frame as a PNG file
             //imagePath = getRessourcePath();
             //Imgcodecs.imwrite(imagePath, this.frame);
             //System.out.println("Frame saved as " + imagePath);
@@ -201,9 +210,10 @@ public class RedRectangleDetection {
 
     /**
      * This method is mostly for testing purposes, and should just help create a generic url for an image path.
+     *
      * @return path.
      */
-    private String getRessourcePath(){
+    private String getRessourcePath() {
         // Get the resource path
         URL resourceUrl = RedRectangleDetection.class.getClassLoader().getResource("resources");
 
@@ -222,14 +232,15 @@ public class RedRectangleDetection {
     /**
      * We loop through our list of lines and perform the findIntersection method on each pair.
      * We end up with a point array of all the corners.
+     *
      * @param points
-     * @param lines the list of linesegments.
+     * @param lines  the list of linesegments.
      */
     private void findCorners(Point[] points, List<LineSegment> lines) {
         int j = 0;
 
-        for (int i = 0; i < 4 ; i ++) {
-            points[i] = findIntersection(lines.get(j),lines.get(++j));
+        for (int i = 0; i < 4; i++) {
+            points[i] = findIntersection(lines.get(j), lines.get(++j));
             j++;
         }
     }
@@ -243,18 +254,18 @@ public class RedRectangleDetection {
         findScale[3] = new LineSegment(courseCoordinates[1], courseCoordinates[3]);
 
         double[] scale = new double[4];
-        scale[0] = findLengthForScale(0,findScale);
-        scale[1] = findLengthForScale(1,findScale);
-        scale[2] = findLengthForScale(2,findScale);
-        scale[3] = findLengthForScale(3,findScale);
+        scale[0] = findLengthForScale(0, findScale);
+        scale[1] = findLengthForScale(1, findScale);
+        scale[2] = findLengthForScale(2, findScale);
+        scale[3] = findLengthForScale(3, findScale);
 
-        double avg1 =(scale[0]+scale[1])/2;
-        double avg2 =(scale[2]+scale[3])/2;
+        double avg1 = (scale[0] + scale[1]) / 2;
+        double avg2 = (scale[2] + scale[3]) / 2;
 
-        double scale1 = avg1/(170.3-1.6);
-        double scale2 = avg2/(125-1.6);
+        double scale1 = avg1 / (170.3 - 1.6);
+        double scale2 = avg2 / (125 - 1.6);
 
-        scaleFactor = (scale1+scale2)/2;
+        scaleFactor = (scale1 + scale2) / 2;
 
         System.out.println("ScaleFactor : " + this.scaleFactor);
 
@@ -268,7 +279,7 @@ public class RedRectangleDetection {
     private LineSegment findScaleShort(LineSegment lineSegment1, LineSegment lineSegment2, int cornerStart, int cornerEnd) {
         Point start;
         Point end;
-        if(lineSegment1.getEndPoint().y < courseCoordinates[cornerStart].y)
+        if (lineSegment1.getEndPoint().y < courseCoordinates[cornerStart].y)
             start = lineSegment1.getEndPoint();
         else
             start = lineSegment1.getStartPoint();
@@ -285,12 +296,12 @@ public class RedRectangleDetection {
         Point start;
         Point end;
 
-        if(lineSegment.getEndPoint().x < courseCoordinates[cornerStart].x)
+        if (lineSegment.getEndPoint().x < courseCoordinates[cornerStart].x)
             start = lineSegment.getEndPoint();
         else
             start = lineSegment.getStartPoint();
 
-        if(lineSegment1.getEndPoint().x > courseCoordinates[cornerEnd].x)
+        if (lineSegment1.getEndPoint().x > courseCoordinates[cornerEnd].x)
             end = lineSegment1.getEndPoint();
         else
             end = lineSegment1.getStartPoint();
@@ -300,7 +311,7 @@ public class RedRectangleDetection {
 
     /**
      * Using simple math equations, we find the intersection between two lines.
-     *
+     * <p>
      * Problems experienced (Fixed), when we would have a vertical line, the slope value would be infinite.
      * To counter this problem, we made a check to see if the x values of the start- and endpoint
      * of a vertical line were the same. If this was the case we would set the boolean value "infiniteSlope"
@@ -309,7 +320,7 @@ public class RedRectangleDetection {
      * The point of the vertical line would thereby be calculated with a different function as seen in the if statement.
      *
      * @param horizontal lineSegment.
-     * @param vertical lineSegment.
+     * @param vertical   lineSegment.
      * @return intersection point of the two lines - equal to the corner.
      */
     public Point findIntersection(LineSegment horizontal, LineSegment vertical) {
@@ -322,16 +333,16 @@ public class RedRectangleDetection {
         double verticalA = vertical.getA(); // slope of line 2
         double verticalB = vertical.getB();  // y-intercept of line 2
 
-        if (vertical.isInfiniteSlope()){
+        if (vertical.isInfiniteSlope()) {
             // Handle the case of a vertical line
             double y = horizontalA * vertical.getEndPoint().x + horizontalB;  // Calculate the y-coordinate of intersection
-            return new Point(vertical.getEndPoint().x,y);
+            return new Point(vertical.getEndPoint().x, y);
         }
         // Calculate the intersection point
         double x = (verticalB - horizontalB) / (horizontalA - verticalA);
         double y = horizontalA * x + horizontalB;
 
-        return new Point(x,y);
+        return new Point(x, y);
     }
 
     /**
@@ -345,9 +356,10 @@ public class RedRectangleDetection {
      * The next two entries will form the top right corner.
      * The next two entries will form the bottom left corner.
      * The last two entries will form the bottom right corner.
+     *
      * @return The list of line segments.
      */
-    private List<LineSegment> findLines(){
+    private List<LineSegment> findLines() {
         //redMask = applyCanny(redMask); //applying the canny edge detection algorithm for more precise detection.
         Mat redMask = findRedMask();
 
@@ -381,17 +393,18 @@ public class RedRectangleDetection {
     /**
      * This method finds the largest LineSegment in the binary image, and return the linesegment object.
      * To find the biggest line segments we use houghLinesP function.
+     *
      * @param binaryImage This image is derived from the original bitmask, but is diviided into four
      *                    smaller areas to easier find each corner.
-     * @param vertical, if true the method will look for a vertical line segment.
-     *                  If false we will be looking for a horizontal line segment
-     * @param addToX Since we split our original frame up into smaller areas of interest,
-     *               we need to add the pixels back into the final result of the coordinates.
-     *               If X is true we will then be adding the width of the areaOfInterest
-     *               to the X values of the starting and end point of the line segment.
-     * @param addToY Same way idea as addToX but for the y values.
-     * @param areaWidth The width of the area.
-     * @param areaHeight The height of the area.
+     * @param vertical,   if true the method will look for a vertical line segment.
+     *                    If false we will be looking for a horizontal line segment
+     * @param addToX      Since we split our original frame up into smaller areas of interest,
+     *                    we need to add the pixels back into the final result of the coordinates.
+     *                    If X is true we will then be adding the width of the areaOfInterest
+     *                    to the X values of the starting and end point of the line segment.
+     * @param addToY      Same way idea as addToX but for the y values.
+     * @param areaWidth   The width of the area.
+     * @param areaHeight  The height of the area.
      * @return a linesegment.
      */
     private LineSegment findLinesegment(Mat binaryImage, boolean vertical, boolean addToX, boolean addToY, double areaWidth, double areaHeight) {
@@ -421,13 +434,13 @@ public class RedRectangleDetection {
 
             //checking if vertical
             //if true we look for vertical, otherwise we look for horizontal, as seen by the degree constraints.
-            if(vertical) {
+            if (vertical) {
                 if (Math.abs(angle) >= 75 && Math.abs(angle) <= 105 && length > maxLineLength) {
                     maxLineLength = length;
                     startPoint = new Point(x1, y1);
                     endPoint = new Point(x2, y2);
                 }
-            }else{
+            } else {
                 if (Math.abs(angle) >= -25 && Math.abs(angle) <= 25 && length > maxLineLength) {
                     maxLineLength = length;
                     startPoint = new Point(x1, y1);
@@ -435,12 +448,12 @@ public class RedRectangleDetection {
                 }
             }
         }
-        if (addToX){ // here we add areawidth to x values, to make them fit with the original frame.
+        if (addToX) { // here we add areawidth to x values, to make them fit with the original frame.
             startPoint.x += areaWidth;
             endPoint.x += areaWidth;
         }
 
-        if (addToY){ // here we add areaHeight to y values, to make them fit with the original frame.
+        if (addToY) { // here we add areaHeight to y values, to make them fit with the original frame.
             startPoint.y += areaHeight;
             endPoint.y += areaHeight;
         }
@@ -456,9 +469,10 @@ public class RedRectangleDetection {
      * This mask will color all pixels black, within a radius of 100 pixels.
      * We will hereby avoid getting noise from the red cross in the middle,
      * that could possible interfere with the detection of the red corners.
+     *
      * @return the binary image (red mask) that we will use for fuurther processing.
      */
-    private Mat findRedMask(){
+    private Mat findRedMask() {
         // Define the center region to exclude
         int centerX = frame.cols() / 2; // X-coordinate of the center
         int centerY = frame.rows() / 2; // Y-coordinate of the center
@@ -471,7 +485,7 @@ public class RedRectangleDetection {
         //create hsv frame
         Mat hsvFrame = new Mat();
         //turn original frame into hsv frame for better color detection
-        Imgproc.cvtColor(frame,hsvFrame,Imgproc.COLOR_BGR2HSV);
+        Imgproc.cvtColor(frame, hsvFrame, Imgproc.COLOR_BGR2HSV);
 
         // Define the lower and upper thresholds for red color
         Scalar lowerRed = new Scalar(0, 100, 100);
@@ -487,17 +501,18 @@ public class RedRectangleDetection {
     /**
      * NOTE ! Well this method should supposedly make the detection more clear.
      * Through testing however we get more precise result using the red mask alone,
-     *  without the canny algorithm, hence the method is left unused.. for now..!
-     *
+     * without the canny algorithm, hence the method is left unused.. for now..!
+     * <p>
      * The canny algorithm should make shape detection in binary image clear and more precise.
      * Hence we chose to apply canny to our binary image, where we end up with an edge image.
      * An edge image will highlight different regions, ie different colors (black or white),
      * since we were to look for a coherent region of white dots (red mask),
      * the region will end up resemble a line much more when looking at the different regions,
      * which is what we are looking for.
+     *
      * @param redMask The red mask is the binary mask we have already created.
      */
-    private Mat applyCanny(Mat redMask){
+    private Mat applyCanny(Mat redMask) {
         double threshold1 = 50;  // Lower threshold for the intensity gradient
         double threshold2 = 150; // Upper threshold for the intensity gradient
         Mat edges = new Mat();
@@ -505,4 +520,55 @@ public class RedRectangleDetection {
         return edges;
     }
 
+    /*
+    Ny
+     */
+    public static class RobotController {
+        private final int courseWidth;
+        private final int courseHeight;
+        private final int robotWidth;
+        private final int robotHeight;
+
+        public RobotController(int courseWidth, int courseHeight, int robotWidth, int robotHeight) {
+            this.courseWidth = courseWidth;
+            this.courseHeight = courseHeight;
+            this.robotWidth = robotWidth;
+            this.robotHeight = robotHeight;
+        }
+
+        public List<Point> getValidTravelPoints() {
+            List<Point> validPoints = new ArrayList<>();
+
+            // Calculate the maximum distance from the sides
+            int maxDistanceX = courseWidth - robotWidth;
+            int maxDistanceY = courseHeight - robotHeight;
+
+            // Generate the valid travel points
+            for (int x = 0; x <= maxDistanceX; x++) {
+                for (int y = 0; y <= maxDistanceY; y++) {
+                    validPoints.add(new Point(x, y));
+                }
+            }
+
+            return validPoints;
+        }
+
+        public static void main(String[] args) {
+            // Create a RobotController instance with course dimensions and robot dimensions
+            int courseWidth = 133;
+            int courseHeight = 178;
+            int robotWidth = 20;
+            int robotHeight = 31;
+
+            RobotController robotController = new RobotController(courseWidth, courseHeight, robotWidth, robotHeight);
+
+            // Get the valid travel points for the robot
+            List<Point> validPoints = robotController.getValidTravelPoints();
+
+            // Print the valid travel points
+            for (Point point : validPoints) {
+                System.out.println("X: " + point.x + ", Y: " + point.y);
+            }
+        }
+    }
 }
