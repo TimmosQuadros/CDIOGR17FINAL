@@ -52,8 +52,12 @@ public class RedRectangleDetection {
         }
 
         redCross = new RedCrossDetection(mask, scaleFactor);
+        Point p1 = new Point(540,340);
+        Point p2 =  new Point(1520.0, 520);
 
-        drawCorners();
+        redCross.pathIntersects(p1, p2);
+
+        drawCorners(p1, p2);
 
         return getFloorCorners();
     }
@@ -158,7 +162,7 @@ public class RedRectangleDetection {
     /**
      * This method will draw green circles on each point received as input.
      */
-    private void drawCorners() {
+    private void drawCorners(Point p1, Point p2) {
         // Draw circles for each coordinate
         for (Point coordinate : courseCoordinates) {
             Imgproc.circle(frame, coordinate, 5, new Scalar(0, 255, 0), -1);
@@ -172,6 +176,8 @@ public class RedRectangleDetection {
             Imgproc.circle(frame, p, 5, new Scalar(0, 255, 0), -1);
             System.out.println("Crosspoint");
         }*/
+
+        Imgproc.line(frame, p1, p2, new Scalar(0, 255, 0));
         Imgproc.circle(frame, redCross.getCoordinates().get(1), 5, new Scalar(0, 255, 0), -1);
         Imgproc.circle(frame, redCross.getCoordinates().get(2), 5, new Scalar(10, 255, 255), -1);
         Imgproc.circle(frame, redCross.getCoordinates().get(3), 5, new Scalar(10, 255, 255), -1);

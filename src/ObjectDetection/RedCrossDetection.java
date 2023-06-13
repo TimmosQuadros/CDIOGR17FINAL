@@ -37,16 +37,41 @@ public class RedCrossDetection {
         circle = new Circle(coordinates.get(0).x, coordinates.get(0).y, (vector.getLength() + (scaleFactor * 11)));
         System.out.println("Length " + vector.getLength());
 
-
         determineCrosscoordinates();
 
         for (LineSegment x : crossLines){
             System.out.println(x.getEndPoint() + " AND " + x.getStartPoint());
         }
 
+        Point ball = null;
+        Point robotCenter = null;
+
         adjustCoordinatesWithScaleFactor(scaleFactor);
 
     }
+
+    public void pathIntersects(Point ball, Point robotCenter) {
+        // Line equation y = mx + c
+        double m = (ball.y - robotCenter.y) / (ball.x - robotCenter.x);
+        double c = robotCenter.y - m * robotCenter.x;
+
+        // Substitute line equation into circle equation
+        double h = circle.getCenter().x;
+        double k = circle.getCenter().y;
+
+        // Coefficients for the quadratic equation
+        double a = (m * m + 1);
+        double b = (2 * m * c - 2 * m * k - 2 * h);
+        double cc = (h * h + c * c - 2 * c * k + k * k - circle.getRadius() * circle.getRadius());
+
+        // Discriminant
+        double discriminant = b * b - 4 * a * cc;
+
+        if (discriminant > 0)
+            System.out.println("The line intersects the circle.");
+        else
+            System.out.println("no intersection");
+}
 
     private void adjustCoordinatesWithScaleFactor(double scaleFactor) {
 

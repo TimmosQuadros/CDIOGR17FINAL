@@ -1,7 +1,6 @@
 package Observer;
 
 import Interface.FindAreaOfInterest;
-import ObjectDetection.MrRobotDetection;
 import ObjectDetection.RedCrossDetection;
 import ObjectDetection.RedRectangleDetection;
 import Singleton.VideoCaptureSingleton;
@@ -40,10 +39,7 @@ public class FindAreaOfInterestSubject extends Subject implements FindAreaOfInte
         return fieldDetection.getScaleFactor();
     }
 
-    public void detectRobot(){
-        MrRobotDetection mrRobotDetection = new MrRobotDetection();
-        mrRobotDetection.findPoints(fieldDetection);
-    }
+
 
     public void newDetection(){
         this.fieldDetection.detectField();
