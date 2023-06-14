@@ -19,7 +19,8 @@ public class RedCrossDetection {
     private Mat frame = new Mat();
     private Mat aoiImage;
     private final List<Point> coordinates = new ArrayList<>();
-    public Circle circle;
+    public Circle crossArea; //will be used to determine if a ball is near the cross.
+    public Circle scalefactorAdjustedCrossArea; // will be used to determine if robert collides with the cross on its path.
 
     /**
      * Constructs a FieldObjectDetection object to detect field objects, specifically the cross lines on the field.
@@ -31,12 +32,14 @@ public class RedCrossDetection {
         fillObstableArray();
         findcenter();
 
-        Vector vector = new Vector(crossLines[0].getStartPoint().x - coordinates.get(0).x,
+        Vector radius = new Vector(crossLines[0].getStartPoint().x - coordinates.get(0).x,
                 crossLines[0].getStartPoint().y - coordinates.get(0).y);
 
-        circle = new Circle(coordinates.get(0).x, coordinates.get(0).y, (vector.getLength() + (scaleFactor * 11)));
-        System.out.println("Length " + vector.getLength());
-
+        //Creates area around the cross
+        crossArea = new Circle(coordinates.get(0).x, coordinates.get(0).y, radius.getLength());
+        //Creates adjusted area near the cross, where the robert is able to drive by it.
+        scalefactorAdjustedCrossArea = new Circle(coordinates.get(0).x, coordinates.get(0).y, (radius.getLength() + (scaleFactor * 11)));
+        System.out.println("Length " + radius.getLength());
 
         determineCrosscoordinates();
 
@@ -44,9 +47,32 @@ public class RedCrossDetection {
             System.out.println(x.getEndPoint() + " AND " + x.getStartPoint());
         }
 
+        Point ball = null;
+        Point robotCenter = null;
+
         adjustCoordinatesWithScaleFactor(scaleFactor);
 
     }
+
+    public boolean pathIntersects(Point ball, Point robotCenter) {
+        // Line equation y = mx + c
+        double m = (ball.y - robotCenter.y) / (ball.x - robotCenter.x);
+        double c = robotCenter.y - m * robotCenter.x;
+
+        // Substitute line equation into circle equation
+        double h = scalefactorAdjustedCrossArea.getCenter().x;
+        double k = scalefactorAdjustedCrossArea.getCenter().y;
+
+        // Coefficients for the quadratic equation
+        double a = (m * m + 1);
+        double b = (2 * m * c - 2 * m * k - 2 * h);
+        double cc = (h * h + c * c - 2 * c * k + k * k - scalefactorAdjustedCrossArea.getRadius() * scalefactorAdjustedCrossArea.getRadius());
+
+        // Discriminant
+        double discriminant = b * b - 4 * a * cc;
+
+        return discriminant > 0;
+}
 
     private void adjustCoordinatesWithScaleFactor(double scaleFactor) {
 
