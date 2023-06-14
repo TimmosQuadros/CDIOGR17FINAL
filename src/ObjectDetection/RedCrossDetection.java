@@ -19,8 +19,8 @@ public class RedCrossDetection {
     private Mat frame = new Mat();
     private Mat aoiImage;
     private final List<Point> coordinates = new ArrayList<>();
-    public Circle crossArea; //will be used to determine if a ball is near the cross.
-    public Circle scalefactorAdjustedCrossArea; // will be used to determine if robert collides with the cross on its path.
+    private Circle crossArea; //will be used to determine if a ball is near the cross.
+    private Circle scalefactorAdjustedCrossArea; // will be used to determine if robert collides with the cross on its path.
 
     /**
      * Constructs a FieldObjectDetection object to detect field objects, specifically the cross lines on the field.
@@ -52,6 +52,14 @@ public class RedCrossDetection {
 
         adjustCoordinatesWithScaleFactor(scaleFactor);
 
+    }
+
+    public Circle getCrossArea(){
+        return crossArea;
+    }
+
+    public Circle getScalefactorAdjustedCrossArea(){
+        return scalefactorAdjustedCrossArea;
     }
 
     public boolean pathIntersects(Point ball, Point robotCenter) {

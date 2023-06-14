@@ -12,9 +12,8 @@ public class PathAdjustment {
         this.fieldDetection = fieldDetection;
     }
 
-    public boolean isNearCross(){
-
-        return true;
+    public boolean isNearCross(Point ballCoordinate){
+        return fieldDetection.getRedCross().getCrossArea().isPointInside(ballCoordinate);
     }
 
     public boolean isNearSide(){
@@ -41,13 +40,15 @@ public class PathAdjustment {
         double c = robotCenter.y - m * robotCenter.x;
 
         // Substitute line equation into circle equation
-        double h = fieldDetection.getRedCross().scalefactorAdjustedCrossArea.getCenter().x;
-        double k = fieldDetection.getRedCross().scalefactorAdjustedCrossArea.getCenter().y;
+        double h = fieldDetection.getRedCross().getScalefactorAdjustedCrossArea().getCenter().x;
+        double k = fieldDetection.getRedCross().getScalefactorAdjustedCrossArea().getCenter().y;
 
         // Coefficients for the quadratic equation
         double a = (m * m + 1);
         double b = (2 * m * c - 2 * m * k - 2 * h);
-        double cc = (h * h + c * c - 2 * c * k + k * k - fieldDetection.getRedCross().scalefactorAdjustedCrossArea.getRadius() * fieldDetection.getRedCross().scalefactorAdjustedCrossArea.getRadius());
+        double cc = (h * h + c * c - 2 * c * k + k * k -
+                fieldDetection.getRedCross().getScalefactorAdjustedCrossArea().getRadius() *
+                        fieldDetection.getRedCross().getScalefactorAdjustedCrossArea().getRadius());
 
         // Discriminant
         double discriminant = b * b - 4 * a * cc;
@@ -80,24 +81,25 @@ public class PathAdjustment {
         if (ballCoordinate.y > fieldDetection.getRedCross().getCoordinates().get(0).y){
             if (ballCoordinate.x > fieldDetection.getRedCross().getCoordinates().get(0).x)
                 //right upper corner.
-                center = fieldDetection.getFloorCorners().get(1);
+                center = fieldDetection.getRawCorners()[1];
             else
                 //left upper corner
-                center = fieldDetection.getFloorCorners().get(0);
+                center = fieldDetection.getRawCorners()[0];
         }else{
             if(ballCoordinate.x > fieldDetection.getRedCross().getCoordinates().get(0).x)
                 //right lower corner
-                center = fieldDetection.getFloorCorners().get(2);
+                center = fieldDetection.getRawCorners()[3];
             else
                 //left lower corner
-                center = fieldDetection.getFloorCorners().get(3);
+                center = fieldDetection.getRawCorners()[2];
         }
 
         //if the center is still null, something have gone wrong and we will skip the ball.
         if (center == null)
             return true;
 
-        Circle circle = new Circle(center, fieldDetection.getRoboWidth());
+        //adjusts robo width with 2 centimeters, to take height for the side widths.
+        Circle circle = new Circle(center, fieldDetection.getRoboWidth() + 2.0);
 
         return circle.isPointInside(ballCoordinate);
     }

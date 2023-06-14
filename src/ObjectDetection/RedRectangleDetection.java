@@ -23,9 +23,10 @@ public class RedRectangleDetection {
     private final int frameHeight = 1080;
     private Mat frame;
     private Point[] courseCoordinates = new Point[4];
+    private Point[] floorCorners = new Point[4];
     private LineSegment[] sideLines;
     private Point deliveryPoint;
-    private List<Point> corners = new ArrayList<>();
+    private List<Point> maskCorners = new ArrayList<>();
     private List<Point> goals = new ArrayList<>();
     private RedCrossDetection redCross;
     private double scaleFactor;
@@ -45,9 +46,10 @@ public class RedRectangleDetection {
     public List<Point> detectField() {
         findAverageCorner(50);
         FindScaling();
+        findCornersForMask();
         findFloorCorners();
         determineGoalCenters();
-        AreaOfInterestFrame mask = new AreaOfInterestFrame(corners);
+        AreaOfInterestFrame mask = new AreaOfInterestFrame(maskCorners);
 
         for (Point p : courseCoordinates) {
             System.out.println("Corner x : " + p.x + " and corner y : " + p.y);
@@ -56,7 +58,7 @@ public class RedRectangleDetection {
         redCross = new RedCrossDetection(mask, scaleFactor);
         Point p1 = new Point(900,500);
         Point p2 =  new Point(1520.0, 520);
-        if(redCross.scalefactorAdjustedCrossArea.isPointInside(p1.x, p1.y)) {
+        if(redCross.getScalefactorAdjustedCrossArea().isPointInside(p1.x, p1.y)) {
             System.out.println("point inside");
         }
         else if(redCross.pathIntersects(p1, p2)){
@@ -68,6 +70,14 @@ public class RedRectangleDetection {
         drawCorners(p1, p2);
 
         return getFloorCorners();
+    }
+
+    private void findFloorCorners() {
+        double adjustmentLength = scaleFactor * (axelLength / 2.0);
+        floorCorners[0] = new Point((adjustmentLength + courseCoordinates[0].x), (adjustmentLength + courseCoordinates[0].y));
+        floorCorners[1] = new Point((courseCoordinates[1].x - adjustmentLength), (adjustmentLength + courseCoordinates[1].y));
+        floorCorners[2] = new Point((adjustmentLength + courseCoordinates[2].x), (courseCoordinates[2].y - adjustmentLength));
+        floorCorners[3] = new Point((courseCoordinates[3].x - adjustmentLength), (courseCoordinates[3].y - adjustmentLength));
     }
 
     /**
@@ -150,7 +160,11 @@ public class RedRectangleDetection {
     }
 
     public List<Point> getFloorCorners() {
-        return corners;
+        return maskCorners;
+    }
+
+    public Point[] getRawCorners(){
+        return courseCoordinates;
     }
 
     public Mat getAoiMask() {
@@ -159,9 +173,9 @@ public class RedRectangleDetection {
 
     public void determineGoalCenters() {
         // finds posts for lefthand side.
-        goals.add(getAverage(corners.get(0), corners.get(3)));
+        goals.add(getAverage(maskCorners.get(0), maskCorners.get(3)));
         //finds posts for righthand side.
-        goals.add(getAverage(corners.get(1), corners.get(2)));
+        goals.add(getAverage(maskCorners.get(1), maskCorners.get(2)));
     }
 
     public List<Point> getGoals() {
@@ -182,13 +196,13 @@ public class RedRectangleDetection {
      *
      * @return the coordinates of the approximated foldiing intersections for each corner.
      */
-    private void findFloorCorners() {
+    private void findCornersForMask() {
         double adjustHeight = 11.0;
         double adjustWidth = 15.0;
-        corners.add(0, new Point((adjustWidth + courseCoordinates[0].x), (adjustHeight + courseCoordinates[0].y)));
-        corners.add(1, new Point((courseCoordinates[1].x - adjustWidth), (adjustHeight + courseCoordinates[1].y)));
-        corners.add(2, new Point((courseCoordinates[3].x - adjustWidth), (courseCoordinates[3].y) - adjustHeight));
-        corners.add(3, new Point((adjustWidth + courseCoordinates[2].x), (courseCoordinates[2].y) - adjustHeight));
+        maskCorners.add(0, new Point((adjustWidth + courseCoordinates[0].x), (adjustHeight + courseCoordinates[0].y)));
+        maskCorners.add(1, new Point((courseCoordinates[1].x - adjustWidth), (adjustHeight + courseCoordinates[1].y)));
+        maskCorners.add(2, new Point((courseCoordinates[3].x - adjustWidth), (courseCoordinates[3].y) - adjustHeight));
+        maskCorners.add(3, new Point((adjustWidth + courseCoordinates[2].x), (courseCoordinates[2].y) - adjustHeight));
     }
 
     /**
@@ -230,7 +244,8 @@ public class RedRectangleDetection {
         Imgproc.circle(frame, redCross.getCoordinates().get(3), 5, new Scalar(10, 255, 255), -1);
         Imgproc.circle(frame, redCross.getCoordinates().get(4), 5, new Scalar(0, 255, 0), -1);
 
-        Imgproc.circle(frame, redCross.scalefactorAdjustedCrossArea.getCenter(), (int) Math.round(redCross.scalefactorAdjustedCrossArea.getRadius()), new Scalar(0, 255, 0), 2);
+        Imgproc.circle(frame, redCross.getScalefactorAdjustedCrossArea().getCenter(),
+                (int) Math.round(redCross.getScalefactorAdjustedCrossArea().getRadius()), new Scalar(0, 255, 0), 2);
 
         // Display the frame
         HighGui.imshow("Frame", frame);
