@@ -52,10 +52,16 @@ public class RedRectangleDetection {
         }
 
         redCross = new RedCrossDetection(mask, scaleFactor);
-        Point p1 = new Point(540,340);
+        Point p1 = new Point(900,500);
         Point p2 =  new Point(1520.0, 520);
+        if(redCross.circle.isPointInside(p1.x, p1.y)) {
+            System.out.println("point inside");
+        }
+        else if(redCross.pathIntersects(p1, p2)){
 
-        redCross.pathIntersects(p1, p2);
+        }else{
+
+        }
 
         drawCorners(p1, p2);
 

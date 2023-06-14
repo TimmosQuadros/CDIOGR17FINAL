@@ -50,7 +50,7 @@ public class RedCrossDetection {
 
     }
 
-    public void pathIntersects(Point ball, Point robotCenter) {
+    public boolean pathIntersects(Point ball, Point robotCenter) {
         // Line equation y = mx + c
         double m = (ball.y - robotCenter.y) / (ball.x - robotCenter.x);
         double c = robotCenter.y - m * robotCenter.x;
@@ -67,10 +67,7 @@ public class RedCrossDetection {
         // Discriminant
         double discriminant = b * b - 4 * a * cc;
 
-        if (discriminant > 0)
-            System.out.println("The line intersects the circle.");
-        else
-            System.out.println("no intersection");
+        return discriminant > 0;
 }
 
     private void adjustCoordinatesWithScaleFactor(double scaleFactor) {
