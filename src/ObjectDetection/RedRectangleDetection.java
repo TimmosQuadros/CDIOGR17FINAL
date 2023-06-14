@@ -23,6 +23,8 @@ public class RedRectangleDetection {
     private final int frameHeight = 1080;
     private Mat frame;
     private Point[] courseCoordinates = new Point[4];
+    private LineSegment[] sideLines;
+    private Point deliveryPoint;
     private List<Point> corners = new ArrayList<>();
     private List<Point> goals = new ArrayList<>();
     private RedCrossDetection redCross;
@@ -54,7 +56,7 @@ public class RedRectangleDetection {
         redCross = new RedCrossDetection(mask, scaleFactor);
         Point p1 = new Point(900,500);
         Point p2 =  new Point(1520.0, 520);
-        if(redCross.circle.isPointInside(p1.x, p1.y)) {
+        if(redCross.scalefactorAdjustedCrossArea.isPointInside(p1.x, p1.y)) {
             System.out.println("point inside");
         }
         else if(redCross.pathIntersects(p1, p2)){
@@ -66,6 +68,45 @@ public class RedRectangleDetection {
         drawCorners(p1, p2);
 
         return getFloorCorners();
+    }
+
+    /**
+     * This method will define the area by the sides of the field.
+     * If the ball coordinate is within this area the ball is defined as being close to the side.
+     * When the ball is close to a side we will use a special method to align the robot with this side,
+     * so the robot can run right-angled into the ball for pickup.
+     */
+    private void determineBallNearSideArea(){
+        //TODO Side area
+    }
+
+    /**
+     * @return returns delivery point.
+     */
+    public Point getDeliveryPoint(){
+        return deliveryPoint;
+    }
+
+    private void setDeliveryPoint(){
+        //TODO deliveryPoint
+        this.deliveryPoint = null;
+    }
+
+    private void setSides(){
+
+    }
+
+    public double getRoboWidth(){
+        return this.scaleFactor * (axelLength / 2.0);
+    }
+
+    public LineSegment getSideLine(Point ballCoordinate){
+        //ball side represents the side that the ball is near.
+        LineSegment ballSide = null;
+
+        //TODO Determine which side to return.
+
+        return ballSide;
     }
 
     private void findAverageCorner(int size) {
@@ -189,7 +230,7 @@ public class RedRectangleDetection {
         Imgproc.circle(frame, redCross.getCoordinates().get(3), 5, new Scalar(10, 255, 255), -1);
         Imgproc.circle(frame, redCross.getCoordinates().get(4), 5, new Scalar(0, 255, 0), -1);
 
-        Imgproc.circle(frame, redCross.circle.getCenter(), (int) Math.round(redCross.circle.getRadius()), new Scalar(0, 255, 0), 2);
+        Imgproc.circle(frame, redCross.scalefactorAdjustedCrossArea.getCenter(), (int) Math.round(redCross.scalefactorAdjustedCrossArea.getRadius()), new Scalar(0, 255, 0), 2);
 
         // Display the frame
         HighGui.imshow("Frame", frame);

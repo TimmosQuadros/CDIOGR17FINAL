@@ -30,9 +30,9 @@ public class RobotAI {
 
 
     public RobotAI(Server server){
-        //FindAreaOfInterestSubject areaOfInterestSubject = new FindAreaOfInterestSubject();
+        FindAreaOfInterestSubject areaOfInterestSubject = new FindAreaOfInterestSubject();
         //corners = areaOfInterestSubject.getCorners();
-        //goals = areaOfInterestSubject.getGoalPos();
+        goals = areaOfInterestSubject.getGoalPos();
         //areaOfInterestSubject.detectRobot();
         //alignRobot = new AlignRobot(corners);
         this.server = server;

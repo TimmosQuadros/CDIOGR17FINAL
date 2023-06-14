@@ -14,6 +14,12 @@ public class Circle {
         this.radius = radius;
     }
 
+    public Circle(Point center, double radius){
+        this.centerX = center.x;
+        this.centerY = center.y;
+        this.radius = radius;
+    }
+
     public double getRadius(){
         return radius;
     }
@@ -24,6 +30,10 @@ public class Circle {
 
     public boolean isPointInside(double x, double y) {
         double distance = Math.sqrt(Math.pow((x - centerX), 2) + Math.pow((y - centerY), 2));
+        return distance <= radius;
+    }
+    public boolean isPointInside(Point point) {
+        double distance = Math.sqrt(Math.pow((point.x - centerX), 2) + Math.pow((point.y - centerY), 2));
         return distance <= radius;
     }
 }
