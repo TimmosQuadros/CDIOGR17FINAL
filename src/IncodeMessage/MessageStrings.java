@@ -5,5 +5,7 @@ public enum     MessageStrings {
     StartAngle,
     Position,
     ObstaclePos,
-    BallsPos;
+    BallsPos,
+    Line,
+    TargetBall;
 }

@@ -32,4 +32,9 @@ public class Incoder
     public String scaleFactor(double scaleFactor){
         return MessageStrings.ScaleFactor+":"+scaleFactor;
     }
+
+    public String lineAB(double[] line) { return MessageStrings.Line+":"+line[0]+","+line[1];}
+    
+    public String targetBall(Point targetBallPosition){ return MessageStrings.TargetBall+":"+targetBallPosition.x+","+targetBallPosition.y;}
+
 }

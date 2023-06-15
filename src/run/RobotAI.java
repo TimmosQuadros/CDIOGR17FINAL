@@ -4,6 +4,7 @@ import IncodeMessage.Incoder;
 import Interface.RobotPosition;
 import LineCreation.AlignRobot;
 import LineCreation.LineSegment;
+import Navigation.BallTracker;
 import Observer.FindAreaOfInterestSubject;
 import Observer.HoughCircleDetectorSubject;
 import Observer.QRCodeDetectorSubject;
@@ -13,6 +14,7 @@ import Singleton.VideoCaptureSingleton;
 import Vectors.VectorCalculations;
 import org.opencv.core.Core;
 import org.opencv.core.Point;
+import org.opencv.highgui.HighGui;
 import org.opencv.videoio.VideoCapture;
 
 import java.io.IOException;
@@ -38,32 +40,12 @@ public class RobotAI {
         this.server = server;
 
     }
-    public void run() {
-            while(true) {
-                RobotPositionSubject robotPositionSubject = new RobotPositionSubject();
 
-                boolean isBlueCircle = true; // Set the desired circle color preference here
-
-                List<Point> robotPos = robotPositionSubject.getPos(isBlueCircle);
-
-                // Process the robotPos as needed
-                // ...
-
-                // Write the robot position to the server
-                // server.writeMessage(robotPos.toString());
-
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    /*
 
     public void run() {
+        Math1.LineCreation lineCreation = new Math1.LineCreation();
+        BallTracker ballTracker = new BallTracker();
+        boolean targetingBall = false;
         while(true){
         RobotPositionSubject robotPositionSubject = new RobotPositionSubject();
         HoughCircleDetectorSubject houghCircleDetectorSubject = new HoughCircleDetectorSubject();
@@ -71,30 +53,39 @@ public class RobotAI {
         boolean isBlueCircle = true; // Set the desired circle color preference here
 
         List<Point> ballPositions = houghCircleDetectorSubject.getBalls();
-        List<Point> robotPos = robotPositionSubject.getPos(isBlueCircle);
 
-        VectorCalculations vectorCalculations = new VectorCalculations(new LineSegment(robotPos.get(0),robotPos.get(1)),ballPositions.get(0));
+
+        List<Point> robotPosBlue = robotPositionSubject.getPos(isBlueCircle);
+        List<Point> robotPosRed = robotPositionSubject.getPos(!isBlueCircle);
+
+        Point redCircleRobot = robotPosRed.get(0);
+        Point blueCircleRobot = robotPosBlue.get(0);
 
         String balls = incoder.ballPositions(ballPositions);
-        String robotPos1 = incoder.starPos(robotPos.get(0));
-        String startAngle = incoder.startAngle(vectorCalculations.getAngle());
-        String scaleFactor = incoder.scaleFactor(6.8);
+        String robotPos1 = incoder.starPos(blueCircleRobot);
 
-        //server.writeMessage(balls);
-        //server.writeMessage(robotPos1);
-        //server.writeMessage(startAngle);
-        //server.writeMessage(scaleFactor);
+            double[] line = lineCreation.getSlopeAndBegin(blueCircleRobot,redCircleRobot);
 
-        //System.out.println(ballPositions.toString());
-        server.writeMessage("Abe");
 
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if(line!=null){
+                Point targetBall = ballTracker.checkIfBallIsOnLine(line,ballPositions,10.0);
+                if(targetBall!=null && !targetingBall){
+                    server.writeMessage(incoder.lineAB(line));
+                    server.writeMessage(incoder.targetBall(targetBall));
+                    System.out.println("ballFound");
+                    targetingBall = true;
+                }
             }
+            if(targetingBall){
+                if(robotPosBlue.size()>0 && robotPosRed.size()>0){
+                    server.writeMessage(incoder.starPos(blueCircleRobot));
+                }
+            }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
         }
     }
 }
-
-     */

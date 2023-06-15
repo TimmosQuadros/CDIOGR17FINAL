@@ -19,7 +19,7 @@ public class BallCollector {
         capturedBalls = 0;
         remainingBalls = 0;
         navigationSystem = new NavigationSystem();
-        server = new Server();
+        server = Server.getServer();
     }
 
     public void start() {

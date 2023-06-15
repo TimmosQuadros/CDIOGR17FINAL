@@ -44,7 +44,7 @@ public class HoughCircleDetectorSubject implements HoughCircleDetector {
                             double[] circle = circles.get(0, i);
                             Point center = new Point(circle[0], circle[1]);
 
-                            if(!listCircles.isEmpty() && listCircles.size()>1){
+                            if(!listCircles.isEmpty()){
                                 double xDiff = 999999999;
                                 double yDiff = 999999999;
                                 for(Point pointNest : listCircles){

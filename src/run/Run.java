@@ -10,20 +10,28 @@ public class Run {
 
     public static void main(String[] args) {
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
-        /*
+
         try {
-            Server server = new Server();
+            Server server = Server.getServer();
+            RobotAI robotAI = new RobotAI(server);
             Thread task1 = new Thread(server);
             task1.start();
-            while (server.connected == null) {
+            //busy wait until robot is connected
+            while (server.getConnected() == null) {
                 Thread.sleep(100);
             }
-            RobotAI robotAI = new RobotAI(server);
-            robotAI.run();
-        } catch (InterruptedException e) {
+            //TODO Make a serverHandler
+            //robotAI.run();
+
+            while(true){
+                String mes = server.receiveMessage();
+                if(mes!=null){
+
+                }
+            }
+        } catch (InterruptedException | IOException e) {
             e.printStackTrace();
-        }*/
-        RobotAI robotAI = new RobotAI(null);
-        robotAI.run();
+        }
+
     }
 }
