@@ -25,7 +25,7 @@ public class FindAreaOfInterestSubject extends Subject implements FindAreaOfInte
     }
 
     @Override
-    public List<Point> getCorners() {
+    public Point[] getCorners() {
         return fieldDetection.getFloorCorners();
     }
 

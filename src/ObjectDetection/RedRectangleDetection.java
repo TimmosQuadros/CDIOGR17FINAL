@@ -3,6 +3,7 @@ package ObjectDetection;
 import Bitmasks.AreaOfInterestFrame;
 import LineCreation.LineSegment;
 import Singleton.VideoCaptureSingleton;
+import Vectors.Vector;
 import org.opencv.core.*;
 import org.opencv.highgui.HighGui;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -23,12 +24,14 @@ public class RedRectangleDetection {
     private final int frameHeight = 1080;
     private Mat frame;
     private Point[] courseCoordinates = new Point[4];
+    private Point[] maskCorners = new Point[4];
     private Point[] floorCorners = new Point[4];
     private LineSegment[] sideLines;
     private Point deliveryPoint;
-    private List<Point> maskCorners = new ArrayList<>();
     private List<Point> goals = new ArrayList<>();
     private RedCrossDetection redCross;
+    private double fieldArea;
+    private double innerFieldArea;
     private double scaleFactor;
     private final int axelLength = 20;
     private final int axelTurnRadius = 22;
@@ -43,13 +46,13 @@ public class RedRectangleDetection {
      *
      * @return
      */
-    public List<Point> detectField() {
+    public Point[] detectField() {
         findAverageCorner(50);
         FindScaling();
         findCornersForMask();
         findFloorCorners();
         determineGoalCenters();
-        AreaOfInterestFrame mask = new AreaOfInterestFrame(maskCorners);
+        AreaOfInterestFrame mask = new AreaOfInterestFrame(List.of(maskCorners));
 
         for (Point p : courseCoordinates) {
             System.out.println("Corner x : " + p.x + " and corner y : " + p.y);
@@ -73,11 +76,20 @@ public class RedRectangleDetection {
     }
 
     private void findFloorCorners() {
-        double adjustmentLength = scaleFactor * (axelLength / 2.0);
+        double adjustmentLength = scaleFactor * (axelLength / 3.0);
         floorCorners[0] = new Point((adjustmentLength + courseCoordinates[0].x), (adjustmentLength + courseCoordinates[0].y));
         floorCorners[1] = new Point((courseCoordinates[1].x - adjustmentLength), (adjustmentLength + courseCoordinates[1].y));
-        floorCorners[2] = new Point((adjustmentLength + courseCoordinates[2].x), (courseCoordinates[2].y - adjustmentLength));
-        floorCorners[3] = new Point((courseCoordinates[3].x - adjustmentLength), (courseCoordinates[3].y - adjustmentLength));
+        floorCorners[3] = new Point((adjustmentLength + courseCoordinates[2].x), (courseCoordinates[2].y - adjustmentLength));
+        floorCorners[2] = new Point((courseCoordinates[3].x - adjustmentLength), (courseCoordinates[3].y - adjustmentLength));
+
+        innerFieldArea = calculateRectangularArea(floorCorners);
+    }
+
+    private double calculateRectangularArea(Point[] corners){
+        Vector wideSide = new Vector(corners[0], corners[1]);
+        Vector narrowSide = new Vector(corners[0], corners[3]);
+
+        return wideSide.getLength() * narrowSide.getLength();
     }
 
     /**
@@ -119,6 +131,52 @@ public class RedRectangleDetection {
         return ballSide;
     }
 
+    public double getFieldArea(){ return fieldArea;}
+
+    public double getInnerFieldArea(){ return innerFieldArea;}
+
+    public RedCrossDetection getRedCross() {
+        return redCross;
+    }
+
+    public double getScaleFactor() {
+        return this.scaleFactor;
+    }
+
+    public Point[] getFloorCorners() {
+        return floorCorners;
+    }
+
+    public Point[] getMaskCorners() {
+        return maskCorners;
+    }
+
+    public Point[] getRawCorners(){
+        return courseCoordinates;
+    }
+
+    public Mat getAoiMask() {
+        return aoiMask;
+    }
+
+    public void determineGoalCenters() {
+        // finds posts for lefthand side.
+        goals.add(getAverage(maskCorners[0], maskCorners[3]));
+        //finds posts for righthand side.
+        goals.add(getAverage(maskCorners[1], maskCorners[2]));
+    }
+
+    public List<Point> getGoals() {
+        return goals;
+    }
+
+    private Point getAverage(Point upperPoint, Point lowerPoint) {
+        double centerX = (upperPoint.x + lowerPoint.x) / 2;
+        double centerY = (upperPoint.y + lowerPoint.y) / 2;
+
+        return new Point(centerX, centerY);
+    }
+
     private void findAverageCorner(int size) {
         Point[][] cornersAve = new Point[size][4];
 
@@ -151,44 +209,6 @@ public class RedRectangleDetection {
         courseCoordinates[3] = new Point(corner4.x / 50.0, corner4.y / 50);
     }
 
-    public RedCrossDetection getRedCross() {
-        return redCross;
-    }
-
-    public double getScaleFactor() {
-        return this.scaleFactor;
-    }
-
-    public List<Point> getFloorCorners() {
-        return maskCorners;
-    }
-
-    public Point[] getRawCorners(){
-        return courseCoordinates;
-    }
-
-    public Mat getAoiMask() {
-        return aoiMask;
-    }
-
-    public void determineGoalCenters() {
-        // finds posts for lefthand side.
-        goals.add(getAverage(maskCorners.get(0), maskCorners.get(3)));
-        //finds posts for righthand side.
-        goals.add(getAverage(maskCorners.get(1), maskCorners.get(2)));
-    }
-
-    public List<Point> getGoals() {
-        return goals;
-    }
-
-    private Point getAverage(Point upperPoint, Point lowerPoint) {
-        double centerX = (upperPoint.x + lowerPoint.x) / 2;
-        double centerY = (upperPoint.y + lowerPoint.y) / 2;
-
-        return new Point(centerX, centerY);
-    }
-
     /**
      * OBS!! This method needs more testing!!
      * <p>
@@ -199,10 +219,12 @@ public class RedRectangleDetection {
     private void findCornersForMask() {
         double adjustHeight = 11.0;
         double adjustWidth = 15.0;
-        maskCorners.add(0, new Point((adjustWidth + courseCoordinates[0].x), (adjustHeight + courseCoordinates[0].y)));
-        maskCorners.add(1, new Point((courseCoordinates[1].x - adjustWidth), (adjustHeight + courseCoordinates[1].y)));
-        maskCorners.add(2, new Point((courseCoordinates[3].x - adjustWidth), (courseCoordinates[3].y) - adjustHeight));
-        maskCorners.add(3, new Point((adjustWidth + courseCoordinates[2].x), (courseCoordinates[2].y) - adjustHeight));
+        maskCorners[0] = new Point((adjustWidth + courseCoordinates[0].x), (adjustHeight + courseCoordinates[0].y));
+        maskCorners[1] = new Point((courseCoordinates[1].x - adjustWidth), (adjustHeight + courseCoordinates[1].y));
+        maskCorners[2] = new Point((courseCoordinates[3].x - adjustWidth), (courseCoordinates[3].y) - adjustHeight);
+        maskCorners[3] = new Point((adjustWidth + courseCoordinates[2].x), (courseCoordinates[2].y) - adjustHeight);
+
+        fieldArea = calculateRectangularArea(maskCorners);
     }
 
     /**
