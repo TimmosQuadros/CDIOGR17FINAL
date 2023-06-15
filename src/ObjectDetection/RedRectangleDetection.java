@@ -131,6 +131,8 @@ public class RedRectangleDetection {
         return ballSide;
     }
 
+    public Point[] getCourseCoordinates(){ return courseCoordinates; }
+
     public double getFieldArea(){ return fieldArea;}
 
     public double getInnerFieldArea(){ return innerFieldArea;}
