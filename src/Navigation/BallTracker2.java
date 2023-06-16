@@ -1,18 +1,13 @@
 package Navigation;
 
-import Math1.LineCreation;
 import org.opencv.core.Point;
-import org.opencv.core.Scalar;
-import org.opencv.imgproc.Imgproc;
 
 import java.util.List;
 
-public class BallTracker {
+public class BallTracker2 {
 
-    public Point checkIfBallIsOnLine(double[] line, List<Point> balls, double threshold) {
+    public Point checkIfBallIsOnLine(double slope, double begin, List<Point> balls, double threshold) {
         if (balls.size() > 0) {
-            double slope = line[0];
-            double begin = line[1];
             for (Point p : balls) {
                 if (Math.abs((p.x * slope + begin) - p.y) < threshold) {
                     return p;
@@ -38,8 +33,12 @@ public class BallTracker {
             double actualAngle = degrees * givenAngleDistance;
 
             // TODO: Code to turn the robot by 'actualAngle' here
-/*
-            Point ball = checkIfBallIsOnLine(line, balls, threshold);
+
+            // Calculate the line equation based on the new robot's angle
+            double slope = Math.tan(Math.toRadians(actualAngle));
+            double begin = 0; // Adjust as needed
+
+            Point ball = checkIfBallIsOnLine(slope, begin, balls, threshold);
             if (ball != null) {
                 System.out.println("Ball found at " + ball.x + ", " + ball.y);
                 return ball;
@@ -56,12 +55,5 @@ public class BallTracker {
         // TODO: Code to move the robot to a new position here
 
         return null;
-    }
-}
-
-
- */
-        }
-        return null; //Den skal fjernes, den er der så der ikke er fejl i koden efter udkommenteringen.
     }
 }
