@@ -40,16 +40,20 @@ public class Server implements Runnable{
         thread.start();
     }
 
-    public String receiveMessage() throws IOException, InterruptedException {
-        input = new Scanner(socket.getInputStream());
+    public String receiveMessage(){
+        try {
+            input = new Scanner(socket.getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         String[] mes = {""};
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 //Make sure that there is something to receive otherwise busy wait
-                while(!input.hasNext()){
+                while(!input.hasNextLine()){
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -61,7 +65,11 @@ public class Server implements Runnable{
         //Start the thread
         thread.start();
         //Wait for the thread to finish
-        thread.join();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return mes[0];
     }
 
@@ -74,8 +82,6 @@ public class Server implements Runnable{
             System.out.println("connected");
             connected = "";
             writer = new PrintWriter(socket.getOutputStream(), true);
-            writer.println("hello");
-            writer.println();
         } catch (IOException e) {
             e.printStackTrace();
         }

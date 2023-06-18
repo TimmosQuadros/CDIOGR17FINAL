@@ -24,6 +24,7 @@ public class RobotPositionSubject implements RobotPosition {
         List<Point> circlePoints = new ArrayList<>();
 
         if (videoCapture.isOpened()) {
+            long startTime = System.currentTimeMillis();
             for (int j = 0; j < frames; j++) {
                 videoCapture.read(frame1);
                 if (!frame1.empty()) {
@@ -50,6 +51,46 @@ public class RobotPositionSubject implements RobotPosition {
 
                     Mat circles = new Mat();
                     Imgproc.HoughCircles(blurredFrame, circles, Imgproc.HOUGH_GRADIENT, 1, 20, 200, 30, 35, 42);
+
+                    if (circles.cols() > 0) {
+                        for (int i = 0; i < circles.cols(); i++) {
+                            double[] circle = circles.get(0, i);
+                            center = new Point(circle[0], circle[1]);
+                            circlePoints.add(center);
+                            return circlePoints;
+                        }
+                    } else {
+                        // just keep trying until you get a result
+                        if((System.currentTimeMillis()-startTime)*0.001<=15){
+                            frames++;
+                        }
+                    }
+                }
+            }
+        } else {
+            System.out.println("Failed to open camera!");
+        }
+        return circlePoints;
+    }
+
+    public List<Point> getPos() {
+        Point center = null;
+        Mat frame1 = new Mat();
+        int frames = 1;
+        List<Point> circlePoints = new ArrayList<>();
+
+        if (videoCapture.isOpened()) {
+            for (int j = 0; j < frames; j++) {
+                videoCapture.read(frame1);
+                if (!frame1.empty()) {
+                    Mat grayFrame = new Mat();
+                    Imgproc.cvtColor(frame1, grayFrame, Imgproc.COLOR_BGR2GRAY);
+
+                    Mat blurredFrame = new Mat();
+                    Imgproc.GaussianBlur(grayFrame, blurredFrame, new Size(9, 9), 2, 2);
+
+                    Mat circles = new Mat();
+                    Imgproc.HoughCircles(grayFrame, circles, Imgproc.HOUGH_GRADIENT, 1, 20, 200, 30, 35, 42);
 
                     if (circles.cols() > 0) {
                         for (int i = 0; i < circles.cols(); i++) {

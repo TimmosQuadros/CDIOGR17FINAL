@@ -9,12 +9,41 @@ import java.util.List;
 
 public class BallTracker {
 
-    public Point checkIfBallIsOnLine(double[] line, List<Point> balls, double threshold) {
+    public Point checkIfBallIsOnLine(double[] line, List<Point> balls, double threshold, Point redCirclePoint, Point blueCirclePoint) {
         if (balls.size() > 0) {
             double slope = line[0];
             double begin = line[1];
             for (Point p : balls) {
-                if (Math.abs((p.x * slope + begin) - p.y) < threshold) {
+                double y = p.x * slope + begin;
+                if (Math.abs((y) - p.y) < threshold) {
+                    /*double beginX;
+                    double endX;
+                    double beginY;
+                    double endY;
+                    beginX = redCirclePoint.x;
+                    beginY = redCirclePoint.y;
+                    if(blueCirclePoint.x-redCirclePoint.x>5){
+                        endX = 0;
+                    }else if(blueCirclePoint.x-redCirclePoint.x<-5){
+                        endX = 1920;
+                    }else{
+                        endX = beginX;
+                        if(blueCirclePoint.y>redCirclePoint.y){
+                            endY = 0;
+                        }else{
+                            endY = 1080;
+                        }
+                        if(beginX==endX){
+                            if(p.y>=beginY && p.y<=endY){
+                                return p;
+                            }
+                        }
+                    }
+                    if(beginX!=endX){
+                        if(p.x>=beginX && p.x<=endX){
+                            return p;
+                        }
+                    }*/
                     return p;
                 }
             }

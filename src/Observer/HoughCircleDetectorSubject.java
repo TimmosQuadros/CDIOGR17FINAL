@@ -16,8 +16,11 @@ public class HoughCircleDetectorSubject implements HoughCircleDetector {
     private final int FRAMECOUNT = 30;
     private final double MINDIFF = 10;
     private final VideoCapture videoCapture;
+    private final VideoCaptureSingleton videoCaptureSingleton;
+
     public HoughCircleDetectorSubject(){
-        this.videoCapture = VideoCaptureSingleton.getInstance().getVideoCapture();
+        this.videoCaptureSingleton = VideoCaptureSingleton.getInstance();
+        this.videoCapture = videoCaptureSingleton.getVideoCapture();
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
     }
 
@@ -28,9 +31,10 @@ public class HoughCircleDetectorSubject implements HoughCircleDetector {
         if (videoCapture.isOpened()) {
             for (int j = 0; j<FRAMECOUNT; j++) {
                 videoCapture.read(frame1);
-                if (!frame1.empty()) {
+                Mat frame = videoCaptureSingleton.mask(frame1);
+                if (!frame.empty()) {
                     Mat grayFrame = new Mat();
-                    Imgproc.cvtColor(frame1, grayFrame, Imgproc.COLOR_BGR2GRAY);
+                    Imgproc.cvtColor(frame, grayFrame, Imgproc.COLOR_BGR2GRAY);
 
                     Mat blurredFrame = new Mat();
                     Imgproc.GaussianBlur(grayFrame, blurredFrame, new Size(9, 9), 2, 2);
@@ -39,7 +43,6 @@ public class HoughCircleDetectorSubject implements HoughCircleDetector {
                     Imgproc.HoughCircles(grayFrame, circles, Imgproc.HOUGH_GRADIENT, 1, 30, 300, 20, 12, 16);
 
                     if (circles.cols() > 0) {
-                        boolean shouldAddBall = false;
                         for (int i = 0; i < circles.cols(); i++) {
                             double[] circle = circles.get(0, i);
                             Point center = new Point(circle[0], circle[1]);
@@ -59,14 +62,16 @@ public class HoughCircleDetectorSubject implements HoughCircleDetector {
                             }else{
                                 listCircles.add(center);
                             }
-
-                            int radius = (int) Math.round(circle[2]);
-                            Imgproc.circle(frame1, center, radius, new Scalar(0, 0, 255), 2);
                         }
                     }
+                    HighGui.imshow("test",frame);
+                    int key = HighGui.waitKey(10);
+                    if (key == 27) {
+                        break;
+                    }
                 }
-                HighGui.imshow("abe",frame1);
             }
+            HighGui.destroyAllWindows();
         } else {
             System.out.println("Failed to open camera!");
         }

@@ -1,9 +1,14 @@
 package run;
 
+import IncodeMessage.MessageStrings;
+import Observer.RobotPositionSubject;
 import Server.Server;
 import org.opencv.core.Core;
+import org.opencv.core.Point;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Timer;
 
 
 public class Run {
@@ -20,16 +25,9 @@ public class Run {
             while (server.getConnected() == null) {
                 Thread.sleep(100);
             }
-            //TODO Make a serverHandler
-            //robotAI.run();
-
-            while(true){
-                String mes = server.receiveMessage();
-                if(mes!=null){
-
-                }
-            }
-        } catch (InterruptedException | IOException e) {
+            //run the robot
+            robotAI.run();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 

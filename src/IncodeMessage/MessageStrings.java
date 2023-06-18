@@ -7,5 +7,6 @@ public enum     MessageStrings {
     ObstaclePos,
     BallsPos,
     Line,
-    TargetBall;
+    TargetBall,
+    GETRobotPos;
 }
