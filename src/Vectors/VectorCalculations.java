@@ -44,11 +44,6 @@ public class VectorCalculations {
         cosAngle = (((vectorOne.getX() * vectorTwo.getX()) + (vectorOne.getY() * vectorTwo.getY())) /
                 (((Math.sqrt(Math.pow(vectorOne.getX(), 2) + Math.pow(vectorOne.getY(), 2)))) *
                         ((Math.sqrt(Math.pow(vectorTwo.getX(), 2) + Math.pow(vectorTwo.getY(), 2))))));
-
-        double crossProduct = crossProduct(vectorOne, vectorTwo);
-        if (crossProduct < 0) {
-            cosAngle = -cosAngle;
-        }
     }
 
     private double crossProduct(Vector vectorOne, Vector vectorTwo) {
@@ -58,7 +53,14 @@ public class VectorCalculations {
     public double getAngle(){
         double angleInRadians = Math.acos(cosAngle);
 
-        return Math.toDegrees(angleInRadians);
+        cosAngle = Math.toDegrees(angleInRadians);
+
+        double crossProduct = crossProduct(vectorOne, vectorTwo);
+        if (crossProduct < 0) {
+            cosAngle = -cosAngle;
+        }
+
+        return cosAngle;
     }
 
 }
