@@ -89,8 +89,10 @@ public class RobotAI {
                 }
             }
 
-            robotFacingTop = facingDirection(redCircle.y, blueCircle.y);
-            robotFacingLeft = facingDirection(redCircle.x, blueCircle.x);
+            if(redCircle!=null && blueCircle!=null){
+                robotFacingTop = facingDirection(redCircle.y, blueCircle.y);
+                robotFacingLeft = facingDirection(redCircle.x, blueCircle.x);
+            }
 
             double[] line = null;
             if(bigcirclePoints.size()>1)
@@ -124,7 +126,7 @@ public class RobotAI {
                         if(mes.equalsIgnoreCase(MessageStrings.GETRobotPos.toString())){
                             List<Point> robPos = robotPositionSubject.getPos();
                             if(robPos.size()>0)
-                                server.writeMessage(robPos.get(0).x+","+robPos.get(0).y+";"+robPos.get(1).x+","+robPos.get(1).y);
+                                server.writeMessage(robPos.get(0).x+","+robPos.get(0).y+";"+robPos.get(1).x+","+robPos.get(1).y+";"+robotFacingLeft);
                         }else{
                             finnish = true;
                         }
