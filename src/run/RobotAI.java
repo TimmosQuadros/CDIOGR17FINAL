@@ -1,24 +1,17 @@
 package run;
 
 import IncodeMessage.Incoder;
-import Interface.RobotPosition;
 import LineCreation.AlignRobot;
-import LineCreation.LineSegment;
 import Navigation.BallTracker;
 import Observer.FindAreaOfInterestSubject;
 import Observer.HoughCircleDetectorSubject;
-import Observer.QRCodeDetectorSubject;
 import Observer.RobotPositionSubject;
 import Server.Server;
-import Singleton.VideoCaptureSingleton;
-import Vectors.VectorCalculations;
 import org.opencv.core.Core;
 import org.opencv.core.Point;
 import org.opencv.highgui.HighGui;
 import org.opencv.videoio.VideoCapture;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class RobotAI {
@@ -30,7 +23,7 @@ public class RobotAI {
     private Incoder incoder = new Incoder();
     private Server server;
     private boolean robotFacingTop;
-    private boolean robotFacingWest;
+    private boolean robotFacingLeft;
 
 
     public RobotAI(Server server) {
@@ -64,7 +57,7 @@ public class RobotAI {
             Point blueCircleRobot = robotPosBlue.get(0);
 
             robotFacingTop = facingDirection(redCircleRobot.y, blueCircleRobot.y);
-            robotFacingWest = facingDirection(redCircleRobot.x, blueCircleRobot.x);
+            robotFacingLeft = facingDirection(redCircleRobot.x, blueCircleRobot.x);
 
             String balls = incoder.ballPositions(ballPositions);
             String robotPos1 = incoder.starPos(blueCircleRobot);
