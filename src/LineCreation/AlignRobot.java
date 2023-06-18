@@ -48,6 +48,7 @@ public class AlignRobot {
     }
 
 
+
     public LineSegment getLengthAlign(){return lengthSlope;}
     public LineSegment getWidthAlign(){return widthSlope;}
 
