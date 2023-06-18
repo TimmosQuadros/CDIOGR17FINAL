@@ -52,7 +52,7 @@ public class VectorCalculations {
     }
 
     private double crossProduct(Vector vectorOne, Vector vectorTwo) {
-        return (vectorOne.getX()) * vectorTwo.getY() - (vectorOne.getY()) * vectorOne.getX();
+        return (vectorOne.getX()) * vectorTwo.getY() - (vectorOne.getY()) * vectorTwo.getX();
     }
 
     public double getAngle(){
