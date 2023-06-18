@@ -47,7 +47,7 @@ public class VectorCalculations {
 
         double crossProduct = crossProduct(vectorOne, vectorTwo);
         if (crossProduct < 0) {
-            cosAngle = 360 - cosAngle;
+            cosAngle = -cosAngle;
         }
     }
 
