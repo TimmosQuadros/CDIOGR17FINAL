@@ -251,6 +251,27 @@ public class PathAdjustment {
         return path;
     }
 
+    public List<Point> pathToGoal(Point roboPosition){
+        List<Point> path = new ArrayList<>();
+
+        if (roboPosition.x < fieldDetection.getRedCross().getCrossArea().getCenter().x){
+            path.add(goalAlignmentPoint);
+            path.add(fieldDetection.getGoals().get(0));
+            return path;
+        }else{
+            path.add(new Point(roboPosition.x, rightLowerQuadrantWayPoint.y));
+            if (roboPosition.y > goalAlignmentPoint.y){
+                path.add(leftLowerQuadrantWayPoint);
+            }else{
+                path.add(leftUpperQuadrantWayPoint);
+            }
+        }
+        path.add(goalAlignmentPoint);
+        path.add(fieldDetection.getGoals().get(0));
+
+        return path;
+    }
+
     /**
      * This method returns true if the line that is created from the robot to the ball,
      * intersects with the equation of the circle representing the red cross obstacle.
