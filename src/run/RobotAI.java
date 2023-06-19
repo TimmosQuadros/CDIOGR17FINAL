@@ -5,6 +5,7 @@ import IncodeMessage.MessageStrings;
 import Interface.RobotPosition;
 import LineCreation.AlignRobot;
 import LineCreation.LineSegment;
+import Math1.LineCreation;
 import Navigation.BallTracker;
 import Observer.FindAreaOfInterestSubject;
 import Observer.HoughCircleDetectorSubject;
@@ -21,8 +22,7 @@ import org.opencv.highgui.HighGui;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class RobotAI {
 
@@ -58,6 +58,7 @@ public class RobotAI {
         List<Point> ballPositions = houghCircleDetectorSubject.getBalls();
         boolean blue = false;
         boolean isLookingForBallAndTurning = false;
+        int i = 0;
         while(true){
             Point redCircle = null;
             Point blueCircle = null;
@@ -97,6 +98,12 @@ public class RobotAI {
             double[] line = null;
             if(bigcirclePoints.size()>1)
                 line = lineCreation.getSlopeAndBegin(bigcirclePoints.get(0),bigcirclePoints.get(1));
+                VectorCalculations vectorCalculations;
+                double angle = 0;
+                if(redCircle!=null && blueCircle!=null){
+                    vectorCalculations = new VectorCalculations(new LineSegment(blueCircle,redCircle),ballPositions.get(0));
+                    angle = vectorCalculations.getAngle();
+                }
             if(line!=null){
                 Point targetBall = ballTracker.checkIfBallIsOnLine(line,ballPositions,10.0,redCircle,blueCircle);
                 if(targetBall!=null && !targetingBall){
@@ -108,9 +115,12 @@ public class RobotAI {
                     targetingBall = true;
                 }else{
                     if(!isLookingForBallAndTurning){
-                        server.writeMessage("Turn");
+                        server.writeMessage("Turn"+";"+angle);
                         System.out.println(server.receiveMessage());
-                        isLookingForBallAndTurning = true;
+                        if(i<2) {
+                            isLookingForBallAndTurning = true;
+                        }
+                        i++;
                     }
                 }
             }
@@ -159,4 +169,49 @@ public class RobotAI {
     private boolean facingDirection(double firstCoordinate, double secondCoordinate){
         return firstCoordinate-secondCoordinate < 0;
     }
+
+    private void testRun(Queue<Point> wayPoints, LineCreation lineCreation, Point robotPosition, RobotPositionSubject robotPositionSubject){
+        Point targetWayPoint = wayPoints.poll();
+        if(targetWayPoint==null){
+            return;
+        }
+        double[] lineToWaypoint = lineCreation.getSlopeAndBegin(robotPosition, targetWayPoint);
+        if(lineToWaypoint==null){
+            return;
+        }
+
+        //Navigate to First wayPoint
+        server.writeMessage(MessageStrings.WayPoints.toString()+";"+lineToWaypoint[0]+","+lineToWaypoint[1]+";"+targetWayPoint.x+","+targetWayPoint.y);
+        robotPosition = startFollowingLine(robotPositionSubject);
+
+        while (!wayPoints.isEmpty()){
+            targetWayPoint = wayPoints.poll();
+            lineToWaypoint = lineCreation.getSlopeAndBegin(robotPosition, targetWayPoint);
+            robotPosition = startFollowingLine(robotPositionSubject);
+        }
+    }
+
+    private Point startFollowingLine(RobotPositionSubject robotPositionSubject) {
+        String res = server.receiveMessage();
+        Point lastPosition = null;
+        while(res.contains(MessageStrings.GETRobotPos.toString())){
+            List<Point> bigCircles = robotPositionSubject.getPos();
+            if(bigCircles.size()>1){
+                Point p1 = bigCircles.get(0);
+                Point p2 = bigCircles.get(1);
+                Point center = getMidPoint(p1,p2);
+                lastPosition = center;
+                server.writeMessage(center.x+","+center.y);
+            }
+            res = server.receiveMessage();
+        }
+        return lastPosition;
+    }
+
+    private Point getMidPoint(Point p1, Point p2) {
+        Point midPoint = new Point((p1.x+p2.x)/2,(p1.y+p2.y)/2);
+        return midPoint;
+    }
 }
+
+
