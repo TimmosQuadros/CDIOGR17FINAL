@@ -76,7 +76,8 @@ public class RedRectangleDetection {
     }
 
     private void findFloorCorners() {
-        double adjustmentLength = scaleFactor * (axelLength / 3.0);
+        //TODO - adjust adjustmentlength based on tests
+        double adjustmentLength = scaleFactor * (axelLength / 2.0);
         floorCorners[0] = new Point((adjustmentLength + courseCoordinates[0].x), (adjustmentLength + courseCoordinates[0].y));
         floorCorners[1] = new Point((courseCoordinates[1].x - adjustmentLength), (adjustmentLength + courseCoordinates[1].y));
         floorCorners[3] = new Point((adjustmentLength + courseCoordinates[2].x), (courseCoordinates[2].y - adjustmentLength));

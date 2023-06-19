@@ -48,6 +48,10 @@ public class LineSegment {
         return endPoint;
     }
 
+    public Point getCenter(){
+        return new Point((this.startPoint.x + this.endPoint.x) / 2, (this.startPoint.y + this.endPoint.y) / 2);
+    }
+
     public double getLength() {
         return Math.sqrt(Math.pow(endPoint.x - startPoint.x, 2) + Math.pow(endPoint.y - startPoint.y, 2));
     }

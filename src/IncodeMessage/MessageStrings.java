@@ -9,5 +9,6 @@ public enum     MessageStrings {
     Line,
     TargetBall,
     GETRobotPos,
-    WayPoints;
+    WayPoints,
+    Turn;
 }

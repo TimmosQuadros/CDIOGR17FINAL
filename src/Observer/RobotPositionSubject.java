@@ -17,7 +17,7 @@ public class RobotPositionSubject implements RobotPosition {
         this.videoCapture = VideoCaptureSingleton.getInstance().getVideoCapture();
     }
     @Override
-    public List<Point> getPos(boolean isBlueCircle) {
+    public List<Point> getPos(boolean isFront) {
         Point center = null;
         Mat frame1 = new Mat();
         int frames = 1;
@@ -28,29 +28,18 @@ public class RobotPositionSubject implements RobotPosition {
             for (int j = 0; j < frames; j++) {
                 videoCapture.read(frame1);
                 if (!frame1.empty()) {
-                    Mat hsvFrame = new Mat();
-                    Imgproc.cvtColor(frame1, hsvFrame, Imgproc.COLOR_BGR2HSV);
-
-                    Scalar lowerRange;
-                    Scalar upperRange;
-                    if (isBlueCircle) {
-                        // Blue circle color range
-                        lowerRange = new Scalar(100, 50, 50);
-                        upperRange = new Scalar(130, 255, 255);
-                    } else {
-                        // Red circle color range
-                        lowerRange = new Scalar(0, 50, 50);
-                        upperRange = new Scalar(20, 255, 255);
-                    }
-
-                    Mat maskedFrame = new Mat();
-                    Core.inRange(hsvFrame, lowerRange, upperRange, maskedFrame);
+                    Mat gray = new Mat();
+                    Imgproc.cvtColor(frame1, gray, Imgproc.COLOR_BGR2GRAY);
 
                     Mat blurredFrame = new Mat();
-                    Imgproc.GaussianBlur(maskedFrame, blurredFrame, new Size(9, 9), 2, 2);
+                    Imgproc.GaussianBlur(gray, blurredFrame, new Size(9, 9), 2, 2);
 
                     Mat circles = new Mat();
-                    Imgproc.HoughCircles(blurredFrame, circles, Imgproc.HOUGH_GRADIENT, 1, 20, 200, 30, 35, 42);
+                    if(!isFront){
+                        Imgproc.HoughCircles(blurredFrame, circles, Imgproc.HOUGH_GRADIENT, 1, 20, 200, 30, 50, 58);
+                    }else{
+                        Imgproc.HoughCircles(blurredFrame, circles, Imgproc.HOUGH_GRADIENT, 1, 20, 200, 30, 35, 42);
+                    }
 
                     if (circles.cols() > 0) {
                         for (int i = 0; i < circles.cols(); i++) {

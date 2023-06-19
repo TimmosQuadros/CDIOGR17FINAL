@@ -59,7 +59,21 @@ public class RobotAI {
         boolean blue = false;
         boolean isLookingForBallAndTurning = false;
         int i = 0;
-        while(true){
+
+        List<Point> blueCircle = robotPositionSubject.getPos(false);
+        List<Point> redCircle = robotPositionSubject.getPos(true);
+        if(blueCircle.size()>0 && redCircle.size()>0){
+            Point robotPos = getMidPoint(blueCircle.get(0),redCircle.get(0));
+            LinkedList<Point> ballPositionsQueue = listOfPointsToQueue(ballPositions);
+            if(ballPositionsQueue.size()>0){
+                testRun(listOfPointsToQueue(ballPositions),lineCreation,robotPos,robotPositionSubject);
+            }
+        }
+
+
+
+
+        /*while(true){
             Point redCircle = null;
             Point blueCircle = null;
             List<Point> redCircleList = robotPositionSubject.getPos(false);
@@ -157,9 +171,22 @@ public class RobotAI {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-        }
+        }*/
     }
 
+    private LinkedList<Point> listOfPointsToQueue(List<Point> ballPositions) {
+        LinkedList<Point> queue = new LinkedList<>();
+        ballPositions.sort(new Comparator<Point>() {
+            @Override
+            public int compare(Point o1, Point o2) {
+                return Double.compare(o1.x, o2.x);
+            }
+        });
+        for(Point p : ballPositions){
+            queue.add(p);
+        }
+        return queue;
+    }
 
     /**
      * @param firstCoordinate the coordinate for the front facing circle
@@ -170,7 +197,8 @@ public class RobotAI {
         return firstCoordinate-secondCoordinate < 0;
     }
 
-    private void testRun(Queue<Point> wayPoints, LineCreation lineCreation, Point robotPosition, RobotPositionSubject robotPositionSubject){
+    private void testRun(LinkedList<Point> wayPoints, LineCreation lineCreation, Point robotPosition, RobotPositionSubject robotPositionSubject){
+        VectorCalculations vectorCalculations;
         Point targetWayPoint = wayPoints.poll();
         if(targetWayPoint==null){
             return;
@@ -180,14 +208,29 @@ public class RobotAI {
             return;
         }
 
+        for(int i = 0; i<2; i++){
+            List<Point> redCirc = robotPositionSubject.getPos(true);
+            List<Point> blueCirc = robotPositionSubject.getPos(false);
+            if(redCirc.size()>0 && blueCirc.size()>0){
+                vectorCalculations = new VectorCalculations(new LineSegment(blueCirc.get(0),redCirc.get(0)), targetWayPoint);
+            }else {
+                return;
+            }
+            //Turn to face firstWayPoint
+            server.writeMessage(MessageStrings.Turn+":"+vectorCalculations.getAngle());
+            //TODO maybe do something
+            String res = server.receiveMessage();
+        }
+
         //Navigate to First wayPoint
-        server.writeMessage(MessageStrings.WayPoints.toString()+";"+lineToWaypoint[0]+","+lineToWaypoint[1]+";"+targetWayPoint.x+","+targetWayPoint.y);
+        server.writeMessage(MessageStrings.WayPoints.toString()+":"+lineToWaypoint[0]+","+lineToWaypoint[1]+";"+targetWayPoint.x+","+targetWayPoint.y);
         robotPosition = startFollowingLine(robotPositionSubject);
 
         while (!wayPoints.isEmpty()){
             targetWayPoint = wayPoints.poll();
             lineToWaypoint = lineCreation.getSlopeAndBegin(robotPosition, targetWayPoint);
             robotPosition = startFollowingLine(robotPositionSubject);
+            server.writeMessage(MessageStrings.WayPoints.toString()+":"+lineToWaypoint[0]+","+lineToWaypoint[1]+";"+targetWayPoint.x+","+targetWayPoint.y);
         }
     }
 
@@ -195,13 +238,13 @@ public class RobotAI {
         String res = server.receiveMessage();
         Point lastPosition = null;
         while(res.contains(MessageStrings.GETRobotPos.toString())){
-            List<Point> bigCircles = robotPositionSubject.getPos();
+            List<Point> smallCircles = robotPositionSubject.getPos(true);
+            List<Point> bigCircles = robotPositionSubject.getPos(false);
             if(bigCircles.size()>1){
                 Point p1 = bigCircles.get(0);
-                Point p2 = bigCircles.get(1);
-                Point center = getMidPoint(p1,p2);
-                lastPosition = center;
-                server.writeMessage(center.x+","+center.y);
+                Point p2 = smallCircles.get(0);
+                lastPosition = getMidPoint(p1,p2);
+                server.writeMessage(p1.x+","+p1.y+";"+p2.x+","+p2.y+";"+robotFacingLeft);
             }
             res = server.receiveMessage();
         }
@@ -209,8 +252,7 @@ public class RobotAI {
     }
 
     private Point getMidPoint(Point p1, Point p2) {
-        Point midPoint = new Point((p1.x+p2.x)/2,(p1.y+p2.y)/2);
-        return midPoint;
+        return new Point((p1.x+p2.x)/2,(p1.y+p2.y)/2);
     }
 }
 
