@@ -2,19 +2,15 @@ package run;
 
 import IncodeMessage.Incoder;
 import IncodeMessage.MessageStrings;
-import Interface.RobotPosition;
 import LineCreation.AlignRobot;
 import LineCreation.LineSegment;
 import Math1.LineCreation;
 import Navigation.BallTracker;
-import Observer.FindAreaOfInterestSubject;
 import Observer.HoughCircleDetectorSubject;
-import Observer.QRCodeDetectorSubject;
 import Observer.RobotPositionSubject;
 import Server.Server;
 import Singleton.VideoCaptureSingleton;
 import Vectors.VectorCalculations;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
@@ -208,6 +204,25 @@ public class RobotAI {
             return;
         }
 
+        //Turn the robot to the desired angle
+        turn(robotPositionSubject, targetWayPoint);
+
+        //Navigate to First wayPoint
+        server.writeMessage(MessageStrings.WayPoints.toString()+":"+lineToWaypoint[0]+","+lineToWaypoint[1]+";"+targetWayPoint.x+","+targetWayPoint.y);
+        robotPosition = startFollowingLine(robotPositionSubject,robotPosition, targetWayPoint);
+
+        while (!wayPoints.isEmpty()){
+            //Turn the robot to the desired angle
+            turn(robotPositionSubject, targetWayPoint);
+            targetWayPoint = wayPoints.poll();
+            lineToWaypoint = lineCreation.getSlopeAndBegin(robotPosition, targetWayPoint);
+            server.writeMessage(MessageStrings.WayPoints.toString()+":"+lineToWaypoint[0]+","+lineToWaypoint[1]+";"+targetWayPoint.x+","+targetWayPoint.y);
+            robotPosition = startFollowingLine(robotPositionSubject,robotPosition, targetWayPoint);
+        }
+    }
+
+    private void turn(RobotPositionSubject robotPositionSubject, Point targetWayPoint) {
+        VectorCalculations vectorCalculations;
         for(int i = 0; i<2; i++){
             List<Point> redCirc = robotPositionSubject.getPos(true);
             List<Point> blueCirc = robotPositionSubject.getPos(false);
@@ -221,33 +236,43 @@ public class RobotAI {
             //TODO maybe do something
             String res = server.receiveMessage();
         }
-
-        //Navigate to First wayPoint
-        server.writeMessage(MessageStrings.WayPoints.toString()+":"+lineToWaypoint[0]+","+lineToWaypoint[1]+";"+targetWayPoint.x+","+targetWayPoint.y);
-        robotPosition = startFollowingLine(robotPositionSubject);
-
-        while (!wayPoints.isEmpty()){
-            targetWayPoint = wayPoints.poll();
-            lineToWaypoint = lineCreation.getSlopeAndBegin(robotPosition, targetWayPoint);
-            robotPosition = startFollowingLine(robotPositionSubject);
-            server.writeMessage(MessageStrings.WayPoints.toString()+":"+lineToWaypoint[0]+","+lineToWaypoint[1]+";"+targetWayPoint.x+","+targetWayPoint.y);
-        }
     }
 
-    private Point startFollowingLine(RobotPositionSubject robotPositionSubject) {
+    private Point startFollowingLine(RobotPositionSubject robotPositionSubject, Point robocupPos, Point targetWayPoint) {
         String res = server.receiveMessage();
         Point lastPosition = null;
+
+        //Test Code
+        VideoCapture videoCapture = VideoCaptureSingleton.getInstance().getVideoCapture();
+        Mat frame = new Mat();
+
+
         while(res.contains(MessageStrings.GETRobotPos.toString())){
             List<Point> smallCircles = robotPositionSubject.getPos(true);
             List<Point> bigCircles = robotPositionSubject.getPos(false);
-            if(bigCircles.size()>1){
+            if(bigCircles.size()>0 && smallCircles.size()>0){
                 Point p1 = bigCircles.get(0);
                 Point p2 = smallCircles.get(0);
+                robotFacingTop = facingDirection(p2.y, p1.y);
+                robotFacingLeft = facingDirection(p2.x, p1.x);
                 lastPosition = getMidPoint(p1,p2);
                 server.writeMessage(p1.x+","+p1.y+";"+p2.x+","+p2.y+";"+robotFacingLeft);
             }
             res = server.receiveMessage();
+            videoCapture.read(frame);
+            HighGui.imshow("abe",frame);
+            if(robotFacingLeft){
+                Imgproc.line(frame,robocupPos,targetWayPoint,new Scalar(255,0,0),6);
+            }else{
+                Imgproc.line(frame,robocupPos,targetWayPoint,new Scalar(255,0,0),6);
+            }
+
+            int key = HighGui.waitKey(10);
+            if(key ==27){
+                break;
+            }
         }
+        HighGui.destroyAllWindows();
         return lastPosition;
     }
 
