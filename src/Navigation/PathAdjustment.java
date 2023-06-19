@@ -61,6 +61,14 @@ public class PathAdjustment {
                 (fieldDetection.getRedCross().getCrossArea().getCenter().y + cornerPoint.y) / 2.0);
     }
 
+    /**
+     * This method finds the path to the ball using the waypoints.
+     * It is in use either when a ball is near the side or cross,
+     * or when it is determined that the current path would intersect with the cross.
+     * @param ballCoordinate coordinate of ball.
+     * @param roboCenter robocenter.
+     * @return An adjusted path to the ball.
+     */
     public List<Point> adjustPath(Point ballCoordinate, Point roboCenter){
         List<Point> path = new ArrayList<>();
         boolean nearSide = isNearSide(ballCoordinate);
@@ -107,6 +115,12 @@ public class PathAdjustment {
         return path;
     }
 
+    /**
+     * We use this method to find which x or y coordinates are outside the inner field.
+     * This is used for when we know a ball is near one of the side,
+     * and we then get to know which side it is by comparing the robots x or y coordiantes,
+     *  with one of these to know where we need to subtract or add to the waypoint.
+     */
     private void determinePointsForSide(){
         if(fieldDetection.getFloorCorners()[0].x > fieldDetection.getFloorCorners()[3].x){
             leftSideX = fieldDetection.getFloorCorners()[0].x;
@@ -154,29 +168,29 @@ public class PathAdjustment {
         boolean opposite = false;
 
         switch (determineQuadrant){
-            case "leftLower" -> { opposite = ballCoordinate.x > fieldDetection.getRedCross().getCrossArea().getCenter().x &&
-            ballCoordinate.y < fieldDetection.getRedCross().getCrossArea().getCenter().y;
+            case "leftLower" -> { opposite = ballCoordinate.x >= fieldDetection.getRedCross().getCrossArea().getCenter().x &&
+            ballCoordinate.y <= fieldDetection.getRedCross().getCrossArea().getCenter().y;
                 if(opposite) {
                     path.add(leftUpperQuadrantWayPoint);
                     path.add(rightUpperQuadrantWayPoint);
                 }
             }
-            case "leftUpper" -> {opposite = ballCoordinate.x > fieldDetection.getRedCross().getCrossArea().getCenter().x &&
-                    ballCoordinate.y > fieldDetection.getRedCross().getCrossArea().getCenter().y;
+            case "leftUpper" -> {opposite = ballCoordinate.x >= fieldDetection.getRedCross().getCrossArea().getCenter().x &&
+                    ballCoordinate.y >= fieldDetection.getRedCross().getCrossArea().getCenter().y;
                 if(opposite) {
                     path.add(leftLowerQuadrantWayPoint);
                     path.add(rightLowerQuadrantWayPoint);
                 }
             }
-            case "rightLower" -> {opposite = ballCoordinate.x < fieldDetection.getRedCross().getCrossArea().getCenter().x &&
-                    ballCoordinate.y < fieldDetection.getRedCross().getCrossArea().getCenter().y;
+            case "rightLower" -> {opposite = ballCoordinate.x <= fieldDetection.getRedCross().getCrossArea().getCenter().x &&
+                    ballCoordinate.y <= fieldDetection.getRedCross().getCrossArea().getCenter().y;
                 if(opposite) {
                     path.add(rightUpperQuadrantWayPoint);
                     path.add(leftUpperQuadrantWayPoint);
                 }
             }
-            case "rightUpper" -> {opposite = ballCoordinate.x < fieldDetection.getRedCross().getCrossArea().getCenter().x &&
-                    ballCoordinate.y > fieldDetection.getRedCross().getCrossArea().getCenter().y;
+            case "rightUpper" -> {opposite = ballCoordinate.x <= fieldDetection.getRedCross().getCrossArea().getCenter().x &&
+                    ballCoordinate.y >= fieldDetection.getRedCross().getCrossArea().getCenter().y;
                 if(opposite) {
                     path.add(rightLowerQuadrantWayPoint);
                     path.add(leftLowerQuadrantWayPoint);
@@ -283,6 +297,7 @@ public class PathAdjustment {
         //check if ball and robo are in same quadrant
         if (isInSameQuadrant(ball, roboCenter))
             return false;
+
         // Line equation y = mx + c
         double m = (ball.y - roboCenter.y) / (ball.x - roboCenter.x);
         double c = roboCenter.y - m * roboCenter.x;

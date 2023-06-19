@@ -1,6 +1,7 @@
 package Observer;
 
 import Interface.FindAreaOfInterest;
+import LineCreation.Circle;
 import ObjectDetection.RedCrossDetection;
 import ObjectDetection.RedRectangleDetection;
 import Singleton.VideoCaptureSingleton;
@@ -16,7 +17,6 @@ public class FindAreaOfInterestSubject extends Subject implements FindAreaOfInte
     public FindAreaOfInterestSubject(){
         fieldDetection = new RedRectangleDetection();
         fieldDetection.detectField();
-        fieldDetection.determineGoalCenters();
     }
 
     @Override
@@ -26,12 +26,19 @@ public class FindAreaOfInterestSubject extends Subject implements FindAreaOfInte
 
     @Override
     public Point[] getCorners() {
-        return fieldDetection.getFloorCorners();
+        return fieldDetection.getCourseCoordinates();
+    }
+
+    public Point[] getFloorCorners(){return fieldDetection.getFloorCorners();}
+
+    @Override
+    public Circle getCross() {
+        return fieldDetection.getRedCross().getCrossArea();
     }
 
     @Override
-    public List<Point> getCross() {
-        return fieldDetection.getRedCross().getCoordinates();
+    public Circle getScaleAdjustedCross() {
+        return fieldDetection.getRedCross().getScalefactorAdjustedCrossArea();
     }
 
     @Override
@@ -39,11 +46,8 @@ public class FindAreaOfInterestSubject extends Subject implements FindAreaOfInte
         return fieldDetection.getScaleFactor();
     }
 
-
-
     public void newDetection(){
         this.fieldDetection.detectField();
-        this.fieldDetection.determineGoalCenters();
     }
 
 

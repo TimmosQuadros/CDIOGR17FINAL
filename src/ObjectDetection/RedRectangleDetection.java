@@ -46,33 +46,16 @@ public class RedRectangleDetection {
      *
      * @return
      */
-    public Point[] detectField() {
+    public void detectField() {
         findAverageCorner(50);
         FindScaling();
         findCornersForMask();
         findFloorCorners();
         determineGoalCenters();
+
         AreaOfInterestFrame mask = new AreaOfInterestFrame(List.of(maskCorners));
 
-        for (Point p : courseCoordinates) {
-            System.out.println("Corner x : " + p.x + " and corner y : " + p.y);
-        }
-
         redCross = new RedCrossDetection(mask, scaleFactor);
-        Point p1 = new Point(900,500);
-        Point p2 =  new Point(1520.0, 520);
-        if(redCross.getScalefactorAdjustedCrossArea().isPointInside(p1.x, p1.y)) {
-            System.out.println("point inside");
-        }
-        else if(redCross.pathIntersects(p1, p2)){
-
-        }else{
-
-        }
-
-        drawCorners(p1, p2);
-
-        return getFloorCorners();
     }
 
     private void findFloorCorners() {
@@ -93,31 +76,6 @@ public class RedRectangleDetection {
         return wideSide.getLength() * narrowSide.getLength();
     }
 
-    /**
-     * This method will define the area by the sides of the field.
-     * If the ball coordinate is within this area the ball is defined as being close to the side.
-     * When the ball is close to a side we will use a special method to align the robot with this side,
-     * so the robot can run right-angled into the ball for pickup.
-     */
-    private void determineBallNearSideArea(){
-        //TODO Side area
-    }
-
-    /**
-     * @return returns delivery point.
-     */
-    public Point getDeliveryPoint(){
-        return deliveryPoint;
-    }
-
-    private void setDeliveryPoint(){
-        //TODO deliveryPoint
-        this.deliveryPoint = null;
-    }
-
-    private void setSides(){
-
-    }
 
     public double getRoboWidth(){
         return this.scaleFactor * (axelLength / 2.0);
