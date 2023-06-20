@@ -36,4 +36,9 @@ public class Circle {
         double distance = Math.sqrt(Math.pow((point.x - centerX), 2) + Math.pow((point.y - centerY), 2));
         return distance <= radius;
     }
+
+    public void setRadius(Point newCenter){
+        this.centerX = newCenter.x;
+        this.centerY = newCenter.y;
+    }
 }

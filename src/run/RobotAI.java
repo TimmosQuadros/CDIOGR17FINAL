@@ -211,6 +211,7 @@ public class RobotAI {
             }
 
             //test out puts
+            Imgproc.circle(frame, targetWayPoint, 5, new Scalar(255,0,0), 10);
             Imgproc.circle(frame, findAreaOfInterestSubject.getCross().getCenter(), 5, new Scalar(255,0,0), 3);
             Imgproc.line(frame,findAreaOfInterestSubject.fieldDetection.getFloorCorners()[0],findAreaOfInterestSubject.fieldDetection.getFloorCorners()[1],new Scalar(255,0,0),6);
             Imgproc.line(frame,findAreaOfInterestSubject.fieldDetection.getFloorCorners()[0],findAreaOfInterestSubject.fieldDetection.getFloorCorners()[3],new Scalar(255,0,0),6);
