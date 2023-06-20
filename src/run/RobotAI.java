@@ -70,15 +70,14 @@ public class RobotAI {
 
             // Repeat until all balls are picked
             while (balls.stream().anyMatch(ball -> !ball.picked)) {
-                Ball nearestBall;
+                Ball nearestBall = null;
 
                 if(ballsCollected==5 || ballsCollected >= easyBallsRemaining){
-                    nearestBall = new Ball(pather.getGoalPoint());
-                    goToObject(nearestBall);
+                    goToObject(null);
                     //pukeBallsOrWhateverWeCallThisMethod();
                 }else{
                     nearestBall = findNearestBall(robotPos, balls);
-                    goToObject(nearestBall);
+                    goToObject(nearestBall.location);
                 }
 
                 if (nearestBall != null && ballsCollected < 5) {
@@ -100,16 +99,24 @@ public class RobotAI {
         }
     }
 
-    private void goToObject(Ball nearestBall) {
-        if(pather.pathIntersects(nearestBall.location, robotPos) ||
-                pather.isAroundCross(nearestBall.location) || pather.isNearSide(nearestBall.location)){
-            List<Point> path = pather.adjustPath(nearestBall.location, robotPos);
-            for (Point waypoint : path){
+    private void goToObject(Point nearestBall) {
+        if (nearestBall != null) {
+            if (pather.pathIntersects(nearestBall, robotPos) ||
+                    pather.isAroundCross(nearestBall) || pather.isNearSide(nearestBall)) {
+                List<Point> path = pather.adjustPath(nearestBall, robotPos);
+                for (Point waypoint : path) {
+                    testRun(waypoint, lineCreation, robotPos, robotPositionSubject);
+                    robotPos = robotPositionSubject.getPos(true).get(0);
+                }
+            } else
+                testRun(nearestBall, lineCreation, robotPos, robotPositionSubject);
+        } else {
+            List<Point> path = pather.pathToGoal(robotPos);
+            for (Point waypoint : path) {
                 testRun(waypoint, lineCreation, robotPos, robotPositionSubject);
                 robotPos = robotPositionSubject.getPos(true).get(0);
             }
-        }else
-            testRun(nearestBall.location, lineCreation, robotPos, robotPositionSubject);
+        }
     }
 
     /**
