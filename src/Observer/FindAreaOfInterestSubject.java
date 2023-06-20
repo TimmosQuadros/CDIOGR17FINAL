@@ -12,7 +12,7 @@ import java.util.List;
 
 public class FindAreaOfInterestSubject extends Subject implements FindAreaOfInterest {
 
-    private final RedRectangleDetection fieldDetection;
+    public final RedRectangleDetection fieldDetection;
 
     public FindAreaOfInterestSubject(){
         fieldDetection = new RedRectangleDetection();

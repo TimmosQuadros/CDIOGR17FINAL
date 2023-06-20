@@ -39,6 +39,7 @@ public class RobotAI {
 
     public RobotAI(Server server){
         findAreaOfInterestSubject = new FindAreaOfInterestSubject();
+        pather = new PathAdjustment(findAreaOfInterestSubject.fieldDetection);
         //corners = areaOfInterestSubject.getCorners();
         //goals = areaOfInterestSubject.getGoalPos();
         //areaOfInterestSubject.detectRobot();
