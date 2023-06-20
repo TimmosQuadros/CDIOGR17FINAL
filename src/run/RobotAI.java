@@ -216,6 +216,7 @@ public class RobotAI {
             Imgproc.line(frame,findAreaOfInterestSubject.fieldDetection.getFloorCorners()[0],findAreaOfInterestSubject.fieldDetection.getFloorCorners()[3],new Scalar(255,0,0),6);
             Imgproc.line(frame,findAreaOfInterestSubject.fieldDetection.getFloorCorners()[1],findAreaOfInterestSubject.fieldDetection.getFloorCorners()[2],new Scalar(255,0,0),6);
             Imgproc.line(frame,findAreaOfInterestSubject.fieldDetection.getFloorCorners()[3],findAreaOfInterestSubject.fieldDetection.getFloorCorners()[2],new Scalar(255,0,0),6);
+            Imgproc.circle(frame, pather.getGoalPoint(), 5, new Scalar(255,0,0), 12);
 
             int key = HighGui.waitKey(10);
             if(key ==27){
