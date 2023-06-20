@@ -62,10 +62,8 @@ public class RobotAI {
 
         blueCircle = robotPositionSubject.getPos(false);
         redCircle = robotPositionSubject.getPos(true);
-        if(blueCircle.size()>0 && redCircle.size()>0){
+        if(blueCircle.size()>0 && redCircle.size()>0)
             robotPos = getMidPoint(blueCircle.get(0),redCircle.get(0));
-
-
 
             int ballsCollected = 0;
 
@@ -87,18 +85,23 @@ public class RobotAI {
                     ballsCollected++;
                     blueCircle = robotPositionSubject.getPos(false);
                     redCircle = robotPositionSubject.getPos(true);
-                    if(blueCircle.size()>0 && redCircle.size()>0) {
-                        robotPos = getMidPoint(blueCircle.get(0), redCircle.get(0));
-                    }else{
-                        robotPos = nearestBall.location;
-                    }
+                    setRoboPos(nearestBall.location);
                 }else if(ballsCollected == 5){
                     ballsCollected = 0;
                 }
                 ballsCollected++;
                 findAreaOfInterestSubject.fieldDetection.getRedCross().redetectCross();
             }
-        }
+
+    }
+
+    private void setRoboPos(Point waypoint){
+        blueCircle = robotPositionSubject.getPos(false);
+        redCircle = robotPositionSubject.getPos(true);
+        if(blueCircle.size()>0 && redCircle.size()>0)
+            robotPos = getMidPoint(blueCircle.get(0),redCircle.get(0));
+        else
+            robotPos = waypoint;
     }
 
     private List<Ball> getBalls() {
@@ -120,10 +123,7 @@ public class RobotAI {
                 List<Point> path = pather.adjustPath(nearestBall, robotPos);
                 for (Point waypoint : path) {
                     testRun(waypoint, lineCreation, robotPos, robotPositionSubject);
-                    if(blueCircle.size()>0 && redCircle.size()>0)
-                        robotPos = getMidPoint(blueCircle.get(0), redCircle.get(0));
-                    else
-                        robotPos = waypoint;
+                    setRoboPos(waypoint);
                 }
             } else
                 testRun(nearestBall, lineCreation, robotPos, robotPositionSubject);
@@ -131,10 +131,7 @@ public class RobotAI {
             List<Point> path = pather.pathToGoal(robotPos);
             for (Point waypoint : path) {
                 testRun(waypoint, lineCreation, robotPos, robotPositionSubject);
-                if(blueCircle.size()>0 && redCircle.size()>0)
-                    robotPos = getMidPoint(blueCircle.get(0), redCircle.get(0));
-                else
-                    robotPos = waypoint;
+                setRoboPos(waypoint);
             }
         }
     }
