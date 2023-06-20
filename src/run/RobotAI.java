@@ -33,6 +33,8 @@ public class RobotAI {
     private FindAreaOfInterestSubject findAreaOfInterestSubject;
     RobotPositionSubject robotPositionSubject;
     Math1.LineCreation lineCreation;
+    HoughCircleDetectorSubject houghCircleDetectorSubject;
+    List<Point> ballPositions;
 
 
     public RobotAI(Server server){
@@ -48,22 +50,16 @@ public class RobotAI {
 
         lineCreation = new Math1.LineCreation();
         robotPositionSubject = new RobotPositionSubject();
-        HoughCircleDetectorSubject houghCircleDetectorSubject = new HoughCircleDetectorSubject();
-        List<Point> ballPositions = houghCircleDetectorSubject.getBalls();
 
+        houghCircleDetectorSubject = new HoughCircleDetectorSubject();
+        List<Ball> balls = getBalls();
 
         List<Point> blueCircle = robotPositionSubject.getPos(false);
         List<Point> redCircle = robotPositionSubject.getPos(true);
         if(blueCircle.size()>0 && redCircle.size()>0){
             robotPos = getMidPoint(blueCircle.get(0),redCircle.get(0));
 
-            List<Ball> balls = new ArrayList<>();
 
-            for (Point ball: ballPositions){                                //Looping through all balls
-                if (pather.isEasy(ball)){                                   //Checking if the ball is considered easy
-                    balls.add(new Ball(ball));
-                }
-            }
 
             int ballsCollected = 0;
 
@@ -74,6 +70,7 @@ public class RobotAI {
                 if(ballsCollected==5 || ballsCollected == balls.size()){
                     goToObject(null);
                     //pukeBallsOrWhateverWeCallThisMethod();
+                    balls = getBalls();
                 }else{
                     nearestBall = findNearestBall(robotPos, balls);
                     goToObject(nearestBall.location);
@@ -95,6 +92,18 @@ public class RobotAI {
                 ballsCollected++;
             }
         }
+    }
+
+    private List<Ball> getBalls() {
+        ballPositions = houghCircleDetectorSubject.getBalls();
+        List<Ball> balls = new ArrayList<>();
+
+        for (Point ball: ballPositions){                                //Looping through all balls
+            if (pather.isEasy(ball)){                                   //Checking if the ball is considered easy
+                balls.add(new Ball(ball));
+            }
+        }
+        return balls;
     }
 
     private void goToObject(Point nearestBall) {
