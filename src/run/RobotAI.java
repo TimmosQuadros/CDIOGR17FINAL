@@ -87,6 +87,7 @@ public class RobotAI {
                     List<Point> path = pather.adjustPath(nearestBall.location, robotPos);
                     for (Point waypoint : path){
                         testRun(waypoint, lineCreation, robotPos, robotPositionSubject);
+                        robotPos = robotPositionSubject.getPos(true).get(0);
                     }
                 }else
                     testRun(nearestBall.location, lineCreation, robotPos, robotPositionSubject);
