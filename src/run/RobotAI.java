@@ -66,13 +66,12 @@ public class RobotAI {
             }
 
             int ballsCollected = 0;
-            int easyBallsRemaining = balls.size();
 
             // Repeat until all balls are picked
             while (balls.stream().anyMatch(ball -> !ball.picked)) {
                 Ball nearestBall = null;
 
-                if(ballsCollected==5 || ballsCollected >= easyBallsRemaining){
+                if(ballsCollected==5 || ballsCollected == balls.size()){
                     goToObject(null);
                     //pukeBallsOrWhateverWeCallThisMethod();
                 }else{
@@ -83,7 +82,6 @@ public class RobotAI {
                 if (nearestBall != null && ballsCollected < 5) {
                     nearestBall.picked = true;
                     ballsCollected++;
-                    easyBallsRemaining--;
                     blueCircle = robotPositionSubject.getPos(false);
                     redCircle = robotPositionSubject.getPos(true);
                     if(blueCircle.size()>0 && redCircle.size()>0) {
