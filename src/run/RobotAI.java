@@ -210,6 +210,12 @@ public class RobotAI {
                 Imgproc.line(frame,robocupPos,targetWayPoint,new Scalar(255,0,0),6);
             }
 
+            //test out puts
+            Imgproc.circle(frame, findAreaOfInterestSubject.getCross().getCenter(), 5, new Scalar(255,0,0), 3);
+            Imgproc.line(frame,findAreaOfInterestSubject.fieldDetection.getFloorCorners()[0],findAreaOfInterestSubject.fieldDetection.getFloorCorners()[1],new Scalar(255,0,0),6);
+            Imgproc.line(frame,findAreaOfInterestSubject.fieldDetection.getFloorCorners()[0],findAreaOfInterestSubject.fieldDetection.getFloorCorners()[3],new Scalar(255,0,0),6);
+            Imgproc.line(frame,findAreaOfInterestSubject.fieldDetection.getFloorCorners()[1],findAreaOfInterestSubject.fieldDetection.getFloorCorners()[2],new Scalar(255,0,0),6);
+            Imgproc.line(frame,findAreaOfInterestSubject.fieldDetection.getFloorCorners()[3],findAreaOfInterestSubject.fieldDetection.getFloorCorners()[2],new Scalar(255,0,0),6);
 
             int key = HighGui.waitKey(10);
             if(key ==27){
