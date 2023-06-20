@@ -51,9 +51,9 @@ public class PathAdjustment {
 
     private void determineWaypoints() {
         leftUpperQuadrantWayPoint = getAverage(fieldDetection.getCourseCoordinates()[0]);
-        leftLowerQuadrantWayPoint = getAverage(fieldDetection.getCourseCoordinates()[3]);
+        leftLowerQuadrantWayPoint = getAverage(fieldDetection.getCourseCoordinates()[2]);
         rightUpperQuadrantWayPoint = getAverage(fieldDetection.getCourseCoordinates()[1]);
-        rightLowerQuadrantWayPoint = getAverage(fieldDetection.getCourseCoordinates()[2]);
+        rightLowerQuadrantWayPoint = getAverage(fieldDetection.getCourseCoordinates()[3]);
     }
 
     private Point getAverage(Point cornerPoint) {
