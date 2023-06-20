@@ -94,6 +94,7 @@ public class RobotAI {
                     ballsCollected = 0;
                 }
                 ballsCollected++;
+                findAreaOfInterestSubject.fieldDetection.getRedCross().redetectCross();
             }
         }
     }
