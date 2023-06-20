@@ -83,9 +83,6 @@ public class PathAdjustment {
                     path.add(ballCoordinate);
                 } else
                     path.add(ballCoordinate);
-
-                if (path.get(0).equals(path.get(1)))// checks to see if the ball and robo were somehow in same quadrant.
-                    path.remove(1);
             }
         }else{
             if (!nearCross && !nearSide) {
@@ -107,6 +104,10 @@ public class PathAdjustment {
         else if (nearSide){
             path.add(determineCoordinateForSidePickup(ballCoordinate));
             path.add(ballCoordinate);
+        }
+
+        for (int i = 0; i < path.size(); i++) {
+            System.out.println(i + "X = " + path.get(i).x + " AND Y = "+ path.get(i).y);
         }
 
         if(path.isEmpty())
