@@ -407,4 +407,8 @@ public class PathAdjustment {
         return rectangle.contains(point);
     }
 
+    public boolean isEasy(Point ballCoordinate){
+        return (!isInCorner(ballCoordinate) | !isAroundCross(ballCoordinate));
+    }
+
 }
