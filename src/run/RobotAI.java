@@ -38,7 +38,11 @@ public class RobotAI {
 
 
     public RobotAI(Server server){
-        findAreaOfInterestSubject = new FindAreaOfInterestSubject();
+        try {
+            findAreaOfInterestSubject = new FindAreaOfInterestSubject();
+        } catch (NullPointerException e){
+            System.out.println("No cross or various other elements, get fucked Timmmmmmmmmmmmmmmmmmmmmmm");
+        }
         pather = new PathAdjustment(findAreaOfInterestSubject.fieldDetection);
         this.server = server;
     }
