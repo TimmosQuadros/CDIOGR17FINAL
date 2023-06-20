@@ -35,6 +35,8 @@ public class RobotAI {
     Math1.LineCreation lineCreation;
     HoughCircleDetectorSubject houghCircleDetectorSubject;
     List<Point> ballPositions;
+    List<Point> blueCircle;
+    List<Point> redCircle;
 
 
     public RobotAI(Server server){
@@ -58,8 +60,8 @@ public class RobotAI {
         houghCircleDetectorSubject = new HoughCircleDetectorSubject();
         List<Ball> balls = getBalls();
 
-        List<Point> blueCircle = robotPositionSubject.getPos(false);
-        List<Point> redCircle = robotPositionSubject.getPos(true);
+        blueCircle = robotPositionSubject.getPos(false);
+        redCircle = robotPositionSubject.getPos(true);
         if(blueCircle.size()>0 && redCircle.size()>0){
             robotPos = getMidPoint(blueCircle.get(0),redCircle.get(0));
 
@@ -118,7 +120,8 @@ public class RobotAI {
                 List<Point> path = pather.adjustPath(nearestBall, robotPos);
                 for (Point waypoint : path) {
                     testRun(waypoint, lineCreation, robotPos, robotPositionSubject);
-                    robotPos = robotPositionSubject.getPos(true).get(0);
+                    if(blueCircle.size()>0 && redCircle.size()>0)
+                        robotPos = getMidPoint(blueCircle.get(0), redCircle.get(0));
                 }
             } else
                 testRun(nearestBall, lineCreation, robotPos, robotPositionSubject);
@@ -126,7 +129,8 @@ public class RobotAI {
             List<Point> path = pather.pathToGoal(robotPos);
             for (Point waypoint : path) {
                 testRun(waypoint, lineCreation, robotPos, robotPositionSubject);
-                robotPos = robotPositionSubject.getPos(true).get(0);
+                if(blueCircle.size()>0 && redCircle.size()>0)
+                    robotPos = getMidPoint(blueCircle.get(0), redCircle.get(0));
             }
         }
     }
