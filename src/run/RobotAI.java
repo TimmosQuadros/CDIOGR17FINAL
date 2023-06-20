@@ -45,7 +45,6 @@ public class RobotAI {
         //areaOfInterestSubject.detectRobot();
         //alignRobot = new AlignRobot(corners);
         this.server = server;
-
     }
 
 
@@ -70,15 +69,39 @@ public class RobotAI {
         if(blueCircle.size()>0 && redCircle.size()>0){
             robotPos = getMidPoint(blueCircle.get(0),redCircle.get(0));
 
+            List<Ball> balls = new ArrayList<>();
+
             LinkedList<Point> ballPositionsQueue = new LinkedList<Point>(); //Adding a variable to store the list of balls
             for (Point ball: ballPositions){                                //Looping through all balls
                 if (pather.isEasy(ball)){                                   //Checking if the ball is considered easy
                     ballPositionsQueue.add(ball);                           //Adding the easy ball to the variable for the remaining balls
+                    balls.add(new Ball(ball));
                 }
             }
 
+            // Repeat until all balls are picked
+            while (balls.stream().anyMatch(ball -> !ball.picked)) {
+                Ball nearestBall = findNearestBall(robotPos, balls);
+                if(pather.pathIntersects(nearestBall.location, robotPos) ||
+                        pather.isAroundCross(nearestBall.location) || pather.isNearSide(nearestBall.location)){
+                    List<Point> path = pather.adjustPath(nearestBall.location, robotPos);
+                    for (Point waypoint : path){
+                        testRun(waypoint, lineCreation, robotPos, robotPositionSubject);
+                    }
+                }
+                if (nearestBall != null) {
+                    nearestBall.picked = true;
+                    blueCircle = robotPositionSubject.getPos(false);
+                    redCircle = robotPositionSubject.getPos(true);
+                    if(blueCircle.size()>0 && redCircle.size()>0) {
+                        robotPos = getMidPoint(blueCircle.get(0), redCircle.get(0));
+                    }else{
+                        robotPos = nearestBall.location;
+                    }
+                }
+            }
 
-            if(ballPositionsQueue.isEmpty()){                               //Checking if the list of ball positions is empty
+            /*if(ballPositionsQueue.isEmpty()){                               //Checking if the list of ball positions is empty
                 ballPositionsQueue = listOfPointsToQueue(ballPositions);    //If empty, all the difficult balls are added to the list with the Iver-pathfinding
             }else{
                 ballPositionsQueue = listOfPointsToQueue(ballPositionsQueue);   //Else all the easy balls are added to the list with waypoints underway
@@ -86,7 +109,7 @@ public class RobotAI {
 
             if(ballPositionsQueue.size()>0){
                 testRun(ballPositionsQueue,lineCreation,robotPos,robotPositionSubject);     //Run is started with the ballWaypoint queue and other required variables
-            }
+            }*/
         }
 
 
@@ -183,6 +206,7 @@ public class RobotAI {
             }
         });
         for(Point p : ballPositions){
+
             queue.addAll(pather.adjustPath(p, robotPos));
         }
         return queue;
@@ -197,27 +221,27 @@ public class RobotAI {
         return firstCoordinate-secondCoordinate < 0;
     }
 
-    private void testRun(LinkedList<Point> wayPoints, LineCreation lineCreation, Point robotPosition, RobotPositionSubject robotPositionSubject){
+    private void testRun(Point wayPoint, LineCreation lineCreation, Point robotPosition, RobotPositionSubject robotPositionSubject){
         VectorCalculations vectorCalculations;
-        Point targetWayPoint = wayPoints.poll();
-        if(targetWayPoint==null){
+        //Point targetWayPoint = wayPoints.poll();
+        if(wayPoint==null){
             return;
         }
 
         //Turn the robot to the desired angle
-        turn(robotPositionSubject, targetWayPoint);
+        turn(robotPositionSubject, wayPoint);
 
-        double[] lineToWaypoint = lineCreation.getSlopeAndBegin(robotPosition, targetWayPoint);
+        double[] lineToWaypoint = lineCreation.getSlopeAndBegin(robotPosition, wayPoint);
         if(lineToWaypoint==null){
             return;
         }
 
         //Navigate to First wayPoint
-        server.writeMessage(MessageStrings.WayPoints.toString()+":"+lineToWaypoint[0]+","+lineToWaypoint[1]+";"+targetWayPoint.x+","+targetWayPoint.y);
+        server.writeMessage(MessageStrings.WayPoints.toString()+":"+lineToWaypoint[0]+","+lineToWaypoint[1]+";"+wayPoint.x+","+wayPoint.y);
         server.receiveMessage();
-        robotPosition = startFollowingLine(robotPositionSubject,robotPosition, targetWayPoint);
+        robotPosition = startFollowingLine(robotPositionSubject,robotPosition, wayPoint);
 
-        while (!wayPoints.isEmpty()){
+        /*while (!wayPoints.isEmpty()){
             //Turn the robot to the desired angle
             targetWayPoint = wayPoints.poll();
             turn(robotPositionSubject, targetWayPoint);
@@ -225,7 +249,7 @@ public class RobotAI {
             server.writeMessage(MessageStrings.WayPoints.toString()+":"+lineToWaypoint[0]+","+lineToWaypoint[1]+";"+targetWayPoint.x+","+targetWayPoint.y);
             server.receiveMessage();
             robotPosition = startFollowingLine(robotPositionSubject,robotPosition, targetWayPoint);
-        }
+        }*/
     }
 
     private void turn(RobotPositionSubject robotPositionSubject, Point targetWayPoint) {
@@ -295,6 +319,36 @@ public class RobotAI {
 
     private Point getMidPoint(Point p1, Point p2) {
         return new Point((p1.x+p2.x)/2,(p1.y+p2.y)/2);
+    }
+
+    private Ball findNearestBall(Point vehiclePosition, List<Ball> balls) {
+        Ball nearestBall = null;
+        double minDistance = Double.MAX_VALUE;
+
+        for (Ball ball : balls) {
+            if (ball.picked) continue;
+
+            double distance = euclideanDistance(vehiclePosition, ball.location);
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestBall = ball;
+            }
+        }
+
+        return nearestBall;
+    }
+
+    private double euclideanDistance(Point p1, Point p2) {
+        return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+    }
+
+    public class Ball {
+        Point location;
+        boolean picked = false;
+
+        Ball(Point ball) {
+            location = ball;
+        }
     }
 }
 
