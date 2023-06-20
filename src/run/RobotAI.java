@@ -122,6 +122,8 @@ public class RobotAI {
                     testRun(waypoint, lineCreation, robotPos, robotPositionSubject);
                     if(blueCircle.size()>0 && redCircle.size()>0)
                         robotPos = getMidPoint(blueCircle.get(0), redCircle.get(0));
+                    else
+                        robotPos = waypoint;
                 }
             } else
                 testRun(nearestBall, lineCreation, robotPos, robotPositionSubject);
@@ -131,6 +133,8 @@ public class RobotAI {
                 testRun(waypoint, lineCreation, robotPos, robotPositionSubject);
                 if(blueCircle.size()>0 && redCircle.size()>0)
                     robotPos = getMidPoint(blueCircle.get(0), redCircle.get(0));
+                else
+                    robotPos = waypoint;
             }
         }
     }
