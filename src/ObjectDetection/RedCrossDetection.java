@@ -17,6 +17,7 @@ public class RedCrossDetection {
 
     public LineSegment[] crossLines = new LineSegment[2];
     private Mat frame = new Mat();
+    private AreaOfInterestFrame aoiMask;
     private Mat aoiImage;
     private final List<Point> coordinates = new ArrayList<>();
     private Circle crossArea; //will be used to determine if a ball is near the cross.
@@ -27,7 +28,8 @@ public class RedCrossDetection {
      * @param aoiMask
      */
     public RedCrossDetection(AreaOfInterestFrame aoiMask, double scaleFactor) {
-        aoiImage = aoiMask.getAoiMask();
+        this.aoiMask = aoiMask;
+        aoiImage = this.aoiMask.getAoiMask();
 
         fillObstableArray();
         findcenter();
@@ -52,6 +54,18 @@ public class RedCrossDetection {
 
         adjustCoordinatesWithScaleFactor(scaleFactor);
 
+    }
+
+    public void redetectCross(){
+        this.aoiImage = this.aoiMask.getAoiMask();
+
+        fillObstableArray();
+        findcenter();
+
+        //Creates area around the cross
+        crossArea.setCenter(coordinates.get(0).x, coordinates.get(0).y);
+        //Creates adjusted area near the cross, where the robert is able to drive by it.
+        scalefactorAdjustedCrossArea.setCenter(coordinates.get(0).x, coordinates.get(0).y);
     }
 
     public Circle getCrossArea(){

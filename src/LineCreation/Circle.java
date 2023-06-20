@@ -37,8 +37,8 @@ public class Circle {
         return distance <= radius;
     }
 
-    public void setRadius(Point newCenter){
-        this.centerX = newCenter.x;
-        this.centerY = newCenter.y;
+    public void setCenter(double x, double y){
+        this.centerX = x;
+        this.centerY = y;
     }
 }
