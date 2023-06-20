@@ -63,22 +63,23 @@ public class RobotAI {
         List<Point> redCircle = robotPositionSubject.getPos(true);
         if(blueCircle.size()>0 && redCircle.size()>0){
             robotPos = getMidPoint(blueCircle.get(0),redCircle.get(0));
-            LinkedList<Point> ballPositionsQueue = new LinkedList<Point>();
-            for (Point ball: ballPositions){
-                if (pather.isEasy(ball)){
-                    ballPositionsQueue.add(ball);
+
+            LinkedList<Point> ballPositionsQueue = new LinkedList<Point>(); //Adding a variable to store the list of balls
+            for (Point ball: ballPositions){                                //Looping through all balls
+                if (pather.isEasy(ball)){                                   //Checking if the ball is considered easy
+                    ballPositionsQueue.add(ball);                           //Adding the easy ball to the variable for the remaining balls
                 }
             }
 
 
-            if(ballPositionsQueue.isEmpty()){
-                ballPositionsQueue = listOfPointsToQueue(ballPositions);
+            if(ballPositionsQueue.isEmpty()){                               //Checking if the list of ball positions is empty
+                ballPositionsQueue = listOfPointsToQueue(ballPositions);    //If empty, all the difficult balls are added to the list with the Iver-pathfinding
             }else{
-                ballPositionsQueue = listOfPointsToQueue(ballPositionsQueue);
+                ballPositionsQueue = listOfPointsToQueue(ballPositionsQueue);   //Else all the easy balls are added to the list with waypoints underway
             }
 
             if(ballPositionsQueue.size()>0){
-                testRun(ballPositionsQueue,lineCreation,robotPos,robotPositionSubject);
+                testRun(ballPositionsQueue,lineCreation,robotPos,robotPositionSubject);     //Run is started with the ballWaypoint queue and other required variables
             }
         }
 

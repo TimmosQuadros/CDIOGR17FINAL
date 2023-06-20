@@ -407,6 +407,12 @@ public class PathAdjustment {
         return rectangle.contains(point);
     }
 
+
+    /**
+     * A single method to perform multiple checks to see if a Point is in a location that is easy to pick up
+     * @param ballCoordinate the point variable to be tested
+     * @return true if the ball is easy, false if the ball is difficult to pick up
+     */
     public boolean isEasy(Point ballCoordinate){
         return (!isInCorner(ballCoordinate) | !isAroundCross(ballCoordinate));
     }
