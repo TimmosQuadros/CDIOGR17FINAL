@@ -88,7 +88,8 @@ public class RobotAI {
                     for (Point waypoint : path){
                         testRun(waypoint, lineCreation, robotPos, robotPositionSubject);
                     }
-                }
+                }else
+                    testRun(nearestBall.location, lineCreation, robotPos, robotPositionSubject);
                 if (nearestBall != null) {
                     nearestBall.picked = true;
                     blueCircle = robotPositionSubject.getPos(false);
