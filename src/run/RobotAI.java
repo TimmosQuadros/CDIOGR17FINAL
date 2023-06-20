@@ -206,6 +206,7 @@ public class RobotAI {
                 Imgproc.line(frame,robocupPos,targetWayPoint,new Scalar(255,0,0),6);
             }
 
+
             int key = HighGui.waitKey(10);
             if(key ==27){
                 break;

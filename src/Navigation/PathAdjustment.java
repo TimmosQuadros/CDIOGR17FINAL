@@ -369,18 +369,18 @@ public class PathAdjustment {
         //compares ball coordinate to center of the cross
         if (ballCoordinate.y > fieldDetection.getRedCross().getCoordinates().get(0).y){
             if (ballCoordinate.x > fieldDetection.getRedCross().getCoordinates().get(0).x)
-                //right upper corner.
-                center = fieldDetection.getRawCorners()[1];
-            else
-                //left upper corner
-                center = fieldDetection.getRawCorners()[0];
-        }else{
-            if(ballCoordinate.x > fieldDetection.getRedCross().getCoordinates().get(0).x)
-                //right lower corner
+                //right lower
                 center = fieldDetection.getRawCorners()[2];
             else
-                //left lower corner
+                //left lower
                 center = fieldDetection.getRawCorners()[3];
+        }else{
+            if(ballCoordinate.x > fieldDetection.getRedCross().getCoordinates().get(0).x)
+                //right upper
+                center = fieldDetection.getRawCorners()[1];
+            else
+                //left upper
+                center = fieldDetection.getRawCorners()[0];
         }
 
         //if the center is still null, something have gone wrong and we will skip the ball.
