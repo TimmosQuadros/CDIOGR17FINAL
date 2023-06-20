@@ -286,6 +286,10 @@ public class PathAdjustment {
         return path;
     }
 
+    public Point getGoalPoint(){
+        return fieldDetection.getGoals().get(0);
+    }
+
     /**
      * This method returns true if the line that is created from the robot to the ball,
      * intersects with the equation of the circle representing the red cross obstacle.

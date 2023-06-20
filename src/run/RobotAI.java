@@ -35,6 +35,8 @@ public class RobotAI {
     private boolean robotFacingTop;
     private boolean robotFacingLeft;
     private FindAreaOfInterestSubject findAreaOfInterestSubject;
+    RobotPositionSubject robotPositionSubject;
+    Math1.LineCreation lineCreation;
 
 
     public RobotAI(Server server){
@@ -54,10 +56,10 @@ public class RobotAI {
         videoCaptureSingleton.setPoint(findAreaOfInterestSubject);
 
         Mat frame = new Mat();
-        Math1.LineCreation lineCreation = new Math1.LineCreation();
+        lineCreation = new Math1.LineCreation();
         BallTracker ballTracker = new BallTracker();
         boolean targetingBall = false;
-        RobotPositionSubject robotPositionSubject = new RobotPositionSubject();
+        robotPositionSubject = new RobotPositionSubject();
         HoughCircleDetectorSubject houghCircleDetectorSubject = new HoughCircleDetectorSubject();
         List<Point> ballPositions = houghCircleDetectorSubject.getBalls();
         boolean blue = false;
@@ -79,20 +81,26 @@ public class RobotAI {
                 }
             }
 
+            int ballsCollected = 0;
+            int easyBallsRemaining = balls.size();
+
             // Repeat until all balls are picked
             while (balls.stream().anyMatch(ball -> !ball.picked)) {
-                Ball nearestBall = findNearestBall(robotPos, balls);
-                if(pather.pathIntersects(nearestBall.location, robotPos) ||
-                        pather.isAroundCross(nearestBall.location) || pather.isNearSide(nearestBall.location)){
-                    List<Point> path = pather.adjustPath(nearestBall.location, robotPos);
-                    for (Point waypoint : path){
-                        testRun(waypoint, lineCreation, robotPos, robotPositionSubject);
-                        robotPos = robotPositionSubject.getPos(true).get(0);
-                    }
-                }else
-                    testRun(nearestBall.location, lineCreation, robotPos, robotPositionSubject);
-                if (nearestBall != null) {
+                Ball nearestBall;
+
+                if(ballsCollected==5 || ballsCollected >= easyBallsRemaining){
+                    nearestBall = new Ball(pather.getGoalPoint());
+                    goToObject(nearestBall);
+                    //pukeBallsOrWhateverWeCallThisMethod();
+                }else{
+                    nearestBall = findNearestBall(robotPos, balls);
+                    goToObject(nearestBall);
+                }
+
+                if (nearestBall != null && ballsCollected < 5) {
                     nearestBall.picked = true;
+                    ballsCollected++;
+                    easyBallsRemaining--;
                     blueCircle = robotPositionSubject.getPos(false);
                     redCircle = robotPositionSubject.getPos(true);
                     if(blueCircle.size()>0 && redCircle.size()>0) {
@@ -100,7 +108,10 @@ public class RobotAI {
                     }else{
                         robotPos = nearestBall.location;
                     }
+                }else if(ballsCollected == 5){
+                    ballsCollected = 0;
                 }
+                ballsCollected++;
             }
 
             /*if(ballPositionsQueue.isEmpty()){                               //Checking if the list of ball positions is empty
@@ -197,6 +208,18 @@ public class RobotAI {
                     e.printStackTrace();
                 }
         }*/
+    }
+
+    private void goToObject(Ball nearestBall) {
+        if(pather.pathIntersects(nearestBall.location, robotPos) ||
+                pather.isAroundCross(nearestBall.location) || pather.isNearSide(nearestBall.location)){
+            List<Point> path = pather.adjustPath(nearestBall.location, robotPos);
+            for (Point waypoint : path){
+                testRun(waypoint, lineCreation, robotPos, robotPositionSubject);
+                robotPos = robotPositionSubject.getPos(true).get(0);
+            }
+        }else
+            testRun(nearestBall.location, lineCreation, robotPos, robotPositionSubject);
     }
 
     private LinkedList<Point> listOfPointsToQueue(List<Point> ballPositions) {
