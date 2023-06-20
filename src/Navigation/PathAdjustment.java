@@ -288,7 +288,7 @@ public class PathAdjustment {
     }
 
     public Point getGoalPoint(){
-        return fieldDetection.getGoals().get(0);
+        return new Point(fieldDetection.getGoals().get(0).x + 15.0, fieldDetection.getGoals().get(0).y);
     }
 
     /**
