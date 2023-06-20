@@ -64,8 +64,8 @@ public class HoughCircleDetectorSubject implements HoughCircleDetector {
                             }
                         }
                     }
-                    //HighGui.imshow("test",frame);
-                    /*int key = HighGui.waitKey(10);
+                    /*HighGui.imshow("test",frame);
+                    int key = HighGui.waitKey(10);
                     if (key == 27) {
                         break;
                     }*/

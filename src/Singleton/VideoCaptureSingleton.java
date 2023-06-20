@@ -1,5 +1,7 @@
 package Singleton;
 
+import ObjectDetection.RedRectangleDetection;
+import Observer.FindAreaOfInterestSubject;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
@@ -11,15 +13,23 @@ public class VideoCaptureSingleton {
     private static VideoCaptureSingleton instance;
     private final VideoCapture videoCapture;
 
-    private final Point point1 = new Point(419.0,118.0);
-    private final Point point2 = new Point(1544.0,131.0);
-    private final Point point3 = new Point(1551.0,961.0);
-    private final Point point4 = new Point(390,960.0);
+    private Point point1 = null;
+    private Point point2 = null;
+    private Point point3 = null;
+    private Point point4 = null;
 
     private VideoCaptureSingleton() {
         // Private constructor to prevent direct instantiation
         videoCapture = new VideoCapture(0);
         setMaxResolution(videoCapture);
+    }
+
+    public void setPoint(FindAreaOfInterestSubject findAreaOfInterestSubject){
+        Point[] corners = findAreaOfInterestSubject.getCorners();
+        point1 = new Point(corners[0].x,corners[0].y);
+        point2 = new Point(corners[1].x,corners[1].y);
+        point3 = new Point(corners[3].x,corners[3].y);
+        point4 = new Point(corners[2].x,corners[2].y);
     }
 
     public static VideoCaptureSingleton getInstance() {

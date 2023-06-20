@@ -3,6 +3,7 @@ package Observer;
 import Interface.RobotPosition;
 import Singleton.VideoCaptureSingleton;
 import org.opencv.core.*;
+import org.opencv.highgui.HighGui;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 
@@ -24,21 +25,19 @@ public class RobotPositionSubject implements RobotPosition {
         List<Point> circlePoints = new ArrayList<>();
 
         if (videoCapture.isOpened()) {
-            long startTime = System.currentTimeMillis();
+            //long startTime = System.currentTimeMillis();
             for (int j = 0; j < frames; j++) {
                 videoCapture.read(frame1);
-                if (!frame1.empty()) {
+                Mat frame = VideoCaptureSingleton.getInstance().mask(frame1);
+                if (!frame.empty()) {
                     Mat gray = new Mat();
-                    Imgproc.cvtColor(frame1, gray, Imgproc.COLOR_BGR2GRAY);
-
-                    Mat blurredFrame = new Mat();
-                    Imgproc.GaussianBlur(gray, blurredFrame, new Size(9, 9), 2, 2);
+                    Imgproc.cvtColor(frame, gray, Imgproc.COLOR_BGR2GRAY);
 
                     Mat circles = new Mat();
                     if(!isFront){
-                        Imgproc.HoughCircles(blurredFrame, circles, Imgproc.HOUGH_GRADIENT, 1, 20, 200, 30, 50, 58);
+                        Imgproc.HoughCircles(gray, circles, Imgproc.HOUGH_GRADIENT, 1, 20, 200, 30, 50, 58);
                     }else{
-                        Imgproc.HoughCircles(blurredFrame, circles, Imgproc.HOUGH_GRADIENT, 1, 20, 200, 30, 35, 42);
+                        Imgproc.HoughCircles(gray, circles, Imgproc.HOUGH_GRADIENT, 1, 20, 200, 30, 30, 46);
                     }
 
                     if (circles.cols() > 0) {
@@ -46,16 +45,24 @@ public class RobotPositionSubject implements RobotPosition {
                             double[] circle = circles.get(0, i);
                             center = new Point(circle[0], circle[1]);
                             circlePoints.add(center);
+                            //Imgproc.circle(frame,center,6,new Scalar(255,0,0),6);
                             return circlePoints;
                         }
                     } else {
                         // just keep trying until you get a result
-                        if((System.currentTimeMillis()-startTime)*0.001<=15){
+                        //if((System.currentTimeMillis()-startTime)*0.001<=15){
                             frames++;
-                        }
+                        //}
                     }
                 }
+                //HighGui.imshow("frame",frame);
+
+                /*int key = HighGui.waitKey(10);
+                if(key==27){
+                    HighGui.destroyAllWindows();
+                }*/
             }
+            //HighGui.destroyAllWindows();
         } else {
             System.out.println("Failed to open camera!");
         }
@@ -67,13 +74,13 @@ public class RobotPositionSubject implements RobotPosition {
         Mat frame1 = new Mat();
         int frames = 1;
         List<Point> circlePoints = new ArrayList<>();
-
         if (videoCapture.isOpened()) {
             for (int j = 0; j < frames; j++) {
                 videoCapture.read(frame1);
-                if (!frame1.empty()) {
+                Mat frame = VideoCaptureSingleton.getInstance().mask(frame1);
+                if (!frame.empty()) {
                     Mat grayFrame = new Mat();
-                    Imgproc.cvtColor(frame1, grayFrame, Imgproc.COLOR_BGR2GRAY);
+                    Imgproc.cvtColor(frame, grayFrame, Imgproc.COLOR_BGR2GRAY);
 
                     Mat blurredFrame = new Mat();
                     Imgproc.GaussianBlur(grayFrame, blurredFrame, new Size(9, 9), 2, 2);

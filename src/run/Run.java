@@ -22,6 +22,7 @@ public class Run {
             Thread task1 = new Thread(server);
             task1.start();
             //busy wait until robot is connected
+            //robotAI.run();
             while (server.getConnected() == null) {
                 Thread.sleep(100);
             }

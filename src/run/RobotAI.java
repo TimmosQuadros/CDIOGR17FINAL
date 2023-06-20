@@ -8,6 +8,7 @@ import Math1.LineCreation;
 import Navigation.BallTracker;
 import Observer.HoughCircleDetectorSubject;
 import Observer.RobotPositionSubject;
+import Observer.FindAreaOfInterestSubject;
 import Server.Server;
 import Singleton.VideoCaptureSingleton;
 import Vectors.VectorCalculations;
@@ -30,10 +31,11 @@ public class RobotAI {
     private Server server;
     private boolean robotFacingTop;
     private boolean robotFacingLeft;
+    private FindAreaOfInterestSubject findAreaOfInterestSubject;
 
 
     public RobotAI(Server server){
-        //FindAreaOfInterestSubject areaOfInterestSubject = new FindAreaOfInterestSubject();
+        findAreaOfInterestSubject = new FindAreaOfInterestSubject();
         //corners = areaOfInterestSubject.getCorners();
         //goals = areaOfInterestSubject.getGoalPos();
         //areaOfInterestSubject.detectRobot();
@@ -44,7 +46,10 @@ public class RobotAI {
 
 
     public void run() {
-        VideoCapture videoCapture = VideoCaptureSingleton.getInstance().getVideoCapture();
+        VideoCaptureSingleton videoCaptureSingleton = VideoCaptureSingleton.getInstance();
+        VideoCapture videoCapture = videoCaptureSingleton.getVideoCapture();
+        videoCaptureSingleton.setPoint(findAreaOfInterestSubject);
+
         Mat frame = new Mat();
         Math1.LineCreation lineCreation = new Math1.LineCreation();
         BallTracker ballTracker = new BallTracker();
@@ -72,33 +77,10 @@ public class RobotAI {
         /*while(true){
             Point redCircle = null;
             Point blueCircle = null;
-            List<Point> redCircleList = robotPositionSubject.getPos(false);
-            List<Point> blueCircleList = new ArrayList<>();
-            if(redCircleList.size()==0){
-                blueCircleList = robotPositionSubject.getPos(true);
-            }
-
-            List<Point> bigcirclePoints = robotPositionSubject.getPos();
-
-            if(blueCircleList.size()>0){
-                blueCircle = blueCircleList.get(0);
-                blue = true;
-            }else if(redCircleList.size()>0){
-                redCircle = redCircleList.get(0);
-                blue = false;
-            }
-
-            for(Point p : bigcirclePoints){
-                if(!blue){
-                    if(Math.abs(p.x-redCircle.x)>10 || Math.abs(p.y-redCircle.y)>10){
-                        blueCircle = p;
-                    }
-                }else{
-                    if(Math.abs(p.x-blueCircle.x)>10 || Math.abs(p.y-blueCircle.y)>10){
-                        redCircle = p;
-                    }
-                }
-            }
+            List<Point> redCircleList = robotPositionSubject.getPos(true);
+            List<Point> blueCircleList = robotPositionSubject.getPos(false);
+            redCircle = redCircleList.get(0);
+            blueCircle = blueCircleList.get(0);
 
             if(redCircle!=null && blueCircle!=null){
                 robotFacingTop = facingDirection(redCircle.y, blueCircle.y);
@@ -106,19 +88,21 @@ public class RobotAI {
             }
 
             double[] line = null;
-            if(bigcirclePoints.size()>1)
-                line = lineCreation.getSlopeAndBegin(bigcirclePoints.get(0),bigcirclePoints.get(1));
-                VectorCalculations vectorCalculations;
-                double angle = 0;
-                if(redCircle!=null && blueCircle!=null){
-                    vectorCalculations = new VectorCalculations(new LineSegment(blueCircle,redCircle),ballPositions.get(0));
-                    angle = vectorCalculations.getAngle();
-                }
+            line = lineCreation.getSlopeAndBegin(redCircle,blueCircle);
+            VectorCalculations vectorCalculations;
+            double angle = 0;
+            if(redCircle!=null && blueCircle!=null){
+                vectorCalculations = new VectorCalculations(new LineSegment(blueCircle,redCircle),ballPositions.get(0));
+                angle = vectorCalculations.getAngle();
+            }
             if(line!=null){
-                Point targetBall = ballTracker.checkIfBallIsOnLine(line,ballPositions,10.0,redCircle,blueCircle);
+
+                Point targetBall = ballPositions.get(0);//ballTracker.checkIfBallIsOnLine(line,ballPositions,10.0,redCircle,blueCircle);
                 if(targetBall!=null && !targetingBall){
                     server.writeMessage(incoder.lineAB(line));
+                    server.receiveMessage();
                     server.writeMessage(incoder.targetBall(targetBall));
+                    server.receiveMessage();
                     System.out.println("ballFound");
                     server.writeMessage("Stop");
                     System.out.println(server.receiveMessage());
@@ -126,6 +110,7 @@ public class RobotAI {
                 }else{
                     if(!isLookingForBallAndTurning){
                         server.writeMessage("Turn"+";"+angle);
+                        server.receiveMessage();
                         System.out.println(server.receiveMessage());
                         if(i<2) {
                             isLookingForBallAndTurning = true;
@@ -144,9 +129,10 @@ public class RobotAI {
                         mes = server.receiveMessage();
                     if(mes!=null){
                         if(mes.equalsIgnoreCase(MessageStrings.GETRobotPos.toString())){
-                            List<Point> robPos = robotPositionSubject.getPos();
+                            List<Point> robPos = robotPositionSubject.getPos(true);
+                            List<Point> robPos1 = robotPositionSubject.getPos(false);
                             if(robPos.size()>0)
-                                server.writeMessage(robPos.get(0).x+","+robPos.get(0).y+";"+robPos.get(1).x+","+robPos.get(1).y+";"+robotFacingLeft);
+                                server.writeMessage(robPos.get(0).x+","+robPos.get(0).y+";"+robPos1.get(0).x+","+robPos1.get(0).y+";"+robotFacingLeft);
                         }else{
                             finnish = true;
                         }
@@ -210,6 +196,7 @@ public class RobotAI {
 
         //Navigate to First wayPoint
         server.writeMessage(MessageStrings.WayPoints.toString()+":"+lineToWaypoint[0]+","+lineToWaypoint[1]+";"+targetWayPoint.x+","+targetWayPoint.y);
+        server.receiveMessage();
         robotPosition = startFollowingLine(robotPositionSubject,robotPosition, targetWayPoint);
 
         while (!wayPoints.isEmpty()){
@@ -218,6 +205,7 @@ public class RobotAI {
             turn(robotPositionSubject, targetWayPoint);
             lineToWaypoint = lineCreation.getSlopeAndBegin(robotPosition, targetWayPoint);
             server.writeMessage(MessageStrings.WayPoints.toString()+":"+lineToWaypoint[0]+","+lineToWaypoint[1]+";"+targetWayPoint.x+","+targetWayPoint.y);
+            server.receiveMessage();
             robotPosition = startFollowingLine(robotPositionSubject,robotPosition, targetWayPoint);
         }
     }
@@ -246,9 +234,8 @@ public class RobotAI {
         //Test Code
         VideoCapture videoCapture = VideoCaptureSingleton.getInstance().getVideoCapture();
         Mat frame = new Mat();
-
-
-        while(res.contains(MessageStrings.GETRobotPos.toString())){
+        boolean small = true;
+        while(true){
             List<Point> smallCircles = robotPositionSubject.getPos(true);
             List<Point> bigCircles = robotPositionSubject.getPos(false);
             if(bigCircles.size()>0 && smallCircles.size()>0){
@@ -257,9 +244,20 @@ public class RobotAI {
                 robotFacingTop = facingDirection(p2.y, p1.y);
                 robotFacingLeft = facingDirection(p2.x, p1.x);
                 lastPosition = getMidPoint(p1,p2);
+                /*if(small){
+                    server.writeMessage(p1.x+","+p1.y+";"+p2.x+","+p2.y+";"+robotFacingLeft);
+                    small = false;
+                }else{
+                    server.writeMessage(p2.x+","+p2.y+";"+p1.x+","+p1.y+";"+robotFacingLeft);
+                    small = true;
+                }*/
                 server.writeMessage(p1.x+","+p1.y+";"+p2.x+","+p2.y+";"+robotFacingLeft);
+
             }
             res = server.receiveMessage();
+            if(res.contains("finnish")){
+                break;
+            }
             videoCapture.read(frame);
             HighGui.imshow("abe",frame);
             if(robotFacingLeft){
