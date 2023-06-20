@@ -6,6 +6,7 @@ import LineCreation.AlignRobot;
 import LineCreation.LineSegment;
 import Math1.LineCreation;
 import Navigation.BallTracker;
+import Navigation.PathAdjustment;
 import Observer.HoughCircleDetectorSubject;
 import Observer.RobotPositionSubject;
 import Observer.FindAreaOfInterestSubject;
@@ -26,9 +27,11 @@ public class RobotAI {
     //Holds the corner in clock direction from top left to bottom left.
     private List<Point> corners;
     private List<Point> goals;
+    private Point robotPos;
     private AlignRobot alignRobot;
     private Incoder incoder = new Incoder();
     private Server server;
+    private PathAdjustment pather;
     private boolean robotFacingTop;
     private boolean robotFacingLeft;
     private FindAreaOfInterestSubject findAreaOfInterestSubject;
@@ -64,10 +67,24 @@ public class RobotAI {
         List<Point> blueCircle = robotPositionSubject.getPos(false);
         List<Point> redCircle = robotPositionSubject.getPos(true);
         if(blueCircle.size()>0 && redCircle.size()>0){
-            Point robotPos = getMidPoint(blueCircle.get(0),redCircle.get(0));
-            LinkedList<Point> ballPositionsQueue = listOfPointsToQueue(ballPositions);
+            robotPos = getMidPoint(blueCircle.get(0),redCircle.get(0));
+
+            LinkedList<Point> ballPositionsQueue = new LinkedList<Point>(); //Adding a variable to store the list of balls
+            for (Point ball: ballPositions){                                //Looping through all balls
+                if (pather.isEasy(ball)){                                   //Checking if the ball is considered easy
+                    ballPositionsQueue.add(ball);                           //Adding the easy ball to the variable for the remaining balls
+                }
+            }
+
+
+            if(ballPositionsQueue.isEmpty()){                               //Checking if the list of ball positions is empty
+                ballPositionsQueue = listOfPointsToQueue(ballPositions);    //If empty, all the difficult balls are added to the list with the Iver-pathfinding
+            }else{
+                ballPositionsQueue = listOfPointsToQueue(ballPositionsQueue);   //Else all the easy balls are added to the list with waypoints underway
+            }
+
             if(ballPositionsQueue.size()>0){
-                testRun(listOfPointsToQueue(ballPositions),lineCreation,robotPos,robotPositionSubject);
+                testRun(ballPositionsQueue,lineCreation,robotPos,robotPositionSubject);     //Run is started with the ballWaypoint queue and other required variables
             }
         }
 
@@ -157,15 +174,15 @@ public class RobotAI {
     }
 
     private LinkedList<Point> listOfPointsToQueue(List<Point> ballPositions) {
-        LinkedList<Point> queue = new LinkedList<>();
+        LinkedList<Point> queue = new LinkedList<Point>();
         ballPositions.sort(new Comparator<Point>() {
             @Override
             public int compare(Point o1, Point o2) {
-                return Double.compare(o1.x, o2.x);
+                return Double.compare(Math.sqrt(Math.pow(o1.x-robotPos.x, 2)+Math.pow(o1.y-robotPos.y, 2)), Math.sqrt(Math.pow(o2.x-robotPos.x, 2)+Math.pow(o2.y-robotPos.y, 2)));
             }
         });
         for(Point p : ballPositions){
-            queue.add(p);
+            queue.addAll(pather.adjustPath(p, robotPos));
         }
         return queue;
     }
