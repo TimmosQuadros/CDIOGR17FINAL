@@ -214,8 +214,8 @@ public class RobotAI {
 
         while (!wayPoints.isEmpty()){
             //Turn the robot to the desired angle
-            turn(robotPositionSubject, targetWayPoint);
             targetWayPoint = wayPoints.poll();
+            turn(robotPositionSubject, targetWayPoint);
             lineToWaypoint = lineCreation.getSlopeAndBegin(robotPosition, targetWayPoint);
             server.writeMessage(MessageStrings.WayPoints.toString()+":"+lineToWaypoint[0]+","+lineToWaypoint[1]+";"+targetWayPoint.x+","+targetWayPoint.y);
             robotPosition = startFollowingLine(robotPositionSubject,robotPosition, targetWayPoint);
