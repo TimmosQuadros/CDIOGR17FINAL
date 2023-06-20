@@ -199,13 +199,14 @@ public class RobotAI {
         if(targetWayPoint==null){
             return;
         }
+
+        //Turn the robot to the desired angle
+        turn(robotPositionSubject, targetWayPoint);
+
         double[] lineToWaypoint = lineCreation.getSlopeAndBegin(robotPosition, targetWayPoint);
         if(lineToWaypoint==null){
             return;
         }
-
-        //Turn the robot to the desired angle
-        turn(robotPositionSubject, targetWayPoint);
 
         //Navigate to First wayPoint
         server.writeMessage(MessageStrings.WayPoints.toString()+":"+lineToWaypoint[0]+","+lineToWaypoint[1]+";"+targetWayPoint.x+","+targetWayPoint.y);
