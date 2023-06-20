@@ -1,5 +1,6 @@
 package Interface;
 
+import LineCreation.Circle;
 import Singleton.VideoCaptureSingleton;
 import org.opencv.core.Point;
 import org.opencv.videoio.VideoCapture;
@@ -10,7 +11,8 @@ public interface FindAreaOfInterest {
 
     public List<Point> getGoalPos();
     public Point[] getCorners();
-    public List<Point> getCross();
+    public Circle getCross();
+    public Circle getScaleAdjustedCross();
     public double getScaleFactor();
 
 }

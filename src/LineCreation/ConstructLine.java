@@ -3,8 +3,6 @@ package LineCreation;
 import org.opencv.core.*;
 
 public class ConstructLine {
-    public static LineEquation line;
-
 
     /**
      * This method creates the constants for the linear line that is determined based on the robots heading and given as
