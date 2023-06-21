@@ -108,7 +108,7 @@ public class RobotAI {
         List<Ball> balls = new ArrayList<>();
 
         for (Point ball: ballPositions){                                //Looping through all balls
-            if (pather.isEasy(ball)){                                   //Checking if the ball is considered easy
+            if (pather.isEasy(ball, robotPos)){                                   //Checking if the ball is considered easy
                 balls.add(new Ball(ball));
             }
         }
@@ -162,8 +162,8 @@ public class RobotAI {
         server.writeMessage(MessageStrings.WayPoints.toString()+":"+lineToWaypoint[0]+","+lineToWaypoint[1]+";"+wayPoint.x+","+wayPoint.y);
         server.receiveMessage();
         robotPosition = startFollowingLine(robotPositionSubject,robotPosition, wayPoint);
-
     }
+
 
     private void turn(RobotPositionSubject robotPositionSubject, Point targetWayPoint) {
         VectorCalculations vectorCalculations;
@@ -180,6 +180,10 @@ public class RobotAI {
             //TODO maybe do something
             String res = server.receiveMessage();
         }
+    }
+
+    private void goToPoint(RobotPositionSubject robotPositionSubject, Point targetWayPoint){
+        VectorCalculations vectorCalculations;
     }
 
     private Point startFollowingLine(RobotPositionSubject robotPositionSubject, Point robocupPos, Point targetWayPoint) {
