@@ -69,37 +69,52 @@ public class PathAdjustment {
      * @param roboCenter robocenter.
      * @return An adjusted path to the ball.
      */
-    public List<Point> adjustPath(Point ballCoordinate, Point roboCenter){
+    public List<Point> adjustPath(Point ballCoordinate, Point roboCenter) {
         List<Point> path = new ArrayList<>();
         boolean nearSide = isNearSide(ballCoordinate);
         boolean nearCross = isAroundCross(ballCoordinate);
 
         //if the first if statement is true, the points to the opposite quadrant will be added to the path.
         //Otherwise we will just add the point of the near quadrant to the path.
-        if(!determineIfRoboAndBallAreInOppositeQuadrant(determineQuadrant(roboCenter, path), ballCoordinate, path)) {
+        if (!determineIfRoboAndBallAreInOppositeQuadrant(determineQuadrant(roboCenter, path), ballCoordinate, path)) {
+            if (!nearCross && !nearSide) {
                 if (pathIntersects(path.get(0), ballCoordinate)) {
                     determineQuadrant(ballCoordinate, path);
                     path.add(ballCoordinate);
                 } else
                     path.add(ballCoordinate);
-        }else{
+            } else if (nearCross) {
+                if (pathIntersects(path.get(0), determineCoordinateForCrossPickup(ballCoordinate))) {
+                    determineQuadrant(determineCoordinateForCrossPickup(ballCoordinate), path);
+                    path.add(determineCoordinateForCrossPickup(ballCoordinate));
+                    path.add(ballCoordinate);
+                } else {
+                    path.add(determineCoordinateForCrossPickup(ballCoordinate));
+                    path.add(ballCoordinate);
+                }
+            } else if (nearSide) {
+                if (pathIntersects(path.get(0), determineCoordinateForSidePickup(ballCoordinate))) {
+                    determineQuadrant(determineCoordinateForSidePickup(ballCoordinate), path);
+                    path.add(determineCoordinateForSidePickup(ballCoordinate));
+                    path.add(ballCoordinate);
+                } else {
+                    path.add(determineCoordinateForSidePickup(ballCoordinate));
+                    path.add(ballCoordinate);
+                }
+            }
+        } else {
+            if (!nearCross && nearSide) {
                 if (!pathIntersects(path.get(1), ballCoordinate))
                     path.add(2, ballCoordinate);
                 else
                     path.add(ballCoordinate);
-        }
-
-        //at this point in the method the robot will have gotten the path to the same quadrant as the ball.
-        //if the ball is defined as easy to pick up, nothing more will happen after here.
-        //if the ball is neear a side or in the area of cross, we will add one more point, to the path.
-
-        if (nearCross){
-            path.add(determineCoordinateForCrossPickup(ballCoordinate));
-            path.add(ballCoordinate);
-        }
-        else if (nearSide){
-            path.add(determineCoordinateForSidePickup(ballCoordinate));
-            path.add(ballCoordinate);
+            }if (nearCross){
+                path.add(determineCoordinateForCrossPickup(ballCoordinate));
+                path.add(ballCoordinate);
+            }else if(nearSide){
+                path.add(determineCoordinateForSidePickup(ballCoordinate));
+                path.add(ballCoordinate);
+            }
         }
 
         for (int i = 0; i < path.size(); i++) {
