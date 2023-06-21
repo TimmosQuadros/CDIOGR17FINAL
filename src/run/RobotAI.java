@@ -131,6 +131,7 @@ public class RobotAI {
                 testRun(waypoint, lineCreation, robotPos, robotPositionSubject);
                 setRoboPos(waypoint);
             }
+            turn(robotPositionSubject, pather.getGoalPoint());
         }
     }
 
@@ -167,10 +168,10 @@ public class RobotAI {
     private void turn(RobotPositionSubject robotPositionSubject, Point targetWayPoint) {
         VectorCalculations vectorCalculations;
         for(int i = 0; i<2; i++){
-            List<Point> redCirc = robotPositionSubject.getPos(true);
-            List<Point> blueCirc = robotPositionSubject.getPos(false);
-            if(redCirc.size()>0 && blueCirc.size()>0){
-                vectorCalculations = new VectorCalculations(new LineSegment(blueCirc.get(0),redCirc.get(0)), targetWayPoint);
+            redCircle = robotPositionSubject.getPos(true);
+            blueCircle = robotPositionSubject.getPos(false);
+            if(redCircle.size()>0 && blueCircle.size()>0){
+                vectorCalculations = new VectorCalculations(new LineSegment(blueCircle.get(0),redCircle.get(0)), targetWayPoint);
             }else {
                 return;
             }
@@ -194,11 +195,13 @@ public class RobotAI {
         Mat frame = new Mat();
         boolean small = true;
         while(true){
-            List<Point> smallCircles = robotPositionSubject.getPos(true);
-            List<Point> bigCircles = robotPositionSubject.getPos(false);
-            if(bigCircles.size()>0 && smallCircles.size()>0){
-                Point p1 = bigCircles.get(0);
-                Point p2 = smallCircles.get(0);
+            //List<Point> smallCircles = robotPositionSubject.getPos(true);
+            //List<Point> bigCircles = robotPositionSubject.getPos(false);
+            blueCircle = robotPositionSubject.getPos(true);
+            redCircle = robotPositionSubject.getPos(false);
+            if(redCircle.size()>0 && blueCircle.size()>0){
+                Point p1 = redCircle.get(0);
+                Point p2 = blueCircle.get(0);
                 robotFacingTop = facingDirection(p2.y, p1.y);
                 robotFacingLeft = facingDirection(p2.x, p1.x);
                 lastPosition = getMidPoint(p1,p2);
@@ -219,6 +222,7 @@ public class RobotAI {
             }
 
             //test out puts
+            /*
             Imgproc.circle(frame, targetWayPoint, 5, new Scalar(255,0,0), 10);
             Imgproc.circle(frame, findAreaOfInterestSubject.getCross().getCenter(), 5, new Scalar(255,0,0), 3);
             Imgproc.line(frame,findAreaOfInterestSubject.fieldDetection.getFloorCorners()[0],findAreaOfInterestSubject.fieldDetection.getFloorCorners()[1],new Scalar(255,0,0),6);
@@ -226,7 +230,7 @@ public class RobotAI {
             Imgproc.line(frame,findAreaOfInterestSubject.fieldDetection.getFloorCorners()[1],findAreaOfInterestSubject.fieldDetection.getFloorCorners()[2],new Scalar(255,0,0),6);
             Imgproc.line(frame,findAreaOfInterestSubject.fieldDetection.getFloorCorners()[3],findAreaOfInterestSubject.fieldDetection.getFloorCorners()[2],new Scalar(255,0,0),6);
             Imgproc.circle(frame, pather.getGoalPoint(), 5, new Scalar(255,0,0), 12);
-
+            */
             int key = HighGui.waitKey(10);
             if(key ==27){
                 break;
