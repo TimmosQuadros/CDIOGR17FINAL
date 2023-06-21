@@ -40,7 +40,7 @@ public class HoughCircleDetectorSubject implements HoughCircleDetector {
                     Imgproc.GaussianBlur(grayFrame, blurredFrame, new Size(9, 9), 2, 2);
 
                     Mat circles = new Mat();
-                    Imgproc.HoughCircles(grayFrame, circles, Imgproc.HOUGH_GRADIENT, 1, 30, 300, 20, 12, 16);
+                    Imgproc.HoughCircles(grayFrame, circles, Imgproc.HOUGH_GRADIENT, 1, 30, 300, 15, 12, 16);
 
                     if (circles.cols() > 0) {
                         for (int i = 0; i < circles.cols(); i++) {
