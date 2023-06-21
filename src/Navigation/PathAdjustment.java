@@ -225,24 +225,20 @@ public class PathAdjustment {
     private String determineQuadrant(Point roboCenter, List<Point> path) {
         if (fieldDetection.getRedCross().getCrossArea().getCenter().x < roboCenter.x){
             if (fieldDetection.getRedCross().getCrossArea().getCenter().y < roboCenter.y) { //right lower quadrant, with largest x and y values
-                if(!isInRange(roboCenter, rightLowerQuadrantWayPoint))
-                    path.add(rightLowerQuadrantWayPoint);
+                path.add(rightLowerQuadrantWayPoint);
                 return "rightLower";
             }
             else {
-                if(!isInRange(roboCenter, rightUpperQuadrantWayPoint))
-                    path.add(rightUpperQuadrantWayPoint);
+                path.add(rightUpperQuadrantWayPoint);
                 return "rightUpper";
             }
         }else{
             if(fieldDetection.getRedCross().getCrossArea().getCenter().y < roboCenter.y){
-                if(!isInRange(roboCenter, leftLowerQuadrantWayPoint))
-                    path.add(leftLowerQuadrantWayPoint);
+                path.add(leftLowerQuadrantWayPoint);
                 return "leftLower";
             }
             else {
-                if(!isInRange(roboCenter, leftUpperQuadrantWayPoint))
-                    path.add(leftUpperQuadrantWayPoint);
+                path.add(leftUpperQuadrantWayPoint);
                 return "leftUpper";
             }
         }
