@@ -435,7 +435,7 @@ public class PathAdjustment {
      * @return true if the ball is easy, false if the ball is difficult to pick up
      */
     public boolean isEasy(Point ballCoordinate, Point roboPos){
-        return (!isInCorner(ballCoordinate) && !isNearCross(ballCoordinate) && isBallInField(ballCoordinate) && !isInRange(roboPos, ballCoordinate));
+        return (!isInCorner(ballCoordinate) && !isNearCross(ballCoordinate) && isBallInField(ballCoordinate) && !isInRange(roboPos, ballCoordinate) && !isNearSide(ballCoordinate));
     }
 
 }
