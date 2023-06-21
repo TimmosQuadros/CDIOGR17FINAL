@@ -77,20 +77,16 @@ public class PathAdjustment {
         //if the first if statement is true, the points to the opposite quadrant will be added to the path.
         //Otherwise we will just add the point of the near quadrant to the path.
         if(!determineIfRoboAndBallAreInOppositeQuadrant(determineQuadrant(roboCenter, path), ballCoordinate, path)) {
-            if (!nearCross && !nearSide) {
                 if (pathIntersects(path.get(0), ballCoordinate)) {
                     determineQuadrant(ballCoordinate, path);
                     path.add(ballCoordinate);
                 } else
                     path.add(ballCoordinate);
-            }
         }else{
-            if (!nearCross && !nearSide) {
                 if (!pathIntersects(path.get(1), ballCoordinate))
                     path.add(2, ballCoordinate);
                 else
                     path.add(ballCoordinate);
-            }
         }
 
         //at this point in the method the robot will have gotten the path to the same quadrant as the ball.
@@ -427,8 +423,8 @@ public class PathAdjustment {
      * @param ballCoordinate the point variable to be tested
      * @return true if the ball is easy, false if the ball is difficult to pick up
      */
-    public boolean isEasy(Point ballCoordinate){
-        return (!isInCorner(ballCoordinate) && !isNearCross(ballCoordinate) && isBallInField(ballCoordinate));
+    public boolean isEasy(Point ballCoordinate, Point roboPos){
+        return (!isInCorner(ballCoordinate) && !isNearCross(ballCoordinate) && isBallInField(ballCoordinate) && !isInRange(roboPos, ballCoordinate));
     }
 
 }
