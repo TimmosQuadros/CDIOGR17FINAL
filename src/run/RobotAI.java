@@ -207,6 +207,8 @@ public class RobotAI {
                 lastPosition = getMidPoint(p1,p2);
 
                 server.writeMessage(p1.x+","+p1.y+";"+p2.x+","+p2.y+";"+robotFacingLeft);
+                if (pather.isNearSide(redCircle.get(0)))
+                    break;
 
             }
             res = server.receiveMessage();
