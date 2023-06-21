@@ -201,6 +201,11 @@ public class PathAdjustment {
         return opposite;
     }
 
+    private boolean isInRange(Point roboCenter, Point wayPoint){
+        Circle roboArea = new Circle(roboCenter, fieldDetection.getRoboWidth() * fieldDetection.getScaleFactor());
+        return roboArea.isPointInside(wayPoint);
+    }
+
     /**
      * This method determines the position of the robot, and dds the first point to the new path.
      * @param roboCenter
@@ -209,20 +214,24 @@ public class PathAdjustment {
     private String determineQuadrant(Point roboCenter, List<Point> path) {
         if (fieldDetection.getRedCross().getCrossArea().getCenter().x < roboCenter.x){
             if (fieldDetection.getRedCross().getCrossArea().getCenter().y < roboCenter.y) { //right lower quadrant, with largest x and y values
-                path.add(rightLowerQuadrantWayPoint);
+                if(!isInRange(roboCenter, rightLowerQuadrantWayPoint))
+                    path.add(rightLowerQuadrantWayPoint);
                 return "rightLower";
             }
             else {
-                path.add(rightUpperQuadrantWayPoint);
+                if(!isInRange(roboCenter, rightUpperQuadrantWayPoint))
+                    path.add(rightUpperQuadrantWayPoint);
                 return "rightUpper";
             }
         }else{
             if(fieldDetection.getRedCross().getCrossArea().getCenter().y < roboCenter.y){
-                path.add(leftLowerQuadrantWayPoint);
+                if(!isInRange(roboCenter, leftLowerQuadrantWayPoint))
+                    path.add(leftLowerQuadrantWayPoint);
                 return "leftLower";
             }
             else {
-                path.add(leftUpperQuadrantWayPoint);
+                if(!isInRange(roboCenter, leftUpperQuadrantWayPoint))
+                    path.add(leftUpperQuadrantWayPoint);
                 return "leftUpper";
             }
         }
@@ -271,7 +280,7 @@ public class PathAdjustment {
 
         if (roboPosition.x < fieldDetection.getRedCross().getCrossArea().getCenter().x){
             path.add(goalAlignmentPoint);
-            path.add(fieldDetection.getGoals().get(0));
+            path.add(getGoalPoint());
             return path;
         }else{
             path.add(new Point(roboPosition.x, rightLowerQuadrantWayPoint.y));
@@ -282,7 +291,7 @@ public class PathAdjustment {
             }
         }
         path.add(goalAlignmentPoint);
-        path.add(fieldDetection.getGoals().get(0));
+        path.add(getGoalPoint());
 
         return path;
     }
