@@ -89,7 +89,6 @@ public class RobotAI {
                 }else if(ballsCollected == 5){
                     ballsCollected = 0;
                 }
-                ballsCollected++;
                 findAreaOfInterestSubject.fieldDetection.getRedCross().redetectCross();
             }
 
