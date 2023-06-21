@@ -74,6 +74,7 @@ public class RobotAI {
                 if(ballsCollected==5 || ballsCollected >= balls.size()){
                     goToObject(null);
                     //pukeBallsOrWhateverWeCallThisMethod();
+                    findAreaOfInterestSubject.fieldDetection.getRedCross().redetectCross();
                     balls = getBalls();
                     ballsCollected = 0;
                 }else{
@@ -88,7 +89,6 @@ public class RobotAI {
                 }else if(ballsCollected == 5){
                     ballsCollected = 0;
                 }
-                findAreaOfInterestSubject.fieldDetection.getRedCross().redetectCross();
             }
 
     }
