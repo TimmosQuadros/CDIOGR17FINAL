@@ -42,10 +42,10 @@ public class RobotAI {
     public RobotAI(Server server){
         try {
             findAreaOfInterestSubject = new FindAreaOfInterestSubject();
+            pather = new PathAdjustment(findAreaOfInterestSubject.fieldDetection);
         } catch (NullPointerException e){
             System.out.println("No cross or various other elements, get fucked Timmmmmmmmmmmmmmmmmmmmmmm");
         }
-        pather = new PathAdjustment(findAreaOfInterestSubject.fieldDetection);
         this.server = server;
     }
 
@@ -71,10 +71,11 @@ public class RobotAI {
             while (balls.stream().anyMatch(ball -> !ball.picked)) {
                 Ball nearestBall = null;
 
-                if(ballsCollected==5 || ballsCollected == balls.size()){
+                if(ballsCollected==5 || ballsCollected > balls.size()){
                     goToObject(null);
                     //pukeBallsOrWhateverWeCallThisMethod();
                     balls = getBalls();
+                    ballsCollected = 0;
                 }else{
                     nearestBall = findNearestBall(robotPos, balls);
                     goToObject(nearestBall.location);
