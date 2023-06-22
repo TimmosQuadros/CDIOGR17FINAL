@@ -1,5 +1,9 @@
 package Observer;
 
+/*
+ * Author Timm Daniel Rasmussen.
+ */
+
 public class FindAreaOfInterestObserver implements Observer{
 
     @Override

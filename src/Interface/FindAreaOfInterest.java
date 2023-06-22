@@ -7,6 +7,10 @@ import org.opencv.videoio.VideoCapture;
 
 import java.util.List;
 
+/*
+ * Author Timm Daniel Rasmussen.
+ */
+
 public interface FindAreaOfInterest {
 
     public List<Point> getGoalPos();

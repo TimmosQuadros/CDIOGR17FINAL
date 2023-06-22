@@ -5,7 +5,10 @@ import Server.Server;
 import org.opencv.core.Point;
 import java.util.ArrayList;
 import java.util.List;
-import ObjectDetection.CircleDetector;
+
+/*
+ * Author Mohammed Irout.
+ */
 
 public class BallCollector {
     private List<Point> ballPositions;

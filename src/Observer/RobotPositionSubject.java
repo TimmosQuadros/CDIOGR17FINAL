@@ -10,6 +10,10 @@ import org.opencv.videoio.VideoCapture;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * Author Timm Daniel Rasmussen.
+ */
+
 public class RobotPositionSubject implements RobotPosition {
 
     private final VideoCapture videoCapture;

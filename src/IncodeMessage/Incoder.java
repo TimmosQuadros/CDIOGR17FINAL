@@ -4,6 +4,10 @@ import org.opencv.core.Point;
 
 import java.util.List;
 
+/*
+ * Author Timm Daniel Rasmussen.
+ */
+
 public class Incoder
 {
     public String ballPositions(List<Point> balls){

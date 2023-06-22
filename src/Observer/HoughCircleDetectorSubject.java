@@ -10,6 +10,10 @@ import org.opencv.videoio.VideoCapture;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * Author Mohammed Irout
+ */
+
 public class HoughCircleDetectorSubject implements HoughCircleDetector {
 
 

@@ -2,6 +2,10 @@ package Navigation;
 
 import org.opencv.core.Point;
 
+/*
+ * Author Emil Iversen, Mohammed Irout and Timm Daniel Rasmussen.
+ */
+
 public class RobotLine {
 
     private static final double TURN_THRESHOLD = 5.0; // Threshold for turning angle in degrees

@@ -10,6 +10,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Timer;
 
+/*
+ * Author Timm Daniel Rasmussen.
+ */
 
 public class Run {
 

@@ -3,6 +3,10 @@ package Observer;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * Author Timm Daniel Rasmussen.
+ */
+
 public class Subject {
 
 	// Collection to hold the registered observers

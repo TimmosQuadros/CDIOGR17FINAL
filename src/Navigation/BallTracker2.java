@@ -4,6 +4,10 @@ import org.opencv.core.Point;
 
 import java.util.List;
 
+/*
+ * Author Mohammed Irout
+ */
+
 public class BallTracker2 {
 
     public Point checkIfBallIsOnLine(double slope, double begin, List<Point> balls, double threshold) {

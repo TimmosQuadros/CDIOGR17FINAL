@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Author Emil Iversen.
+ * Author Emil Iversen, Esben Gotsche...
  * this class' methods will be used to determine if we should go for a ball in this order.
  * First we check whether the ball is collectable, with the go for ball method.
  * If this method return true, we move on to the next check.

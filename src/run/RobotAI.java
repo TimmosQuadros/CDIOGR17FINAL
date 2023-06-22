@@ -1,6 +1,6 @@
 package run;
 
-/**
+/*
  * Author Emil Iversen, Esben Fribo Gøttsche, Mohammed Irout and Timm Daniel Rasmussen.
  */
 

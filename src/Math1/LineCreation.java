@@ -2,6 +2,10 @@ package Math1;
 
 import org.opencv.core.Point;
 
+/*
+ * Author Timm Daniel Rasmussen.
+ */
+
 public class LineCreation {
 
     public double[] getSlopeAndBegin(Point p1, Point p2){

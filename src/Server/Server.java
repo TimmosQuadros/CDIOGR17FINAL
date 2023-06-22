@@ -9,6 +9,10 @@ import java.net.Socket;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicReference;
 
+/*
+ * Author Timm Daniel Rasmussen.
+ */
+
 public class Server implements Runnable{
 
     public String getConnected() {

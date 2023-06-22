@@ -10,6 +10,10 @@ import org.opencv.videoio.VideoCapture;
 
 import java.util.List;
 
+/*
+ * Author Emil Iversen, Esben Gotsche
+ */
+
 public class FindAreaOfInterestSubject extends Subject implements FindAreaOfInterest {
 
     public final RedRectangleDetection fieldDetection;

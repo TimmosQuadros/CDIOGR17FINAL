@@ -9,6 +9,10 @@ import org.opencv.videoio.VideoCapture;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * Author Mohammed Irout and Timm Daniel Rasmussen.
+ */
+
 public class VideoCaptureSingleton {
     private static VideoCaptureSingleton instance;
     private final VideoCapture videoCapture;

@@ -7,6 +7,10 @@ import org.opencv.imgproc.Imgproc;
 
 import java.util.List;
 
+/*
+ * Author Mohammed Irout and Timm Daniel Rasmussen.
+ */
+
 public class BallTracker {
 
     public Point checkIfBallIsOnLine(double[] line, List<Point> balls, double threshold, Point redCirclePoint, Point blueCirclePoint) {

@@ -5,6 +5,10 @@ import org.opencv.core.Point;
 
 import java.util.*;
 
+/*
+ * Author Emil Iversen, Mohammed Irout and Timm Daniel Rasmussen.
+ */
+
 public class NavigationSystem implements Navigation {
     @Override
     public void goTo(Point src, Point dst, double direction) {

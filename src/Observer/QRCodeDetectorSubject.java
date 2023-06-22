@@ -11,6 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/*
+ * Author Timm Daniel Rasmussen.
+ */
+
 public class QRCodeDetectorSubject extends Subject implements QRCodeDetector {
 
     private final VideoCapture videoCapture;

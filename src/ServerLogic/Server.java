@@ -1,9 +1,5 @@
 package ServerLogic;
 
-/**
- * Timm Daniel Rasmussen.
- */
-
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
@@ -12,6 +8,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import javax.swing.JFrame;
+
+/*
+ * Author Emil Iversen
+ */
 
 public class Server implements KeyListener{
 	PrintWriter writer;
