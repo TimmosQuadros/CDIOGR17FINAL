@@ -1,0 +1,237 @@
+Index: src/ObjectDetection/FieldObjectDetection.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/ObjectDetection/FieldObjectDetection.java b/src/ObjectDetection/RedCrossDetection.java
+rename from src/ObjectDetection/FieldObjectDetection.java
+rename to src/ObjectDetection/RedCrossDetection.java
+--- a/src/ObjectDetection/FieldObjectDetection.java	
++++ b/src/ObjectDetection/RedCrossDetection.java	
+@@ -1,32 +1,83 @@
+ package ObjectDetection;
+ 
++import Bitmasks.AreaOfInterestMask;
+ import LineCreation.LineSegment;
+ import org.opencv.core.*;
++import org.opencv.highgui.HighGui;
+ import org.opencv.imgcodecs.Imgcodecs;
+ import org.opencv.imgproc.Imgproc;
+-import run.Main;
+ 
+-import java.util.List;
++import static run.Main.videoCapture;
+ 
+-public class FieldObjectDetection {
++public class RedCrossDetection {
+ 
+     public static LineSegment[] crossLines = new LineSegment[2];
++    private AreaOfInterestMask aoiMask = null;
++    private Mat frame = new Mat();
++    private Point crossCenter;
+ 
+     /**
+      * Constructs a FieldObjectDetection object to detect field objects, specifically the cross lines on the field.
+      *
+      */
+-    public FieldObjectDetection() {
+-        String imagePath = "src/main/resources/FieldImages/fieldwithcross.png";
++    public RedCrossDetection() {
++    }
++
++    public void detectCross(){
++        retrieveFrame();
++        Mat aoiImage = createAOIMask(frame);
++
++        fillObstableArray(aoiImage);
++        crossCenter = RedRectangleDetection.findIntersection(crossLines[1], crossLines[0]);
++    }
++
++    public void detectCrossTest(){
++        String imagePath = "resources/FieldImages/cutfieldImageWithCross.png";
+         Mat frame = Imgcodecs.imread(imagePath);
+-        Mat redCrossMask = createRedCrossMask(frame);
++        //Mat aoiImage = createAOIMask(frame);
++
++        fillObstableArray(frame);
++
++        Imgproc.circle(frame, crossLines[0].getStartPoint(), 5, new Scalar(0, 255, 0), -1);
++        Imgproc.circle(frame, crossLines[0].getEndPoint(), 5, new Scalar(0, 255, 0), -1);
++
++        Imgproc.circle(frame, crossLines[1].getStartPoint(), 5, new Scalar(0, 255, 0), -1);
++        Imgproc.circle(frame, crossLines[1].getEndPoint(), 5, new Scalar(0, 255, 0), -1);
+ 
+-        //Mat redCrossMask = createRedCrossMask(Objects.requireNonNull(RedRectangleDetection.retrieveFrame(videoCapture)), areaOfInterest[0], areaOfInterest[1], areaOfInterest[3], areaOfInterest[2]);
+-        fillObstableArray(redCrossMask);
++        crossCenter = RedRectangleDetection.findIntersection(crossLines[1], crossLines[0]);
+ 
++        Imgproc.circle(frame, crossCenter, 5, new Scalar(0, 255, 0), -1);
++
++        // Display the frame
++        HighGui.imshow("Frame", frame);
++        HighGui.waitKey();
++
++        frame.release();
+     }
+ 
+-    private void fillObstableArray(Mat redCrossMask) {
++    public void retrieveFrame(){
++        // Check if the VideoCapture object is opened successfully
++        if (!videoCapture.isOpened()) {
++            System.out.println("Failed to open the webcam.");
++            return ;
++        }
++
++        while (!videoCapture.read(this.frame)) { //reads next frame of videocapture into the frame variable.
++            System.out.println("Failed to capture a frame.");
++        }
++    }
++
++    private void fillObstableArray(Mat aoiMask) {
++        Mat hsvImage = new Mat();
++        Imgproc.cvtColor(aoiMask, hsvImage, Imgproc.COLOR_BGR2HSV);
++        Mat redCrossMask = new Mat();
++
++        // Define the lower and upper thresholds for red color
++        Scalar lowerRed = new Scalar(0, 100, 100);
++        Scalar upperRed = new Scalar(10, 255, 255);
++
++        Core.inRange(hsvImage, lowerRed, upperRed, redCrossMask);
++
+         //vertical line
+         crossLines[0] = findLinesegment(redCrossMask, true);
+ 
+@@ -46,33 +97,19 @@
+      * @return the red cross mask.
+      */
+ 
+-    public static Mat createRedCrossMask(Mat frame) {
+-        // Create a blank bitmask with the same size as the frame
+-        Mat mask = Mat.zeros(frame.size(), CvType.CV_8UC1);
+-
+-        // Define the area of interest as a polygon
+-        MatOfPoint roi = new MatOfPoint(Main.courseCoordinates[4], Main.courseCoordinates[5], Main.courseCoordinates[7], Main.courseCoordinates[6]);
+-        MatOfPoint[] roiContours = { roi };
++    public Mat createAOIMask(Mat frame) {
++        // Apply the mask to the original image
++        Mat maskedImage = new Mat();
+ 
+-        // Fill the area of interest with white color (255) in the bitmask
+-        Imgproc.fillPoly(mask, List.of(roiContours), new Scalar(255));
++        if(aoiMask == null)
++            aoiMask = new AreaOfInterestMask(frame);
+ 
+-        // Convert the frame to the HSV color space
+-        Mat hsvFrame = new Mat();
+-        Imgproc.cvtColor(frame, hsvFrame, Imgproc.COLOR_BGR2HSV);
++        frame.copyTo(maskedImage, aoiMask.getAoiMask());
+ 
+-        // Define the lower and upper bounds of the red color in HSV
+-        Scalar lowerRed = new Scalar(0, 100, 100);
+-        Scalar upperRed = new Scalar(10, 255, 255);
++        // Save the masked image and the binary mask image
++        Imgcodecs.imwrite("maskedImage.jpg", maskedImage);
+ 
+-        // Create the red color mask using the defined bounds
+-        Mat redMask = new Mat();
+-        Core.inRange(hsvFrame, lowerRed, upperRed, redMask);
+-
+-        // Apply the area of interest mask to the red color mask
+-        Core.bitwise_and(redMask, mask, redMask);
+-
+-        return redMask;
++        return maskedImage;
+     }
+ 
+     private LineSegment findLinesegment(Mat binaryImage, boolean vertical) {
+Index: src/ObjectDetection/RedRectangleDetection.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package ObjectDetection;\r\n\r\nimport Bitmasks.AreaOfInterestMask;\r\nimport LineCreation.LineSegment;\r\nimport org.opencv.core.*;\r\nimport org.opencv.highgui.HighGui;\r\nimport org.opencv.imgcodecs.Imgcodecs;\r\nimport org.opencv.imgproc.Imgproc;\r\n\r\nimport java.io.File;\r\nimport java.net.URL;\r\nimport java.util.ArrayList;\r\nimport java.util.List;\r\n\r\nimport static run.Main.courseCoordinates;\r\nimport static run.Main.videoCapture;\r\n\r\npublic class RedRectangleDetection {\r\n\r\n    private final int frameWidth = 1920;\r\n    private final int frameHeight = 1080;\r\n    private Mat frame;\r\n\r\n\r\n    public RedRectangleDetection(){\r\n    }\r\n\r\n    /**\r\n     * Method to be used in real time.\r\n     * We will use the coordinates found to define an area of interest, in which we will search\r\n     * for the remaining objects that is : table tennis balls, obstacle and Mr. Robot.\r\n     * Having a subsection of the actual frame defined minimized the computational work errors / disturbances\r\n     * of observations not of interest.\r\n     */\r\n    public void detectField(){\r\n        retrieveFrame();\r\n        findCorners(findLines(frame)); // find corners.\r\n        findFloorCorners();\r\n        determineGoalCenters();\r\n        AreaOfInterestMask aoiMask = new AreaOfInterestMask(this.frame);\r\n\r\n        //drawCorners(coordinates, frame);\r\n\r\n    }\r\n\r\n    private void determineGoalCenters() {\r\n        // finds posts for lefthand side.\r\n        courseCoordinates[8] = getAverage(courseCoordinates[4],courseCoordinates[6]);\r\n\r\n        //finds posts for righthand side.\r\n        courseCoordinates[9] = getAverage(courseCoordinates[5],courseCoordinates[7]);\r\n    }\r\n\r\n    private Point getAverage(Point upperPoint, Point lowerPoint) {\r\n        double centerX = (upperPoint.x + lowerPoint.x) / 2;\r\n        double centerY = (upperPoint.y + lowerPoint.y) / 2;\r\n\r\n        return new Point(centerX,centerY);\r\n    }\r\n\r\n    /**\r\n     * OBS!! This method needs more testing!!\r\n     *\r\n     * Fiinds an approximation of the coordiinates of the folding in the corner.\r\n     * @return the coordinates of the approximated foldiing intersections for each corner.\r\n     */\r\n    private void findFloorCorners() {\r\n        double adjustHeight = 8.0;\r\n        double adjustWidth = 10.0;\r\n        courseCoordinates[4] = new Point((adjustWidth + courseCoordinates[0].x),(adjustHeight + courseCoordinates[0].y));\r\n        courseCoordinates[5] = new Point((courseCoordinates[1].x - adjustWidth),(adjustHeight + courseCoordinates[1].y));\r\n        courseCoordinates[6] = new Point((adjustWidth + courseCoordinates[2].x),(courseCoordinates[2].y) - adjustHeight);\r\n        courseCoordinates[7] = new Point((courseCoordinates[3].x - adjustWidth),(courseCoordinates[3].y) - adjustHeight);\r\n\r\n    }\r\n\r\n    /**\r\n     * method to test how well working the methods are using png images.\r\n     */\r\n    public void testRedRectangleDetection(){\r\n        String imagePath = \"resources/FieldImages/bluegreen.jpg\";\r\n        //String imagePath = \"resources/FieldImages/MrRobotBlackGreenNBlueEnds.jpg\";\r\n        frame = Imgcodecs.imread(imagePath);\r\n\r\n        findCorners(findLines(frame));\r\n        findFloorCorners();\r\n        determineGoalCenters();\r\n        //drawCorners(frame);\r\n        for (Point x : courseCoordinates){\r\n            System.out.println(\"X coordinate = \" + x.x + \" AND y coordinate = \" + x.y);\r\n        }\r\n    }\r\n\r\n    /**\r\n     * This method will draw green circles on each point received as input.\r\n     * @param frame frame to draw on.\r\n     */\r\n    private void drawCorners(Mat frame) {\r\n        // Draw circles for each coordinate\r\n        for (Point coordinate : courseCoordinates) {\r\n            Imgproc.circle(frame, coordinate, 5, new Scalar(0, 255, 0), -1);\r\n        }\r\n        Imgproc.circle(frame, new Point(courseCoordinates[2].x + 10, courseCoordinates[2].y - 10), 5, new Scalar(0, 0, 255), -1);\r\n\r\n\r\n        Imgproc.circle(frame, courseCoordinates[8], 5, new Scalar(0, 255, 0), -1);\r\n\r\n        Imgproc.circle(frame, courseCoordinates[9], 5, new Scalar(0, 255, 0), -1);\r\n\r\n        Imgproc.circle(frame, new Point(766.0, 429.0), 5, new Scalar(0, 255, 0), -1);\r\n        Imgproc.circle(frame, new Point(674.0,627.5), 5, new Scalar(0, 255, 0), -1);\r\n\r\n        /*List<Point> pointList = new ArrayList<>();\r\n        pointList.add(new Point(596.0, 302.0));\r\n        pointList.add(new Point(575.0, 408.0));\r\n        pointList.add(new Point(531.0, 348.0));\r\n        pointList.add(new Point(638.0, 363.0));\r\n        MatOfPoint2f points = new MatOfPoint2f();\r\n        points.fromList(pointList);\r\n\r\n        Point center = new Point();\r\n        float[] radius = new float[1];\r\n        Imgproc.minEnclosingCircle(points, center, radius);\r\n        Imgproc.circle(frame, center, (int) radius[0], new Scalar(0, 255, 0), 2);\r\n\r\n         */\r\n\r\n        // Display the frame\r\n        HighGui.imshow(\"Frame\", frame);\r\n        HighGui.waitKey();\r\n\r\n        frame.release();\r\n    }\r\n\r\n    /**\r\n     * This method will retrieve a frame to analyze from the videocapture.\r\n     * @return frame to analyze.\r\n     */\r\n    public void retrieveFrame(){\r\n        // Check if the VideoCapture object is opened successfully\r\n        if (!videoCapture.isOpened()) {\r\n            System.out.println(\"Failed to open the webcam.\");\r\n            return;\r\n        }\r\n        String imagePath = null;\r\n\r\n        this.frame = new Mat();\r\n        if (videoCapture.read(this.frame)) { //reads next frame of videocapture into the frame variable.\r\n             //Save the frame as a PNG file\r\n            //imagePath = getRessourcePath();\r\n            //Imgcodecs.imwrite(imagePath, this.frame);\r\n            //System.out.println(\"Frame saved as \" + imagePath);\r\n        } else {\r\n            System.out.println(\"Failed to capture a frame.\");\r\n        }\r\n    }\r\n\r\n    /**\r\n     * This method is mostly for testing purposes, and should just help create a generic url for an image path.\r\n     * @return path.\r\n     */\r\n    private String getRessourcePath(){\r\n        // Get the resource path\r\n        URL resourceUrl = RedRectangleDetection.class.getClassLoader().getResource(\"resources\");\r\n\r\n        String resourcePath = null;\r\n\r\n        // Check if the resource URL is not null\r\n        if (resourceUrl != null) {\r\n            // Convert the resource URL to a file path\r\n            resourcePath = new File(resourceUrl.getFile()).getAbsolutePath();\r\n\r\n        }\r\n\r\n        return (resourcePath != null) ? resourcePath : \"file not found\";\r\n    }\r\n\r\n    /**\r\n     * We loop through our list of lines and perform the findIntersection method on each pair.\r\n     * We end up with a point array of all the corners.\r\n     * @param lines the list of linesegments.\r\n     */\r\n    private void findCorners(List<LineSegment> lines) {\r\n        int j = 0;\r\n\r\n        for (int i = 0; i < 4 ; i ++) {\r\n            courseCoordinates[i] = findIntersection(lines.get(j),lines.get(++j));\r\n            j++;\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Using simple math equations, we find the intersection between two lines.\r\n     *\r\n     * Problems experienced (Fixed), when we would have a vertical line, the slope value would be infinite.\r\n     * To counter this problem, we made a check to see if the x values of the start- and endpoint\r\n     * of a vertical line were the same. If this was the case we would set the boolean value \"infiniteSlope\"\r\n     * to true in the LineSegments object, and skip the individual calculation of the slope (a)\r\n     * and intersection with y-axis (b) for this linesegment.\r\n     * The point of the vertical line would thereby be calculated with a different function as seen in the if statement.\r\n     *\r\n     * @param horizontal lineSegment.\r\n     * @param vertical lineSegment.\r\n     * @return intersection point of the two lines - equal to the corner.\r\n     */\r\n    private Point findIntersection(LineSegment horizontal, LineSegment vertical) {\r\n        horizontal.determineEquation();\r\n        vertical.determineEquation();\r\n\r\n        double horizontalA = horizontal.getA();  // slope of line 1\r\n        double horizontalB = horizontal.getB();  // y-intercept of line 1\r\n\r\n        double verticalA = vertical.getA(); // slope of line 2\r\n        double verticalB = vertical.getB();  // y-intercept of line 2\r\n\r\n        if (vertical.isInfiniteSlope()){\r\n            // Handle the case of a vertical line\r\n            double y = horizontalA * vertical.getEndPoint().x + horizontalB;  // Calculate the y-coordinate of intersection\r\n            return new Point(vertical.getEndPoint().x,y);\r\n        }\r\n        // Calculate the intersection point\r\n        double x = (verticalB - horizontalB) / (horizontalA - verticalA);\r\n        double y = horizontalA * x + horizontalB;\r\n\r\n        return new Point(x,y);\r\n    }\r\n\r\n    /**\r\n     * In this method we create a red bitmask for the frame.\r\n     * We then divide the bitmask into 4 regions of equal size,\r\n     * that is we divide right down the middle vertically and horizontally to get 4 areas of interest.\r\n     * These areas will each contain one corner of the field.\r\n     * We then loop through each area of interest to find one vertical and one horizontal line segment.\r\n     * The linesegment will be stored in the lineSegments arraylist, where the first 2 entries\r\n     * will be the top left corner.\r\n     * The next two entries will form the top right corner.\r\n     * The next two entries will form the bottom left corner.\r\n     * The last two entries will form the bottom right corner.\r\n     * @param frame the still image from the live video.\r\n     * @return The list of line segments.\r\n     */\r\n    private List<LineSegment> findLines(Mat frame){\r\n        //bit mask for all the red areas in the frame\r\n        Mat redMask = findRedMask(frame);\r\n        //redMask = applyCanny(redMask); //applying the canny edge detection algorithm for more precise detection.\r\n\r\n        // Define the number of divisions and the size of each division\r\n        int areaWidth = frameWidth / 2;\r\n        int areaHeight = frameHeight / 2;\r\n\r\n        List<LineSegment> lineSegments = new ArrayList<>();\r\n\r\n        // Divide the bitmask frame into smaller areas and search for line segments\r\n        for (int i = 0; i < 2; i++) {\r\n            for (int j = 0; j < 2; j++) {\r\n                // Define the top-left and bottom-right corners of the area\r\n                int startX = j * areaWidth;\r\n                int startY = i * areaHeight;\r\n                int endX = startX + areaWidth;\r\n                int endY = startY + areaHeight;\r\n\r\n                // Extract the area of interest from the bitmask frame\r\n                Mat areaOfInterest = new Mat(redMask, new Rect(new Point(startX, startY), new Point(endX, endY)));\r\n\r\n                // Find the horizontal and vertical lines in the area of interest\r\n                lineSegments.add(findLinesegment(areaOfInterest, false, (j > 0), (i > 0), areaWidth, areaHeight));\r\n                lineSegments.add(findLinesegment(areaOfInterest, true, (j > 0), (i > 0), areaWidth, areaHeight));\r\n            }\r\n        }\r\n\r\n        //Just a test code to view results -- should be deleted when tested thoroughly! :D\r\n        for (LineSegment x : lineSegments){\r\n            //System.out.println(\"Corner = (\" + x.getStartPoint() + \",\" + x.getEndPoint() +\")\");\r\n            Imgproc.line(this.frame, x.getStartPoint(), x.getEndPoint(), new Scalar(255, 0, 0), 2);\r\n\r\n        }\r\n\r\n        return lineSegments;\r\n    }\r\n\r\n    /**\r\n     * This method finds the largest LineSegment in the binary image, and return the linesegment object.\r\n     * To find the biggest line segments we use houghLinesP function.\r\n     * @param binaryImage This image is derived from the original bitmask, but is diviided into four\r\n     *                    smaller areas to easier find each corner.\r\n     * @param vertical, if true the method will look for a vertical line segment.\r\n     *                  If false we will be looking for a horizontal line segment\r\n     * @param addToX Since we split our original frame up into smaller areas of interest,\r\n     *               we need to add the pixels back into the final result of the coordinates.\r\n     *               If X is true we will then be adding the width of the areaOfInterest\r\n     *               to the X values of the starting and end point of the line segment.\r\n     * @param addToY Same way idea as addToX but for the y values.\r\n     * @param areaWidth The width of the area.\r\n     * @param areaHeight The height of the area.\r\n     * @return a linesegment.\r\n     */\r\n    private LineSegment findLinesegment(Mat binaryImage, boolean vertical, boolean addToX, boolean addToY, double areaWidth, double areaHeight) {\r\n        Mat lines = new Mat();\r\n        int rho = 1; // Distance resolution of the accumulator in pixels\r\n        double theta = Math.PI / 180; // Angle resolution of the accumulator in radians\r\n        int threshold = 100; // Minimum number of intersections to detect a line\r\n        int minLineLength = 200; // Minimum length of a line in pixels\r\n        int maxLineGap = 10; // Maximum gap between line segments allowed in pixels\r\n\r\n        // The houghLinesP function helps us look for line shapes and patterns.\r\n        Imgproc.HoughLinesP(binaryImage, lines, rho, theta, threshold, minLineLength, maxLineGap);\r\n\r\n        double maxLineLength = 0;\r\n        Point startPoint = new Point();\r\n        Point endPoint = new Point();\r\n\r\n        for (int i = 0; i < lines.rows(); i++) {\r\n            double[] line = lines.get(i, 0);\r\n            double x1 = line[0];\r\n            double y1 = line[1];\r\n            double x2 = line[2];\r\n            double y2 = line[3];\r\n\r\n            double length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));\r\n            double angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;\r\n\r\n            //checking if vertical\r\n            //if true we look for vertical, otherwise we look for horizontal, as seen by the degree constraints.\r\n            if(vertical) {\r\n                if (Math.abs(angle) >= 75 && Math.abs(angle) <= 105 && length > maxLineLength) {\r\n                    maxLineLength = length;\r\n                    startPoint = new Point(x1, y1);\r\n                    endPoint = new Point(x2, y2);\r\n                }\r\n            }else{\r\n                if (Math.abs(angle) >= -25 && Math.abs(angle) <= 25 && length > maxLineLength) {\r\n                    maxLineLength = length;\r\n                    startPoint = new Point(x1, y1);\r\n                    endPoint = new Point(x2, y2);\r\n                }\r\n            }\r\n        }\r\n        if (addToX){ // here we add areawidth to x values, to make them fit with the original frame.\r\n            startPoint.x += areaWidth;\r\n            endPoint.x += areaWidth;\r\n        }\r\n\r\n        if (addToY){ // here we add areaHeight to y values, to make them fit with the original frame.\r\n            startPoint.y += areaHeight;\r\n            endPoint.y += areaHeight;\r\n        }\r\n\r\n        return new LineSegment(startPoint, endPoint);\r\n    }\r\n\r\n    /**\r\n     * This method will give us the red mask, from detection colors within the red threshhold.\r\n     * The binary mask is essentially a binary image, where all the red colors detected\r\n     * are turned into white pixels, and those that are not red will be black.\r\n     * We are also creating a mask to exclude the center region of the frame, which we are not interested in.\r\n     * This mask will color all pixels black, within a radius of 100 pixels.\r\n     * We will hereby avoid getting noise from the red cross in the middle,\r\n     * that could possible interfere with the detection of the red corners.\r\n     * @param frame The frame is thee image we are working with.\r\n     * @return the binary image (red mask) that we will use for fuurther processing.\r\n     */\r\n    private Mat findRedMask(Mat frame){\r\n        // Define the center region to exclude\r\n        int centerX = frame.cols() / 2; // X-coordinate of the center\r\n        int centerY = frame.rows() / 2; // Y-coordinate of the center\r\n        int exclusionRadius = 300; // Radius of the center region to exclude\r\n\r\n        // Create a mask to exclude the center region\r\n        Mat mask = new Mat(frame.size(), CvType.CV_8UC1, Scalar.all(255));\r\n        Imgproc.circle(mask, new Point(centerX, centerY), exclusionRadius, new Scalar(0), -1);\r\n\r\n        //create hsv frame\r\n        Mat hsvFrame = new Mat();\r\n        //turn original frame into hsv frame for better color detection\r\n        Imgproc.cvtColor(frame,hsvFrame,Imgproc.COLOR_BGR2HSV);\r\n\r\n        // Define the lower and upper thresholds for red color\r\n        Scalar lowerRed = new Scalar(0, 100, 100);\r\n        Scalar upperRed = new Scalar(10, 255, 255);\r\n\r\n        Mat redMask = new Mat();\r\n        //all red areas will be represented as white dots while non red areas will be black.\r\n        Core.inRange(hsvFrame, lowerRed, upperRed, redMask);\r\n\r\n        return redMask;\r\n    }\r\n\r\n    /**\r\n     * NOTE ! Well this method should supposedly make the detection more clear.\r\n     * Through testing however we get more precise result using the red mask alone,\r\n     *  without the canny algorithm, hence the method is left unused.. for now..!\r\n     *\r\n     * The canny algorithm should make shape detection in binary image clear and more precise.\r\n     * Hence we chose to apply canny to our binary image, where we end up with an edge image.\r\n     * An edge image will highlight different regions, ie different colors (black or white),\r\n     * since we were to look for a coherent region of white dots (red mask),\r\n     * the region will end up resemble a line much more when looking at the different regions,\r\n     * which is what we are looking for.\r\n     * @param redMask The red mask is the binary mask we have already created.\r\n     */\r\n    private Mat applyCanny(Mat redMask){\r\n        double threshold1 = 50;  // Lower threshold for the intensity gradient\r\n        double threshold2 = 150; // Upper threshold for the intensity gradient\r\n        Mat edges = new Mat();\r\n        Imgproc.Canny(redMask, edges, threshold1, threshold2);\r\n        return edges;\r\n    }\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/ObjectDetection/RedRectangleDetection.java b/src/ObjectDetection/RedRectangleDetection.java
+--- a/src/ObjectDetection/RedRectangleDetection.java	
++++ b/src/ObjectDetection/RedRectangleDetection.java	
+@@ -203,7 +203,7 @@
+      * @param vertical lineSegment.
+      * @return intersection point of the two lines - equal to the corner.
+      */
+-    private Point findIntersection(LineSegment horizontal, LineSegment vertical) {
++    public static Point findIntersection(LineSegment horizontal, LineSegment vertical) {
+         horizontal.determineEquation();
+         vertical.determineEquation();
+ 
+Index: .gitignore
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># Default ignored files\r\n/shelf/\r\n/.idea/workspace.xml\r\n# Editor-based HTTP Client requests\r\n/httpRequests/\r\n# Datasource local storage ignored files\r\n/dataSources/\r\n/dataSources.local.xml\r\n\r\n/vcs.xml\r\n\r\n*.xml\r\n\r\n# Compiled class file\r\n*.class
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.gitignore b/.gitignore
+--- a/.gitignore	
++++ b/.gitignore	
+@@ -11,5 +11,7 @@
+ 
+ *.xml
+ 
++out/
++
+ # Compiled class file
+-*.class
+\ No newline at end of file
++/*.class
+\ No newline at end of file
+Index: src/run/Main.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package run;\r\n\r\nimport ObjectDetection.FieldObjectDetection;\r\nimport ObjectDetection.MrRobotDetection;\r\nimport ObjectDetection.RedRectangleDetection;\r\nimport org.opencv.core.Core;\r\nimport org.opencv.core.Mat;\r\nimport org.opencv.core.Point;\r\nimport org.opencv.core.Scalar;\r\nimport org.opencv.highgui.HighGui;\r\nimport org.opencv.imgproc.Imgproc;\r\nimport org.opencv.videoio.VideoCapture;\r\n\r\nimport java.util.List;\r\nimport java.util.concurrent.Callable;\r\nimport java.util.concurrent.ExecutorService;\r\nimport java.util.concurrent.Executors;\r\nimport java.util.concurrent.Future;\r\n\r\npublic class Main {\r\n\r\n    //load the opencv library into the JVM at runtime\r\n    static {\r\n        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);\r\n    }\r\n    public static VideoCapture videoCapture;\r\n\r\n    //An array to store relevant course coordinates. Index 0-3 will correspond to the raw corner coordinates.\r\n    //Index 4-7 will be the adjusted corner coordinates. And 8-9 will be the goal coordinates.\r\n    //for the corner coordinates, the firs elements will be from top left to bottom right.\r\n    //The goals will be from left to right.\r\n    //ie courseCoordinates[0] will be the to left corner. courseCoordinates[2] will be bottom left corner, and so on.\r\n    public static Point[] courseCoordinates = new Point[10];\r\n\r\n    public static void main(String[] args) throws InterruptedException {\r\n        //print current version of opencv\r\n        System.out.println(Core.VERSION);\r\n\r\n        testWithoutVideo();\r\n\r\n        //runWithVideo();\r\n\r\n    }\r\n\r\n    private static void runWithVideo() {\r\n        videoCapture = new VideoCapture(0);\r\n        setMaxResolution();\r\n\r\n        //detecs field\r\n        RedRectangleDetection rectangleDetection = new RedRectangleDetection();\r\n        rectangleDetection.detectField();\r\n\r\n        //detect cross\r\n        FieldObjectDetection fieldObjectDetection = new FieldObjectDetection();\r\n\r\n        MrRobotDetection mrRobot = new MrRobotDetection();\r\n        mrRobot.findPoints();\r\n\r\n        videoCapture.release();\r\n    }\r\n\r\n    private static void testWithoutVideo() {\r\n        //detecs field\r\n        RedRectangleDetection rectangleDetection = new RedRectangleDetection();\r\n        rectangleDetection.testRedRectangleDetection();\r\n\r\n        //detect cross\r\n        //FieldObjectDetection fieldObjectDetection = new FieldObjectDetection();\r\n\r\n        //detect robot\r\n        MrRobotDetection mrRobot = new MrRobotDetection();\r\n        mrRobot.test();\r\n    }\r\n\r\n    private static void setMaxResolution() {\r\n        // Set the property for maximum resolution to a high value\r\n        int maxResolutionProperty = -1;\r\n        // Find the property representing the maximum resolution\r\n        double maxResolution = 0.0;\r\n        ;\r\n        for (int prop = 0; prop < 20; prop++) { // Iterate over the properties\r\n            double value = videoCapture.get(prop);\r\n            if (value > maxResolution) {\r\n                maxResolution = value;\r\n                maxResolutionProperty = prop;\r\n            }\r\n        }\r\n\r\n        videoCapture.set(maxResolutionProperty, 9999);\r\n\r\n        // Get the resolution of the video capture\r\n        int width = (int) videoCapture.get(3);\r\n        int height = (int) videoCapture.get(4);\r\n\r\n        // Print the resolution\r\n        System.out.println(\"Resolution: \" + width + \"x\" + height);\r\n    }\r\n\r\n    private static void executorservice(){\r\n        // Create an ExecutorService with a fixed thread pool\r\n        ExecutorService executor = Executors.newFixedThreadPool(1);\r\n\r\n        // Create an instance of your task\r\n        Callable<List<Point>> task = new findAreaOfInterestTask();\r\n        // Submit the task to the executor\r\n        Future<List<Point>> future = executor.submit(task);\r\n\r\n        // Retrieve the result from the future object\r\n        try {\r\n            future.get();\r\n        } catch (Exception e) {\r\n            e.printStackTrace();\r\n        }finally {\r\n            // Shutdown the executor when done\r\n            executor.shutdown();\r\n        }\r\n    }\r\n\r\n}\r\n\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/run/Main.java b/src/run/Main.java
+--- a/src/run/Main.java	
++++ b/src/run/Main.java	
+@@ -1,14 +1,10 @@
+ package run;
+ 
+-import ObjectDetection.FieldObjectDetection;
++import ObjectDetection.RedCrossDetection;
+ import ObjectDetection.MrRobotDetection;
+ import ObjectDetection.RedRectangleDetection;
+ import org.opencv.core.Core;
+-import org.opencv.core.Mat;
+ import org.opencv.core.Point;
+-import org.opencv.core.Scalar;
+-import org.opencv.highgui.HighGui;
+-import org.opencv.imgproc.Imgproc;
+ import org.opencv.videoio.VideoCapture;
+ 
+ import java.util.List;
+@@ -51,7 +47,7 @@
+         rectangleDetection.detectField();
+ 
+         //detect cross
+-        FieldObjectDetection fieldObjectDetection = new FieldObjectDetection();
++        RedCrossDetection fieldObjectDetection = new RedCrossDetection();
+ 
+         MrRobotDetection mrRobot = new MrRobotDetection();
+         mrRobot.findPoints();
+@@ -65,11 +61,12 @@
+         rectangleDetection.testRedRectangleDetection();
+ 
+         //detect cross
+-        //FieldObjectDetection fieldObjectDetection = new FieldObjectDetection();
++        RedCrossDetection redCrossDetection = new RedCrossDetection();
++        redCrossDetection.detectCrossTest();
+ 
+         //detect robot
+-        MrRobotDetection mrRobot = new MrRobotDetection();
+-        mrRobot.test();
++        //MrRobotDetection mrRobot = new MrRobotDetection();
++        //mrRobot.test();
+     }
+ 
+     private static void setMaxResolution() {
