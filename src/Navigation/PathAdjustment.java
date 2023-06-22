@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Author Emil Iversen.
  * this class' methods will be used to determine if we should go for a ball in this order.
  * First we check whether the ball is collectable, with the go for ball method.
  * If this method return true, we move on to the next check.
@@ -49,6 +50,10 @@ public class PathAdjustment {
                 fieldDetection.getGoals().get(0).y);
     }
 
+    /**
+     * Determines the waypoints that is defined by the center point between the corner and center of cross for each quadrant.
+     * The points will be used to generate fixed routes to the other quadrants.
+     */
     private void determineWaypoints() {
         leftUpperQuadrantWayPoint = getAverage(fieldDetection.getCourseCoordinates()[0]);
         leftLowerQuadrantWayPoint = getAverage(fieldDetection.getCourseCoordinates()[2]);
@@ -151,6 +156,11 @@ public class PathAdjustment {
         }
     }
 
+    /**
+     * this method finds a coordinate so the robot, should be able to pick the ball up in a straight line from there.
+     * @param ballCoordinate
+     * @return
+     */
     private Point determineCoordinateForSidePickup(Point ballCoordinate) {
         Point alignmentPoint = null;
 
@@ -166,6 +176,7 @@ public class PathAdjustment {
         return alignmentPoint;
     }
 
+
     private Point determineCoordinateForCrossPickup(Point ballCoordinate) {
         Vector vector = new Vector(fieldDetection.getRedCross().getCrossArea().getCenter(), ballCoordinate);
         Vector normVector = new Vector(vector.getX() / vector.getLength(), vector.getY() / vector.getLength());
@@ -176,6 +187,14 @@ public class PathAdjustment {
                 fieldDetection.getRedCross().getCrossArea().getCenter().y + extendedVector.getY());
     }
 
+    /**
+     * This method determines if the robot is in the opposite quadrant on the field compared to the balls.
+     * If this is the case another points will be added to the path.
+     * @param determineQuadrant
+     * @param ballCoordinate
+     * @param path
+     * @return
+     */
     private boolean determineIfRoboAndBallAreInOppositeQuadrant(String determineQuadrant, Point ballCoordinate, List<Point> path) {
         boolean opposite = false;
 
@@ -219,8 +238,7 @@ public class PathAdjustment {
 
     /**
      * This method determines the position of the robot, and dds the first point to the new path.
-     * @param roboCenter
-     * @param path
+     * Returns a string that is used to determine if robot is opposite to ball.
      */
     private String determineQuadrant(Point roboCenter, List<Point> path) {
         if (fieldDetection.getRedCross().getCrossArea().getCenter().x < roboCenter.x){
@@ -244,10 +262,20 @@ public class PathAdjustment {
         }
     }
 
+    /**
+     * creates exclusion zone, for balls in this area.
+     * @param ballCoordinate
+     * @return
+     */
     public boolean isNearCross(Point ballCoordinate){
         return fieldDetection.getRedCross().getCrossArea().isPointInside(ballCoordinate);
     }
 
+    /**
+     * This method determines if the balls are just around the cross, in which case we also need a special path to pick up.
+     * @param ballCoordinate
+     * @return
+     */
     public boolean isAroundCross(Point ballCoordinate){
         return fieldDetection.getRedCross().getScalefactorAdjustedCrossArea().isPointInside(ballCoordinate);
     }
@@ -282,6 +310,11 @@ public class PathAdjustment {
         return path;
     }
 
+    /**
+     * Gets the robot on one of the predefined path to the goal, based on the robots location.
+     * @param roboPosition
+     * @return the path of points to follow.
+     */
     public List<Point> pathToGoal(Point roboPosition){
         List<Point> path = new ArrayList<>();
 
@@ -362,15 +395,6 @@ public class PathAdjustment {
         }
     }
 
-    public void alighWithSide(){
-
-    }
-
-    public Point[] createFixedPathToGoal(){
-        Point[] pathToGoal = new Point[4];
-
-        return pathToGoal;
-    }
 
     /**
      * This method is used to determined if a ball is hard to collect.

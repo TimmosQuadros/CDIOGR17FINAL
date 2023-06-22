@@ -1,5 +1,10 @@
 package Vectors;
 
+/**
+ * Author Emil Iversen.
+ */
+
+
 import LineCreation.LineSegment;
 import org.opencv.core.Point;
 

@@ -1,5 +1,10 @@
 package run;
 
+/**
+ * Author Emil Iversen, Esben Fribo Gøttsche, Mohammed Irout and Timm Daniel Rasmussen.
+ */
+
+
 import IncodeMessage.Incoder;
 import IncodeMessage.MessageStrings;
 import LineCreation.AlignRobot;

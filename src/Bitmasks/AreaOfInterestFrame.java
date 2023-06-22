@@ -1,5 +1,10 @@
 package Bitmasks;
 
+/**
+ * Author Emil Iversen.
+ * Creates a mask based on the course coordinates, that blurs out everything outside the field.
+ */
+
 import Singleton.VideoCaptureSingleton;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;

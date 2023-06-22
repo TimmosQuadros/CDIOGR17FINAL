@@ -1,5 +1,9 @@
 package LineCreation;
 
+/**
+ * Author Emil Iversen.
+ */
+
 import org.opencv.core.*;
 
 public class ConstructLine {

@@ -1,5 +1,9 @@
 package LineCreation;
 
+/**
+ * Author Emil Iversen.
+ */
+
 import org.opencv.core.Point;
 
 import java.util.List;

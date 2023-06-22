@@ -15,8 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Langt brede = 178 cm.
- * Kort brede = 133 cm.
+ * Author Emil Iversen.
  */
 public class RedRectangleDetection {
 
@@ -26,16 +25,12 @@ public class RedRectangleDetection {
     private Point[] courseCoordinates = new Point[4];
     private Point[] maskCorners = new Point[4];
     private Point[] floorCorners = new Point[4];
-    private LineSegment[] sideLines;
-    private Point deliveryPoint;
     private List<Point> goals = new ArrayList<>();
     private RedCrossDetection redCross;
     private double fieldArea;
     private double innerFieldArea;
     private double scaleFactor;
     private final int axelLength = 20;
-    private final int axelTurnRadius = 22;
-    private Mat aoiMask;
 
     /**
      * Method to be used in real time.
@@ -58,6 +53,9 @@ public class RedRectangleDetection {
         redCross = new RedCrossDetection(mask, scaleFactor);
     }
 
+    /**
+     * This method adjusts the detected corners found, such that the coordinates match those of the actual field.
+     */
     private void findFloorCorners() {
         //TODO - adjust adjustmentlength based on tests
         double adjustmentLength = scaleFactor * (axelLength / 3.0);
@@ -75,7 +73,6 @@ public class RedRectangleDetection {
 
         return wideSide.getLength() * narrowSide.getLength();
     }
-
 
     public double getRoboWidth(){
         return this.scaleFactor * (axelLength / 2.0);
@@ -116,10 +113,6 @@ public class RedRectangleDetection {
         return courseCoordinates;
     }
 
-    public Mat getAoiMask() {
-        return aoiMask;
-    }
-
     public void determineGoalCenters() {
         // finds posts for lefthand side.
         goals.add(getAverage(maskCorners[0], maskCorners[3]));
@@ -127,6 +120,9 @@ public class RedRectangleDetection {
         goals.add(getAverage(maskCorners[1], maskCorners[2]));
     }
 
+    /**
+     * @returns the list of goals, with the left goal being the first index.
+     */
     public List<Point> getGoals() {
         return goals;
     }
@@ -138,6 +134,12 @@ public class RedRectangleDetection {
         return new Point(centerX, centerY);
     }
 
+    /**
+     * Detects the corners in 50 different frames to achieve as good precision as possible.
+     * We thought it would be okay to use some extra computational power for this,
+     * since we assumed that we would be able to not move the field in our run.
+     * @param size How many times we want to redetect.
+     */
     private void findAverageCorner(int size) {
         Point[][] cornersAve = new Point[size][4];
 
@@ -171,8 +173,6 @@ public class RedRectangleDetection {
     }
 
     /**
-     * OBS!! This method needs more testing!!
-     * <p>
      * Fiinds an approximation of the coordiinates of the folding in the corner.
      *
      * @return the coordinates of the approximated foldiing intersections for each corner.
@@ -296,6 +296,9 @@ public class RedRectangleDetection {
         }
     }
 
+    /**
+     * Method to find the scalefactor, so that we are able to convert pixels to centimeters, to feed our robot.
+     */
     private void FindScaling() {
         LineSegment[] findScale = new LineSegment[4];
 
@@ -535,7 +538,6 @@ public class RedRectangleDetection {
 
         //create hsv frame
         Mat hsvFrame = new Mat();
-        //turn original frame into hsv frame for better color detection
         Imgproc.cvtColor(frame, hsvFrame, Imgproc.COLOR_BGR2HSV);
 
         // Define the lower and upper thresholds for red color
@@ -543,7 +545,6 @@ public class RedRectangleDetection {
         Scalar upperRed = new Scalar(10, 255, 255);
 
         Mat redMask = new Mat();
-        //all red areas will be represented as white dots while non red areas will be black.
         Core.inRange(hsvFrame, lowerRed, upperRed, redMask);
 
         return redMask;
@@ -571,55 +572,4 @@ public class RedRectangleDetection {
         return edges;
     }
 
-    /*
-    Ny
-     */
-    public static class RobotController {
-        private final int courseWidth;
-        private final int courseHeight;
-        private final int robotWidth;
-        private final int robotHeight;
-
-        public RobotController(int courseWidth, int courseHeight, int robotWidth, int robotHeight) {
-            this.courseWidth = courseWidth;
-            this.courseHeight = courseHeight;
-            this.robotWidth = robotWidth;
-            this.robotHeight = robotHeight;
-        }
-
-        public List<Point> getValidTravelPoints() {
-            List<Point> validPoints = new ArrayList<>();
-
-            // Calculate the maximum distance from the sides
-            int maxDistanceX = courseWidth - robotWidth;
-            int maxDistanceY = courseHeight - robotHeight;
-
-            // Generate the valid travel points
-            for (int x = 0; x <= maxDistanceX; x++) {
-                for (int y = 0; y <= maxDistanceY; y++) {
-                    validPoints.add(new Point(x, y));
-                }
-            }
-
-            return validPoints;
-        }
-
-        public static void main(String[] args) {
-            // Create a RobotController instance with course dimensions and robot dimensions
-            int courseWidth = 133;
-            int courseHeight = 178;
-            int robotWidth = 20;
-            int robotHeight = 31;
-
-            RobotController robotController = new RobotController(courseWidth, courseHeight, robotWidth, robotHeight);
-
-            // Get the valid travel points for the robot
-            List<Point> validPoints = robotController.getValidTravelPoints();
-
-            // Print the valid travel points
-            for (Point point : validPoints) {
-                System.out.println("X: " + point.x + ", Y: " + point.y);
-            }
-        }
-    }
 }

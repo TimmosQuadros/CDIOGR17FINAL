@@ -1,5 +1,9 @@
 package LineCreation;
 
+/**
+ * Author Emil Iversen.
+ */
+
 import org.opencv.core.Point;
 
 public class Circle {
@@ -28,10 +32,11 @@ public class Circle {
         return new Point(centerX,centerY);
     }
 
-    public boolean isPointInside(double x, double y) {
-        double distance = Math.sqrt(Math.pow((x - centerX), 2) + Math.pow((y - centerY), 2));
-        return distance <= radius;
-    }
+    /**
+     * Determines if a points is within the radius of the circle based on its center.
+     * @param point
+     * @return
+     */
     public boolean isPointInside(Point point) {
         double distance = Math.sqrt(Math.pow((point.x - centerX), 2) + Math.pow((point.y - centerY), 2));
         return distance <= radius;

@@ -1,5 +1,9 @@
 package Vectors;
 
+/**
+ * Author Emil Iversen.
+ */
+
 import org.opencv.core.Point;
 
 public class Vector {

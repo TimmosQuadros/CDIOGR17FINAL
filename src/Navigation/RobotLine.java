@@ -6,24 +6,6 @@ public class RobotLine {
 
     private static final double TURN_THRESHOLD = 5.0; // Threshold for turning angle in degrees
 
-    public static void main(String[] args) {
-        // Robot's current position
-        Point robotPosition = new Point(0, 0);
-
-        // Ball's location
-        Point ballLocation = new Point(5, 5);
-
-        // Calculate the angle and distance to the ball
-        double angle = calculateAngle(robotPosition, ballLocation);
-        double distance = calculateDistance(robotPosition, ballLocation);
-
-        // Turn the robot towards the ball
-        turnRobot(angle);
-
-        // Move the robot forward towards the ball
-        moveRobot(distance);
-    }
-
     private static double calculateAngle(Point robotPosition, Point ballLocation) {
         // Calculate the angle between the robot's position and the ball's location
         double deltaX = ballLocation.x - robotPosition.x;

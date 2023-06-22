@@ -1,5 +1,9 @@
 package ObjectDetection;
 
+/**
+ * Author Emil Iversen
+ */
+
 import Bitmasks.AreaOfInterestFrame;
 import LineCreation.Circle;
 import LineCreation.LineSegment;

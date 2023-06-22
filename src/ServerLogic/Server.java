@@ -1,5 +1,9 @@
 package ServerLogic;
 
+/**
+ * Timm Daniel Rasmussen.
+ */
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
