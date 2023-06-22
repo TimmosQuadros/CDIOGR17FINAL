@@ -54,23 +54,7 @@ public class RedRectangleDetection {
         determineGoalCenters();
         AreaOfInterestFrame mask = new AreaOfInterestFrame(List.of(maskCorners));
 
-        for (Point p : courseCoordinates) {
-            System.out.println("Corner x : " + p.x + " and corner y : " + p.y);
-        }
-
         redCross = new RedCrossDetection(mask, scaleFactor);
-        Point p1 = new Point(900,500);
-        Point p2 =  new Point(1520.0, 520);
-        if(redCross.getScalefactorAdjustedCrossArea().isPointInside(p1.x, p1.y)) {
-            System.out.println("point inside");
-        }
-        else if(redCross.pathIntersects(p1, p2)){
-
-        }else{
-
-        }
-
-        drawCorners(p1, p2);
 
         return getFloorCorners();
     }
@@ -237,8 +221,8 @@ public class RedRectangleDetection {
         //String imagePath = "resources/FieldImages/MrRobotBlackGreenNBlueEnds.jpg";
         frame = Imgcodecs.imread(imagePath);
 
-        //findFloorCorners();
-        //drawCorners(frame);
+        findFloorCorners();
+        drawCorners();
         //for (Point x : courseCoordinates){
         //  System.out.println("X coordinate = " + x.x + " AND y coordinate = " + x.y);
         //}
@@ -247,7 +231,7 @@ public class RedRectangleDetection {
     /**
      * This method will draw green circles on each point received as input.
      */
-    private void drawCorners(Point p1, Point p2) {
+    private void drawCorners() {
         // Draw circles for each coordinate
         for (Point coordinate : courseCoordinates) {
             Imgproc.circle(frame, coordinate, 5, new Scalar(0, 255, 0), -1);
@@ -262,7 +246,6 @@ public class RedRectangleDetection {
             System.out.println("Crosspoint");
         }*/
 
-        Imgproc.line(frame, p1, p2, new Scalar(0, 255, 0));
         Imgproc.circle(frame, redCross.getCoordinates().get(1), 5, new Scalar(0, 255, 0), -1);
         Imgproc.circle(frame, redCross.getCoordinates().get(2), 5, new Scalar(10, 255, 255), -1);
         Imgproc.circle(frame, redCross.getCoordinates().get(3), 5, new Scalar(10, 255, 255), -1);
